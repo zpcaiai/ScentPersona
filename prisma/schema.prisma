@@ -67,6 +67,28 @@ model Feedback {
   @@map("feedbacks")
 }
 
+model Order {
+  id              String    @id @default(cuid())
+  orderNo         String    @unique
+  sessionId       String?
+  productType     String
+  productIdsJson  String    @default("[]")
+  amount          Int
+  status          String    @default("pending")
+  platform        String    @default("weapp")
+  prepayId        String?
+  transactionId   String?
+  customerName    String
+  customerPhone   String
+  shippingAddress String?
+  note            String?
+  paidAt          DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("orders")
+}
+
 model AdminMetricSnapshot {
   id                  String   @id @default(cuid())
   date                DateTime @default(now())
