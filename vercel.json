@@ -1,0 +1,6 @@
+{
+  "buildCommand": "prisma generate && prisma migrate deploy && next build",
+  "github": {
+    "silent": false
+  }
+}
