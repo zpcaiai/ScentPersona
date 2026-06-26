@@ -1,0 +1,55 @@
+import type { ScentTag } from "@/lib/scoring/types";
+
+export const SCENT_TAGS: ScentTag[] = [
+  "clean",
+  "cold",
+  "sweet",
+  "woody",
+  "soft",
+  "presence",
+  "sleep",
+  "commute",
+  "date",
+  "gift",
+  "spiritual",
+  "bright",
+  "mature",
+  "cozy",
+  "escape",
+];
+
+export const SCENT_TAG_LABELS: Record<ScentTag, string> = {
+  clean: "干净",
+  cold: "冷感",
+  sweet: "甜感",
+  woody: "木质",
+  soft: "柔和",
+  presence: "存在感",
+  sleep: "睡前",
+  commute: "通勤",
+  date: "约会",
+  gift: "送礼",
+  spiritual: "精神",
+  bright: "明亮",
+  mature: "成熟",
+  cozy: "温暖",
+  escape: "逃离",
+};
+
+export const SCENT_TAG_DESCRIPTIONS: Record<ScentTag, string> = {
+  clean: "像刚洗好的白衬衫，清爽不张扬",
+  cold: "冷调、克制、有距离感",
+  sweet: "甜美、温暖、有亲和力",
+  woody: "木质调、沉稳、有深度",
+  soft: "贴肤感、不刺鼻、温柔",
+  presence: "有气场、容易被记住",
+  sleep: "适合睡前、安静、放松",
+  commute: "适合日常通勤、不突兀",
+  date: "适合约会、有吸引力",
+  gift: "适合送礼、接受度高",
+  spiritual: "有精神感、适合冥想阅读",
+  bright: "明亮、活泼、有能量",
+  mature: "成熟、内敛、有阅历感",
+  cozy: "温暖、舒适、有包裹感",
+  escape: "逃离感、像在别处",
+};
