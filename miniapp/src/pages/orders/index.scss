@@ -1,0 +1,113 @@
+.orders {
+  padding-bottom: 48rpx;
+}
+
+.orders-search {
+  display: flex;
+  padding: 24rpx 32rpx;
+  gap: 16rpx;
+}
+
+.orders-search-input {
+  flex: 1;
+  background: #f5f0e8;
+  border-radius: 12rpx;
+  padding: 20rpx 24rpx;
+  font-size: 28rpx;
+  color: #44403c;
+}
+
+.orders-search-btn {
+  flex-shrink: 0;
+  padding: 0 32rpx;
+}
+
+.orders-empty {
+  text-align: center;
+  padding: 120rpx 32rpx;
+  color: #a8a29e;
+  font-size: 28rpx;
+}
+
+.order-card {
+  background: #ffffff;
+  border-radius: 20rpx;
+  padding: 28rpx;
+  margin: 16rpx 24rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.03);
+}
+
+.order-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12rpx;
+}
+
+.order-card-no {
+  font-size: 26rpx;
+  color: #a8a29e;
+}
+
+.order-card-status {
+  font-size: 24rpx;
+  padding: 4rpx 16rpx;
+  border-radius: 16rpx;
+}
+
+.order-status-pending {
+  background: rgba(196, 132, 92, 0.12);
+  color: #c4845c;
+}
+
+.order-status-paid {
+  background: rgba(124, 144, 112, 0.12);
+  color: #7c9070;
+}
+
+.order-status-shipped {
+  background: rgba(59, 130, 246, 0.12);
+  color: #3b82f6;
+}
+
+.order-status-completed {
+  background: rgba(124, 144, 112, 0.12);
+  color: #7c9070;
+}
+
+.order-status-cancelled {
+  background: rgba(168, 162, 158, 0.12);
+  color: #a8a29e;
+}
+
+.order-status-refunded {
+  background: rgba(220, 38, 38, 0.08);
+  color: #dc2626;
+}
+
+.order-card-type {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #44403c;
+}
+
+.order-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #f5f0e8;
+}
+
+.order-card-date {
+  font-size: 24rpx;
+  color: #a8a29e;
+}
+
+.order-card-amount {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #c4845c;
+}

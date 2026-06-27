@@ -1,0 +1,111 @@
+.detail {
+  padding-bottom: 140rpx;
+}
+
+.detail-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  color: #a8a29e;
+}
+
+.detail-hero {
+  padding: 48rpx 32rpx;
+  background: linear-gradient(135deg, rgba(124, 144, 112, 0.08), #f5f0e8);
+}
+
+.detail-name {
+  display: block;
+  font-size: 44rpx;
+  font-weight: 700;
+  color: #44403c;
+  margin-bottom: 12rpx;
+}
+
+.detail-scene {
+  display: block;
+  font-size: 28rpx;
+  color: #78716c;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+.detail-desc {
+  display: block;
+  font-size: 28rpx;
+  color: #57534e;
+  line-height: 1.7;
+  margin-bottom: 16rpx;
+}
+
+.detail-pro {
+  display: block;
+  font-size: 26rpx;
+  color: #a8a29e;
+  line-height: 1.6;
+}
+
+.detail-notes-label {
+  display: block;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #7c9070;
+  margin-top: 16rpx;
+}
+
+.detail-notes {
+  display: block;
+  font-size: 28rpx;
+  color: #57534e;
+  margin-top: 4rpx;
+}
+
+.detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.detail-suitable {
+  display: flex;
+  align-items: center;
+  padding: 6rpx 0;
+}
+
+.detail-not-suitable-label {
+  display: block;
+  font-size: 26rpx;
+  color: #c4845c;
+  margin-top: 16rpx;
+  margin-bottom: 4rpx;
+}
+
+.detail-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  padding: 24rpx 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+
+.detail-price-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-price {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #c4845c;
+}
+
+.detail-price-full {
+  font-size: 24rpx;
+  color: #a8a29e;
+  margin-top: 4rpx;
+}

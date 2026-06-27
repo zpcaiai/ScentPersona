@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import PageShell from "@/components/layout/PageShell";
 import { SITE_COPY } from "@/data/copy";
 import { PRODUCTS, getProductById } from "@/data/products";
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("sessionId");
   const [recommendedIds, setRecommendedIds] = useState<string[]>([]);
@@ -174,5 +174,13 @@ export default function CheckoutPage() {
         </form>
       </div>
     </PageShell>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense>
+      <CheckoutContent />
+    </Suspense>
   );
 }

@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import PageShell from "@/components/layout/PageShell";
 import { SITE_COPY } from "@/data/copy";
 import { PRODUCTS } from "@/data/products";
 
-export default function FeedbackPage() {
+function FeedbackContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("sessionId");
   const purchaseIntentId = searchParams.get("purchaseIntentId");
@@ -234,5 +234,13 @@ export default function FeedbackPage() {
         </button>
       </form>
     </PageShell>
+  );
+}
+
+export default function FeedbackPage() {
+  return (
+    <Suspense>
+      <FeedbackContent />
+    </Suspense>
   );
 }

@@ -1,0 +1,160 @@
+.feedback {
+  padding-bottom: 48rpx;
+}
+
+.feedback-header {
+  padding: 48rpx 32rpx 24rpx;
+}
+
+.feedback-title {
+  display: block;
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #44403c;
+}
+
+.feedback-subtitle {
+  display: block;
+  font-size: 26rpx;
+  color: #78716c;
+  margin-top: 8rpx;
+}
+
+.feedback-check {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f5f0e8;
+}
+
+.feedback-check:last-child {
+  border-bottom: none;
+}
+
+.feedback-check-active {
+  color: #c4845c;
+}
+
+.feedback-rating {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12rpx 0;
+}
+
+.feedback-rating-name {
+  font-size: 28rpx;
+  color: #44403c;
+}
+
+.feedback-rating-stars {
+  display: flex;
+  gap: 8rpx;
+}
+
+.feedback-star {
+  font-size: 36rpx;
+  color: #d6d3d1;
+}
+
+.feedback-star-active {
+  color: #c4845c;
+}
+
+.feedback-picker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f5f0e8;
+  border-radius: 12rpx;
+  padding: 24rpx;
+  font-size: 28rpx;
+}
+
+.feedback-picker-arrow {
+  color: #a8a29e;
+  font-size: 32rpx;
+}
+
+.feedback-radio-row {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 16rpx;
+}
+
+.feedback-radio {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx;
+  border-radius: 12rpx;
+  background: #f5f0e8;
+  font-size: 28rpx;
+  color: #78716c;
+}
+
+.feedback-radio-active {
+  background: rgba(124, 144, 112, 0.15);
+  color: #7c9070;
+  font-weight: 600;
+}
+
+.feedback-sub-label {
+  display: block;
+  font-size: 26rpx;
+  color: #78716c;
+  margin-top: 24rpx;
+  margin-bottom: 12rpx;
+}
+
+.feedback-radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 12rpx;
+}
+
+.feedback-radio-option {
+  background: #f5f0e8;
+  border-radius: 12rpx;
+  padding: 16rpx 24rpx;
+  font-size: 26rpx;
+  color: #78716c;
+}
+
+.feedback-textarea {
+  background: #f5f0e8;
+  border-radius: 12rpx;
+  padding: 24rpx;
+  font-size: 28rpx;
+  width: 100%;
+  min-height: 200rpx;
+  box-sizing: border-box;
+}
+
+.feedback-submit {
+  padding: 24rpx;
+}
+
+.feedback-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 32rpx;
+}
+
+.feedback-success-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #7c9070;
+  margin-bottom: 16rpx;
+}
+
+.feedback-success-desc {
+  font-size: 28rpx;
+  color: #78716c;
+  text-align: center;
+  margin-bottom: 48rpx;
+}

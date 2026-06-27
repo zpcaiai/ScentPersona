@@ -1,0 +1,115 @@
+.order-detail {
+  padding-bottom: 140rpx;
+}
+
+.order-detail-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  color: #a8a29e;
+}
+
+.order-detail-banner {
+  padding: 48rpx 32rpx;
+  text-align: center;
+}
+
+.order-banner-pending {
+  background: rgba(196, 132, 92, 0.08);
+}
+
+.order-banner-paid {
+  background: rgba(124, 144, 112, 0.08);
+}
+
+.order-banner-shipped {
+  background: rgba(59, 130, 246, 0.06);
+}
+
+.order-banner-completed {
+  background: rgba(124, 144, 112, 0.08);
+}
+
+.order-banner-cancelled {
+  background: rgba(168, 162, 158, 0.08);
+}
+
+.order-detail-status {
+  display: block;
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #44403c;
+}
+
+.order-detail-paid-time {
+  display: block;
+  font-size: 24rpx;
+  color: #a8a29e;
+  margin-top: 12rpx;
+}
+
+.order-detail-product {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f5f0e8;
+}
+
+.order-detail-product-name {
+  font-size: 28rpx;
+  color: #44403c;
+}
+
+.order-detail-product-price {
+  font-size: 28rpx;
+  color: #c4845c;
+  font-weight: 600;
+}
+
+.order-detail-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 20rpx;
+  margin-top: 8rpx;
+  border-top: 1rpx solid #e7e5e4;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #44403c;
+}
+
+.order-detail-amount {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #c4845c;
+}
+
+.order-detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12rpx 0;
+}
+
+.order-detail-label {
+  font-size: 26rpx;
+  color: #a8a29e;
+}
+
+.order-detail-value {
+  font-size: 26rpx;
+  color: #44403c;
+  text-align: right;
+}
+
+.order-detail-pay {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  padding: 24rpx 32rpx;
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.06);
+}
