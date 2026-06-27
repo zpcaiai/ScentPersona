@@ -5,7 +5,6 @@ const navItems = [
   { href: "/quiz", label: "开始测试" },
   { href: "/products", label: "小样套装" },
   { href: "/feedback", label: "反馈" },
-  { href: "/admin", label: "后台" },
 ];
 
 export default function Header() {

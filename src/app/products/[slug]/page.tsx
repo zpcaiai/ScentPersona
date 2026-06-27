@@ -32,7 +32,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
       <div className="card">
         <h1 className="text-2xl font-serif text-stone-800">{p.name}</h1>
         <div className="mt-2 text-lg text-clay-500">
-          ¥{(p.price / 100).toFixed(1)}
+          ¥{((p.price.sample ?? p.price.fullSize ?? 0) / 100).toFixed(1)}
         </div>
         <p className="mt-4 text-stone-600 leading-relaxed">
           {p.emotionalScene}

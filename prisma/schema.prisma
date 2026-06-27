@@ -70,6 +70,7 @@ model Feedback {
 model Order {
   id              String    @id @default(cuid())
   orderNo         String    @unique
+  accessToken     String    @unique
   sessionId       String?
   productType     String
   productIdsJson  String    @default("[]")

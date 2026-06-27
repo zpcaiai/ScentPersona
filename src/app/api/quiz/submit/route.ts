@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { QUIZ_QUESTIONS } from "@/data/quizQuestions";
 import { scoreQuizAnswers } from "@/lib/scoring/scoreQuiz";
 import { matchPersona } from "@/lib/scoring/matchPersona";
 import { recommendProducts } from "@/lib/scoring/recommendProducts";
@@ -18,6 +19,7 @@ export async function POST(request: NextRequest) {
 
     const answers: QuizAnswerInput[] = body.answers;
     const source: string | undefined = body.source;
+    const questionMap = new Map(QUIZ_QUESTIONS.map((q) => [q.id, q]));
 
     const scored = scoreQuizAnswers({ answers });
     const matched = matchPersona({
@@ -47,11 +49,7 @@ export async function POST(request: NextRequest) {
           create: answers.map((a) => ({
             questionId: a.questionId,
             optionId: a.optionId,
-            tagScoresJson: JSON.stringify(
-              scored.warnings.includes(`Unknown questionId: ${a.questionId}`)
-                ? {}
-                : {}
-            ),
+            tagScoresJson: JSON.stringify(getAnswerContribution(a, questionMap)),
           })),
         },
       },
@@ -69,4 +67,26 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+function getAnswerContribution(
+  answer: QuizAnswerInput,
+  questionMap: Map<string, (typeof QUIZ_QUESTIONS)[number]>
+) {
+  const question = questionMap.get(answer.questionId);
+  const option = question?.options.find((o) => o.id === answer.optionId);
+
+  if (!option) {
+    return {
+      tagScores: {},
+      personaScores: {},
+      valid: false,
+    };
+  }
+
+  return {
+    tagScores: option.tagScores,
+    personaScores: option.personaScores ?? {},
+    valid: true,
+  };
 }
