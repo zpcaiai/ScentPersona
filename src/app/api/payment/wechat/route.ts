@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { isOrderAccessAuthorized } from "@/lib/order-utils";
+import { isOrderAccessAuthorized, isPendingOrderExpired } from "@/lib/order-utils";
 import { createWechatJsapiOrder, isWechatConfigured } from "@/lib/wechat-pay";
 
 export async function POST(request: NextRequest) {
@@ -36,6 +36,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "Unauthorized order access" },
         { status: 403 }
+      );
+    }
+
+    if (isPendingOrderExpired(order)) {
+      await db.order.update({
+        where: { id: order.id },
+        data: { status: "cancelled", cancelledAt: new Date() },
+      });
+      return NextResponse.json(
+        { error: "Order has expired" },
+        { status: 400 }
       );
     }
 

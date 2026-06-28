@@ -55,6 +55,7 @@ model Feedback {
   id                  String      @id @default(cuid())
   sessionId           String?
   purchaseIntentId    String?
+  orderId             String?
   personaId           String?
   favoriteProductId   String?
   dislikedProductIdsJson String    @default("[]")
@@ -82,8 +83,13 @@ model Order {
   customerName    String
   customerPhone   String
   shippingAddress String?
+  trackingNumber  String?
   note            String?
   paidAt          DateTime?
+  shippedAt       DateTime?
+  completedAt     DateTime?
+  cancelledAt     DateTime?
+  refundedAt      DateTime?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
@@ -101,4 +107,16 @@ model AdminMetricSnapshot {
   fullSizeConversions Int      @default(0)
 
   @@map("admin_metric_snapshots")
+}
+
+model DataDeletionRequest {
+  id          String   @id @default(cuid())
+  contact    String
+  identifier String
+  reason     String?
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+  resolvedAt  DateTime?
+
+  @@map("data_deletion_requests")
 }

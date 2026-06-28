@@ -162,6 +162,14 @@ export function requestWechatPay(orderId: string, accessToken: string, openid: s
   });
 }
 
+export function loginWechat(code: string) {
+  return request<{ openid: string }>({
+    url: "/api/auth/wechat-login",
+    method: "POST",
+    data: { code },
+  });
+}
+
 export function requestXhsPay(orderId: string, accessToken: string) {
   return request<{
     tradeNo: string;

@@ -11,6 +11,8 @@ function FeedbackContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("sessionId");
   const purchaseIntentId = searchParams.get("purchaseIntentId");
+  const orderId = searchParams.get("orderId");
+  const orderAccessToken = searchParams.get("orderAccessToken");
 
   const [personaId, setPersonaId] = useState<string | null>(null);
   const [recommendedIds, setRecommendedIds] = useState<string[]>([]);
@@ -22,6 +24,8 @@ function FeedbackContent() {
   const [fullSizeProduct, setFullSizeProduct] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [feedbackAllowed, setFeedbackAllowed] = useState(true);
 
   useEffect(() => {
     if (sessionId) {
@@ -35,21 +39,66 @@ function FeedbackContent() {
     }
   }, [sessionId]);
 
+  useEffect(() => {
+    if (orderId && orderAccessToken) {
+      fetch(`/api/order/${orderId}?accessToken=${encodeURIComponent(orderAccessToken)}`)
+        .then(async (res) => {
+          if (!res.ok) throw new Error("order unavailable");
+          return res.json();
+        })
+        .then((order) => {
+          setFeedbackAllowed(!["pending", "cancelled", "refunded"].includes(order.status));
+          if (order.sessionId && !sessionId) {
+            fetch(`/api/quiz/result?sessionId=${order.sessionId}`)
+              .then((res) => res.json())
+              .then((data) => {
+                if (data.personaId) setPersonaId(data.personaId);
+                if (data.recommendedProductIds) setRecommendedIds(data.recommendedProductIds);
+              })
+              .catch(() => {});
+          }
+        })
+        .catch(() => {
+          setFeedbackAllowed(false);
+        });
+    }
+  }, [orderId, orderAccessToken, sessionId]);
+
   const productsToShow = recommendedIds.length > 0
     ? PRODUCTS.filter((p) => recommendedIds.includes(p.id))
     : PRODUCTS;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+
+    if (!feedbackAllowed) {
+      setError("订单支付完成后才能提交试香反馈。");
+      return;
+    }
+
+    if (!favoriteProduct) {
+      setError("请选择最喜欢的一支。");
+      return;
+    }
+
+    const requiredRatings = ["accuracy", "satisfaction", "packaging"];
+    if (requiredRatings.some((key) => !ratings[key])) {
+      setError("请完成推荐准确度、整体满意度和包装体验评分。");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await fetch("/api/feedback/submit", {
+      const res = await fetch("/api/feedback/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           sessionId: sessionId ?? undefined,
           purchaseIntentId: purchaseIntentId ?? undefined,
+          orderId: orderId ?? undefined,
+          orderAccessToken: orderAccessToken ?? undefined,
           personaId: personaId ?? undefined,
           favoriteProductId: favoriteProduct,
           dislikedProductIds: dislikedProducts,
@@ -59,9 +108,15 @@ function FeedbackContent() {
           fullSizeProductId: fullSizeProduct,
         }),
       });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "反馈提交失败");
+      }
+
       setSubmitted(true);
-    } catch {
-      // ignore
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "反馈提交失败，请稍后重试");
     } finally {
       setLoading(false);
     }
@@ -97,6 +152,12 @@ function FeedbackContent() {
       </div>
 
       <form onSubmit={handleSubmit} className="grid gap-6 mt-4">
+        {!feedbackAllowed && (
+          <div className="rounded-xl border border-clay-200 bg-clay-400/10 p-4 text-sm text-clay-600">
+            订单支付完成后才能填写试香反馈。
+          </div>
+        )}
+
         {/* Favorite product */}
         <div className="card">
           <h3 className="font-serif text-stone-700">你最喜欢哪一支？</h3>
@@ -229,7 +290,13 @@ function FeedbackContent() {
           )}
         </div>
 
-        <button type="submit" disabled={loading} className="btn-primary">
+        {error && (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+            {error}
+          </div>
+        )}
+
+        <button type="submit" disabled={loading || !feedbackAllowed} className="btn-primary">
           {loading ? "提交中..." : "提交反馈"}
         </button>
       </form>

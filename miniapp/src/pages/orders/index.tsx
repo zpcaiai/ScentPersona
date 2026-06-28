@@ -1,19 +1,23 @@
-import { useState } from "react";
-import { View, Text, Input, Button } from "@tarojs/components";
+import { useEffect, useState } from "react";
+import { View, Text, Button } from "@tarojs/components";
 import Taro from "@tarojs/taro";
-import { fetchOrders } from "../../lib/request";
+import { fetchOrder } from "../../lib/request";
 import { formatPrice } from "../../lib/utils";
 import "./index.scss";
+
+const ORDER_TOKEN_STORAGE_KEY = "orderAccessTokens";
 
 interface OrderItem {
   orderId: string;
   orderNo: string;
-  orderAccessToken: string;
   productType: string;
   productIds: string[];
   amount: number;
   status: string;
   platform: string;
+  customerName: string;
+  customerPhone: string;
+  transactionId: string | null;
   createdAt: string;
   paidAt: string | null;
 }
@@ -28,21 +32,43 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export default function Orders() {
-  const [phone, setPhone] = useState("");
   const [orders, setOrders] = useState<OrderItem[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [searched, setSearched] = useState(false);
+  const [tokens, setTokens] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
 
-  const handleSearch = async () => {
-    if (!phone.trim()) {
-      Taro.showToast({ title: "请输入手机号", icon: "none" });
-      return;
-    }
+  useEffect(() => {
+    loadLocalOrders();
+  }, []);
+
+  const loadLocalOrders = async () => {
     setLoading(true);
-    setSearched(true);
+    const savedTokens = Taro.getStorageSync(ORDER_TOKEN_STORAGE_KEY) || {};
+    setTokens(savedTokens);
+
     try {
-      const res = await fetchOrders(phone.trim());
-      setOrders(res.orders);
+      const loaded: Array<OrderItem | null> = await Promise.all(
+        Object.entries(savedTokens).map(([orderId, accessToken]) =>
+          fetchOrder(orderId, String(accessToken)).then((order) => ({
+            orderId: order.orderId,
+            orderNo: order.orderNo,
+            productType: order.productType,
+            productIds: order.productIds,
+            amount: order.amount,
+            status: order.status,
+            platform: order.platform,
+            customerName: order.customerName,
+            customerPhone: order.customerPhone,
+            transactionId: order.transactionId,
+            createdAt: order.createdAt,
+            paidAt: order.paidAt,
+          })).catch(() => null)
+        )
+      );
+      setOrders(
+        loaded
+          .filter((order): order is OrderItem => order !== null)
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      );
     } catch {
       setOrders([]);
     } finally {
@@ -59,22 +85,14 @@ export default function Orders() {
   return (
     <View className="orders">
       <View className="orders-search">
-        <Input
-          className="orders-search-input"
-          placeholder="输入手机号查询订单"
-          type="number"
-          maxlength={11}
-          value={phone}
-          onInput={(e) => setPhone(e.detail.value)}
-        />
-        <Button className="btn-primary orders-search-btn" onClick={handleSearch} disabled={loading}>
-          {loading ? "查询中..." : "查询"}
+        <Button className="btn-primary orders-search-btn" onClick={loadLocalOrders} disabled={loading}>
+          {loading ? "加载中..." : "刷新订单"}
         </Button>
       </View>
 
-      {searched && orders.length === 0 && !loading && (
+      {orders.length === 0 && !loading && (
         <View className="orders-empty">
-          <Text>暂无订单</Text>
+          <Text>暂无本机订单</Text>
         </View>
       )}
 
@@ -82,7 +100,7 @@ export default function Orders() {
         <View
           key={order.orderId}
           className="order-card"
-          onClick={() => goToDetail(order.orderId, order.orderAccessToken)}
+          onClick={() => goToDetail(order.orderId, tokens[order.orderId] || "")}
         >
           <View className="order-card-header">
             <Text className="order-card-no">{order.orderNo}</Text>

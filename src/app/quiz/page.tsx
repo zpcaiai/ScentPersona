@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import PageShell from "@/components/layout/PageShell";
 import QuizIntro from "@/components/quiz/QuizIntro";
@@ -10,6 +10,8 @@ import QuizNavigation from "@/components/quiz/QuizNavigation";
 import { QUIZ_QUESTIONS } from "@/data/quizQuestions";
 import { SITE_COPY } from "@/data/copy";
 import type { QuizAnswerInput } from "@/lib/scoring/types";
+
+const QUIZ_DRAFT_KEY = "scentpersona:quiz-draft";
 
 export default function QuizPage() {
   const router = useRouter();
@@ -22,6 +24,35 @@ export default function QuizPage() {
   const total = QUIZ_QUESTIONS.length;
   const currentQuestion = QUIZ_QUESTIONS[currentIndex];
   const selectedOptionId = answers[currentQuestion?.id] ?? null;
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(QUIZ_DRAFT_KEY);
+      if (!raw) return;
+
+      const draft = JSON.parse(raw) as {
+        started?: boolean;
+        currentIndex?: number;
+        answers?: Record<string, string>;
+      };
+
+      if (draft.answers && Object.keys(draft.answers).length > 0) {
+        setAnswers(draft.answers);
+        setCurrentIndex(Math.min(Math.max(draft.currentIndex ?? 0, 0), total - 1));
+        setStarted(draft.started ?? true);
+      }
+    } catch {
+      window.localStorage.removeItem(QUIZ_DRAFT_KEY);
+    }
+  }, [total]);
+
+  useEffect(() => {
+    if (!started) return;
+    window.localStorage.setItem(
+      QUIZ_DRAFT_KEY,
+      JSON.stringify({ started, currentIndex, answers })
+    );
+  }, [answers, currentIndex, started]);
 
   const handleStart = () => {
     setStarted(true);
@@ -64,6 +95,7 @@ export default function QuizPage() {
       }
 
       const data = await res.json();
+      window.localStorage.removeItem(QUIZ_DRAFT_KEY);
       router.push(`/result/${data.sessionId}`);
     } catch {
       setError(SITE_COPY.quiz.errorText);

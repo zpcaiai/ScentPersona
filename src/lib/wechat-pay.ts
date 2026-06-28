@@ -1,6 +1,7 @@
 import crypto from "crypto";
 
 const WECHAT_APPID = process.env.WECHAT_APPID || "";
+const WECHAT_APP_SECRET = process.env.WECHAT_APP_SECRET || "";
 const WECHAT_MCHID = process.env.WECHAT_MCHID || "";
 const WECHAT_SERIAL_NO = process.env.WECHAT_SERIAL_NO || "";
 const WECHAT_PRIVATE_KEY = process.env.WECHAT_PRIVATE_KEY || "";
@@ -32,6 +33,10 @@ export interface WechatPrepayResult {
   nonceStr: string;
   package: string;
   signType: string;
+}
+
+export interface WechatNativePayResult {
+  codeUrl: string;
 }
 
 export async function createWechatJsapiOrder(params: {
@@ -88,6 +93,123 @@ export async function createWechatJsapiOrder(params: {
     nonceStr,
     package: packageStr,
     signType: "RSA",
+  };
+}
+
+export async function exchangeWechatLoginCode(code: string): Promise<{
+  openid: string;
+  sessionKey?: string;
+}> {
+  if (!WECHAT_APPID || !WECHAT_APP_SECRET) {
+    throw new Error("WeChat login is not configured");
+  }
+
+  const url = new URL("https://api.weixin.qq.com/sns/jscode2session");
+  url.searchParams.set("appid", WECHAT_APPID);
+  url.searchParams.set("secret", WECHAT_APP_SECRET);
+  url.searchParams.set("js_code", code);
+  url.searchParams.set("grant_type", "authorization_code");
+
+  const res = await fetch(url.toString(), {
+    method: "GET",
+    headers: { Accept: "application/json" },
+  });
+
+  if (!res.ok) {
+    throw new Error(`WeChat login API error: ${res.status}`);
+  }
+
+  const data = (await res.json()) as {
+    openid?: string;
+    session_key?: string;
+    errcode?: number;
+    errmsg?: string;
+  };
+
+  if (!data.openid) {
+    throw new Error(data.errmsg || `WeChat login failed: ${data.errcode ?? "unknown"}`);
+  }
+
+  return {
+    openid: data.openid,
+    sessionKey: data.session_key,
+  };
+}
+
+export async function createWechatNativeOrder(params: {
+  orderNo: string;
+  amount: number;
+  description: string;
+}): Promise<WechatNativePayResult> {
+  const apiUrl = "/v3/pay/transactions/native";
+  const fullUrl = `https://api.mch.weixin.qq.com${apiUrl}`;
+  const body = JSON.stringify({
+    appid: WECHAT_APPID,
+    mchid: WECHAT_MCHID,
+    description: params.description,
+    out_trade_no: params.orderNo,
+    notify_url: WECHAT_NOTIFY_URL,
+    amount: { total: params.amount, currency: "CNY" },
+  });
+
+  const auth = buildAuthorization("POST", apiUrl, body);
+  const res = await fetch(fullUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: auth,
+      Accept: "application/json",
+    },
+    body,
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`WeChat Pay Native API error: ${res.status} ${errText}`);
+  }
+
+  const data = (await res.json()) as { code_url: string };
+  return { codeUrl: data.code_url };
+}
+
+export async function queryWechatOrderByOutTradeNo(orderNo: string): Promise<{
+  tradeState: string;
+  transactionId?: string;
+  amount?: number;
+  mchid?: string;
+  successTime?: string;
+}> {
+  const apiUrl = `/v3/pay/transactions/out-trade-no/${encodeURIComponent(orderNo)}?mchid=${encodeURIComponent(WECHAT_MCHID)}`;
+  const fullUrl = `https://api.mch.weixin.qq.com${apiUrl}`;
+  const auth = buildAuthorization("GET", apiUrl, "");
+
+  const res = await fetch(fullUrl, {
+    method: "GET",
+    headers: {
+      Authorization: auth,
+      Accept: "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`WeChat Pay query error: ${res.status} ${errText}`);
+  }
+
+  const data = (await res.json()) as {
+    trade_state: string;
+    transaction_id?: string;
+    amount?: { total?: number };
+    mchid?: string;
+    success_time?: string;
+  };
+
+  return {
+    tradeState: data.trade_state,
+    transactionId: data.transaction_id,
+    amount: data.amount?.total,
+    mchid: data.mchid,
+    successTime: data.success_time,
   };
 }
 

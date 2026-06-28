@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { PRODUCTS } from "@/data/products";
 import { generateOrderAccessToken, generateOrderNo } from "@/lib/order-utils";
+import { getClientKey, normalizePhone, rateLimit, sanitizeText } from "@/lib/api-guards";
 
 const SUPPORTED_PRODUCT_TYPES = new Set(["three_sample_kit", "sample-set-3"]);
 const SAMPLE_KIT_AMOUNT = 2990;
@@ -12,14 +13,15 @@ function normalizeProductIds(value: unknown): string[] {
   return value.filter((id): id is string => typeof id === "string" && productIds.has(id));
 }
 
-function normalizePhone(value: unknown): string | null {
-  if (typeof value !== "string") return null;
-  const phone = value.trim();
-  return /^1\d{10}$/.test(phone) ? phone : null;
-}
-
 export async function POST(request: NextRequest) {
   try {
+    if (!rateLimit(getClientKey(request, "order:create"), 20, 60_000)) {
+      return NextResponse.json(
+        { error: "Too many requests" },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
 
     if (!body || !body.productType || typeof body.amount !== "number") {
@@ -44,7 +46,8 @@ export async function POST(request: NextRequest) {
     }
 
     const customerPhone = normalizePhone(body.customerPhone);
-    if (!body.customerName || !customerPhone) {
+    const customerName = sanitizeText(body.customerName, 40);
+    if (!customerName || !customerPhone) {
       return NextResponse.json(
         { error: "Invalid request: customerName and a valid customerPhone are required" },
         { status: 400 }
@@ -73,10 +76,10 @@ export async function POST(request: NextRequest) {
         amount: body.amount,
         status: "pending",
         platform,
-        customerName: String(body.customerName).trim(),
+        customerName,
         customerPhone,
-        shippingAddress: body.shippingAddress ?? null,
-        note: body.note ?? null,
+        shippingAddress: sanitizeText(body.shippingAddress, 200),
+        note: sanitizeText(body.note, 300),
       },
     });
 

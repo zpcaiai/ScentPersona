@@ -2,21 +2,23 @@
 
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import PageShell from "@/components/layout/PageShell";
 import { SITE_COPY } from "@/data/copy";
 import { PRODUCTS, getProductById } from "@/data/products";
 
 function CheckoutContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("sessionId");
+  const selectedProductIds = searchParams.get("productIds");
   const [recommendedIds, setRecommendedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: "",
     phone: "",
-    email: "",
+    address: "",
     note: "",
   });
 
@@ -33,62 +35,54 @@ function CheckoutContent() {
     }
   }, [sessionId]);
 
-  const recommendedProducts = recommendedIds
+  const checkoutProductIds = selectedProductIds
+    ? selectedProductIds.split(",").filter((id) => getProductById(id)).slice(0, 3)
+    : recommendedIds;
+
+  const recommendedProducts = checkoutProductIds
     .map((id) => getProductById(id))
     .filter(Boolean);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
 
     try {
-      const res = await fetch("/api/purchase/intent", {
+      const productIds = checkoutProductIds.length > 0
+        ? checkoutProductIds
+        : PRODUCTS.slice(0, 3).map((p) => p.id);
+
+      const res = await fetch("/api/order/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           sessionId: sessionId ?? undefined,
-          productType: "three_sample_kit",
-          productIds: recommendedIds.length > 0 ? recommendedIds : PRODUCTS.slice(0, 3).map((p) => p.id),
-          price: 2990,
+          productType: "sample-set-3",
+          productIds,
+          amount: 2990,
+          platform: "web",
           customerName: form.name,
           customerPhone: form.phone,
-          customerEmail: form.email || undefined,
+          shippingAddress: form.address || undefined,
           note: form.note || undefined,
         }),
       });
 
-      if (res.ok) {
-        setSubmitted(true);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "订单创建失败");
       }
-    } catch {
-      // ignore
+
+      const data = await res.json();
+      window.localStorage.setItem(`orderAccessToken:${data.orderId}`, data.orderAccessToken);
+      router.push(`/order/${data.orderId}?accessToken=${encodeURIComponent(data.orderAccessToken)}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "订单创建失败，请稍后重试");
     } finally {
       setLoading(false);
     }
   };
-
-  if (submitted) {
-    return (
-      <PageShell>
-        <div className="text-center py-16">
-          <h1 className="text-xl font-serif text-stone-800">
-            {SITE_COPY.checkout.successTitle}
-          </h1>
-          <p className="mt-3 text-stone-600 leading-relaxed">
-            {SITE_COPY.checkout.successDesc}
-          </p>
-          <div className="mt-6 flex flex-col gap-3 items-center">
-            <Link href="/feedback" className="btn-primary w-48">
-              填写试香反馈
-            </Link>
-            <Link href="/" className="btn-secondary w-48">
-              返回首页
-            </Link>
-          </div>
-        </div>
-      </PageShell>
-    );
-  }
 
   return (
     <PageShell>
@@ -100,9 +94,6 @@ function CheckoutContent() {
           {SITE_COPY.checkout.subtitle}
         </p>
       </div>
-
-      {/* TODO: Integrate real payment (Stripe/WeChat Pay/Alipay) here */}
-
       {recommendedProducts.length > 0 && (
         <div className="mt-6">
           <h3 className="font-serif text-stone-700 mb-3">你的推荐小样</h3>
@@ -150,11 +141,11 @@ function CheckoutContent() {
             />
           </div>
           <div>
-            <label className="text-sm text-stone-600 block mb-1">邮箱（选填）</label>
+            <label className="text-sm text-stone-600 block mb-1">收货地址（选填）</label>
             <input
-              type="email"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              type="text"
+              value={form.address}
+              onChange={(e) => setForm({ ...form, address: e.target.value })}
               className="w-full rounded-xl border border-cream-200 bg-white px-4 py-2 text-sm focus:outline-none focus:border-sage-400"
             />
           </div>
@@ -168,8 +159,14 @@ function CheckoutContent() {
             />
           </div>
 
+          {error && (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+              {error}
+            </div>
+          )}
+
           <button type="submit" disabled={loading} className="btn-primary">
-            {loading ? "提交中..." : "确认领取（模拟支付）"}
+            {loading ? "创建订单中..." : "创建订单并去支付"}
           </button>
         </form>
       </div>

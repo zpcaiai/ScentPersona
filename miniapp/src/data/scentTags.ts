@@ -1,4 +1,4 @@
-import type { ScentTag } from "../lib/scoring/types";
+import type { ScentTag } from "@/lib/scoring/types";
 
 export const SCENT_TAGS: ScentTag[] = [
   "clean",

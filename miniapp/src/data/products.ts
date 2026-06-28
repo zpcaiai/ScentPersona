@@ -1,4 +1,4 @@
-import type { ScentTag, PersonaId } from "../lib/scoring/types";
+import type { ScentTag, PersonaId } from "@/lib/scoring/types";
 
 export interface Product {
   id: string;

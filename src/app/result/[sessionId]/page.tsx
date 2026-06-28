@@ -5,7 +5,6 @@ import PersonaHero from "@/components/result/PersonaHero";
 import ScentProfileCard from "@/components/result/ScentProfileCard";
 import RecommendedSamples from "@/components/result/RecommendedSamples";
 import ShareCard from "@/components/result/ShareCard";
-import QuizResultCTA from "@/components/quiz/QuizResultCTA";
 import { db } from "@/lib/db";
 import { getPersonaById } from "@/data/personas";
 import { getProductById } from "@/data/products";
@@ -106,9 +105,7 @@ export default async function ResultPage({ params }: ResultPageProps) {
         </div>
       </div>
 
-      <RecommendedSamples recommendations={recommendations} />
-
-      <QuizResultCTA sessionId={session.id} />
+      <RecommendedSamples recommendations={recommendations} sessionId={session.id} />
 
       <ShareCard persona={p} />
 

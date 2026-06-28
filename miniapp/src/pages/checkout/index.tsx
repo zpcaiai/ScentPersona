@@ -4,7 +4,7 @@ import Taro, { useRouter } from "@tarojs/taro";
 import { getProductById } from "../../data/products";
 import { SITE_COPY } from "../../data/copy";
 import { formatPrice } from "../../lib/utils";
-import { createOrder, requestWechatPay, requestXhsPay } from "../../lib/request";
+import { createOrder, loginWechat, requestWechatPay, requestXhsPay } from "../../lib/request";
 import "./index.scss";
 
 const ORDER_TOKEN_STORAGE_KEY = "orderAccessTokens";
@@ -81,10 +81,17 @@ export default function Checkout() {
 
   const payWechat = async (oid: string, accessToken: string) => {
     try {
-      const loginRes = await Taro.login();
       const openid = Taro.getStorageSync("openid") || "";
+      let resolvedOpenid = openid;
 
-      const payRes = await requestWechatPay(oid, accessToken, openid || loginRes.code);
+      if (!resolvedOpenid) {
+        const loginRes = await Taro.login();
+        const authRes = await loginWechat(loginRes.code);
+        resolvedOpenid = authRes.openid;
+        Taro.setStorageSync("openid", resolvedOpenid);
+      }
+
+      const payRes = await requestWechatPay(oid, accessToken, resolvedOpenid);
 
       await Taro.requestPayment({
         timeStamp: payRes.timeStamp,

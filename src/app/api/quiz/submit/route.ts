@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { QUIZ_QUESTIONS } from "@/data/quizQuestions";
+import { getClientKey, rateLimit } from "@/lib/api-guards";
 import { scoreQuizAnswers } from "@/lib/scoring/scoreQuiz";
 import { matchPersona } from "@/lib/scoring/matchPersona";
 import { recommendProducts } from "@/lib/scoring/recommendProducts";
@@ -8,16 +9,34 @@ import type { QuizAnswerInput } from "@/lib/scoring/types";
 
 export async function POST(request: NextRequest) {
   try {
+    if (!rateLimit(getClientKey(request, "quiz:submit"), 30, 60_000)) {
+      return NextResponse.json(
+        { error: "Too many requests" },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
 
-    if (!body || !Array.isArray(body.answers) || body.answers.length < 1) {
+    if (!body || !Array.isArray(body.answers) || body.answers.length !== QUIZ_QUESTIONS.length) {
       return NextResponse.json(
-        { error: "Invalid request: answers must be a non-empty array" },
+        { error: "Invalid request: answers must include every quiz question" },
         { status: 400 }
       );
     }
 
     const answers: QuizAnswerInput[] = body.answers;
+    const questionIds = new Set(QUIZ_QUESTIONS.map((q) => q.id));
+    const answerQuestionIds = new Set(answers.map((answer) => answer.questionId));
+    if (
+      answerQuestionIds.size !== QUIZ_QUESTIONS.length ||
+      answers.some((answer) => !questionIds.has(answer.questionId))
+    ) {
+      return NextResponse.json(
+        { error: "Invalid request: duplicate or unknown questionId" },
+        { status: 400 }
+      );
+    }
     const source: string | undefined = body.source;
     const questionMap = new Map(QUIZ_QUESTIONS.map((q) => [q.id, q]));
 

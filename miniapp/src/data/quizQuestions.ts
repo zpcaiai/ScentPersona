@@ -1,4 +1,4 @@
-import type { ScentTag, PersonaId, PartialTagScores, PartialPersonaScores } from "../lib/scoring/types";
+import type { ScentTag, PersonaId, PartialTagScores, PartialPersonaScores } from "@/lib/scoring/types";
 
 export interface QuizOption {
   id: string;

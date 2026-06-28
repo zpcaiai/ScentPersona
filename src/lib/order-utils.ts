@@ -1,5 +1,7 @@
 import crypto from "crypto";
 
+export const PENDING_ORDER_TIMEOUT_MS = 30 * 60 * 1000;
+
 export function generateOrderNo(): string {
   const now = new Date();
   const y = now.getFullYear();
@@ -24,4 +26,11 @@ export function isOrderAccessAuthorized(
   if (expected.length !== provided.length) return false;
 
   return crypto.timingSafeEqual(expected, provided);
+}
+
+export function isPendingOrderExpired(order: {
+  status: string;
+  createdAt: Date;
+}): boolean {
+  return order.status === "pending" && Date.now() - order.createdAt.getTime() > PENDING_ORDER_TIMEOUT_MS;
 }
