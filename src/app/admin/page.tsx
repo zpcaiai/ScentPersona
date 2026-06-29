@@ -5,42 +5,79 @@ import { PRODUCTS, getProductById } from "@/data/products";
 import { SITE_COPY } from "@/data/copy";
 import { parseJsonArray } from "@/lib/utils";
 import AdminOrderActions from "@/components/admin/AdminOrderActions";
+import { createdAtWhere, parseAdminDateRange } from "@/lib/admin-date-range";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminPage() {
-  const [sessions, intents, feedbacks, orders, deletionRequests] = await Promise.all([
+export default async function AdminPage({
+  searchParams,
+}: {
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
+  const dateRange = parseAdminDateRange(searchParams);
+  const rangeWhere = createdAtWhere(dateRange);
+  const paidStatusWhere = { status: { in: ["paid", "processing", "shipped", "completed"] } };
+
+  const [
+    sessions,
+    intents,
+    feedbacks,
+    orders,
+    deletionRequests,
+    productOrders,
+    analyticsGroups,
+    totalSessions,
+    totalIntents,
+    totalFeedbacks,
+    fullSizeConversions,
+    totalOrders,
+    paidOrders,
+    paidRevenue,
+  ] = await Promise.all([
     db.quizSession.findMany({
+      where: rangeWhere,
       orderBy: { createdAt: "desc" },
       select: { personaId: true, recommendedProductIdsJson: true, createdAt: true },
     }),
     db.purchaseIntent.findMany({
+      where: rangeWhere,
       orderBy: { createdAt: "desc" },
-      take: 50,
+      take: 100,
     }),
     db.feedback.findMany({
+      where: rangeWhere,
+      orderBy: { createdAt: "desc" },
+      take: 100,
+    }),
+    db.order.findMany({
+      where: rangeWhere,
+      orderBy: { createdAt: "desc" },
+      take: 200,
+    }),
+    db.dataDeletionRequest.findMany({
       orderBy: { createdAt: "desc" },
       take: 50,
     }),
     db.order.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 100,
+      where: rangeWhere,
+      select: { productIdsJson: true },
     }),
-    db.dataDeletionRequest.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 20,
+    db.analyticsEvent.groupBy({
+      by: ["eventName"],
+      where: rangeWhere,
+      _count: { _all: true },
+    }),
+    db.quizSession.count({ where: rangeWhere }),
+    db.purchaseIntent.count({ where: rangeWhere }),
+    db.feedback.count({ where: rangeWhere }),
+    db.feedback.count({ where: { ...rangeWhere, boughtFullSize: true } }),
+    db.order.count({ where: rangeWhere }),
+    db.order.count({ where: { ...rangeWhere, ...paidStatusWhere } }),
+    db.order.aggregate({
+      _sum: { amount: true },
+      where: { ...rangeWhere, ...paidStatusWhere },
     }),
   ]);
-
-  const totalSessions = await db.quizSession.count();
-  const totalIntents = await db.purchaseIntent.count();
-  const totalFeedbacks = await db.feedback.count();
-  const totalOrders = await db.order.count();
-  const paidOrders = await db.order.count({ where: { status: { in: ["paid", "processing", "shipped", "completed"] } } });
-  const paidRevenue = await db.order.aggregate({
-    _sum: { amount: true },
-    where: { status: { in: ["paid", "processing", "shipped", "completed"] } },
-  });
 
   const personaCounts: Record<string, number> = {};
   for (const session of sessions) {
@@ -50,7 +87,7 @@ export default async function AdminPage() {
   }
 
   const productCounts: Record<string, number> = {};
-  for (const order of orders) {
+  for (const order of productOrders) {
     const ids = parseJsonArray<string>(order.productIdsJson);
     for (const id of ids) {
       productCounts[id] = (productCounts[id] || 0) + 1;
@@ -63,10 +100,22 @@ export default async function AdminPage() {
   const paidRate = totalOrders > 0
     ? Math.round((paidOrders / totalOrders) * 100)
     : 0;
+  const eventCounts = analyticsGroups.reduce<Record<string, number>>((acc, group) => {
+    acc[group.eventName] = group._count._all;
+    return acc;
+  }, {});
+  const pageViews = eventCounts.page_view || 0;
+  const quizStarts = eventCounts.quiz_start || 0;
+  const resultViews = eventCounts.result_view || 0;
+  const checkoutViews = eventCounts.checkout_view || 0;
+  const checkoutSubmits = eventCounts.checkout_submit || totalOrders;
   const statusCounts = orders.reduce<Record<string, number>>((acc, order) => {
     acc[order.status] = (acc[order.status] || 0) + 1;
     return acc;
   }, {});
+  const exportHref = dateRange.queryString
+    ? `/api/admin/export/orders?${dateRange.queryString}`
+    : "/api/admin/export/orders";
 
   return (
     <PageShell>
@@ -74,9 +123,48 @@ export default async function AdminPage() {
         <h1 className="text-2xl font-serif text-stone-800 text-center">
           {SITE_COPY.admin.title}
         </h1>
+        <p className="mt-2 text-center text-sm text-stone-500">
+          当前范围：{dateRange.label}
+        </p>
+        <div className="mt-5 grid gap-3 rounded-2xl border border-cream-200 bg-white/80 p-4">
+          <div className="flex flex-wrap justify-center gap-2 text-sm">
+            <a href="/admin?range=7d" className="rounded-full border border-cream-200 px-3 py-1 text-stone-600 hover:border-sage-400">
+              最近 7 天
+            </a>
+            <a href="/admin" className="rounded-full border border-cream-200 px-3 py-1 text-stone-600 hover:border-sage-400">
+              最近 30 天
+            </a>
+            <a href="/admin?range=all" className="rounded-full border border-cream-200 px-3 py-1 text-stone-600 hover:border-sage-400">
+              全部
+            </a>
+          </div>
+          <form action="/admin" className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
+            <label className="grid gap-1 text-xs text-stone-500">
+              开始日期
+              <input
+                type="date"
+                name="from"
+                defaultValue={dateRange.fromInput}
+                className="rounded-lg border border-cream-200 bg-white px-3 py-2 text-sm text-stone-700"
+              />
+            </label>
+            <label className="grid gap-1 text-xs text-stone-500">
+              结束日期
+              <input
+                type="date"
+                name="to"
+                defaultValue={dateRange.toInput}
+                className="rounded-lg border border-cream-200 bg-white px-3 py-2 text-sm text-stone-700"
+              />
+            </label>
+            <button type="submit" className="rounded-lg bg-sage-600 px-4 py-2 text-sm font-medium text-cream-50 sm:self-end">
+              筛选
+            </button>
+          </form>
+        </div>
         <div className="mt-4 text-center">
           <a
-            href="/api/admin/export/orders"
+            href={exportHref}
             className="inline-flex rounded-full border border-sage-400 px-4 py-2 text-sm text-sage-600 hover:bg-sage-400/10"
           >
             导出订单 CSV
@@ -85,7 +173,7 @@ export default async function AdminPage() {
       </div>
 
       {/* Overview metrics */}
-      <div className="grid grid-cols-2 gap-4 mt-4 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 mt-4 sm:grid-cols-5">
         <div className="card text-center">
           <div className="text-3xl font-serif text-sage-600">{totalSessions}</div>
           <div className="text-xs text-stone-500 mt-1">测试完成数</div>
@@ -104,14 +192,38 @@ export default async function AdminPage() {
           </div>
           <div className="text-xs text-stone-500 mt-1">已支付收入</div>
         </div>
+        <div className="card text-center">
+          <div className="text-3xl font-serif text-clay-500">{fullSizeConversions}</div>
+          <div className="text-xs text-stone-500 mt-1">正装意向</div>
+        </div>
       </div>
 
       <div className="card mt-6">
         <h3 className="font-serif text-stone-700 mb-4">交易漏斗</h3>
         <div className="grid gap-3 text-sm text-stone-600">
           <div className="flex items-center justify-between">
-            <span>测试完成 → 下单</span>
-            <span>{totalOrders} 单 / {orderRate}%</span>
+            <span>访问</span>
+            <span>{pageViews} 次</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span>开始测试</span>
+            <span>{quizStarts} 次</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span>完成测试</span>
+            <span>{totalSessions} 次</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span>查看结果</span>
+            <span>{resultViews} 次</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span>进入结账</span>
+            <span>{checkoutViews} 次</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span>提交订单</span>
+            <span>{checkoutSubmits} 次 / 测试后下单率 {orderRate}%</span>
           </div>
           <div className="flex items-center justify-between">
             <span>下单 → 支付</span>
@@ -120,6 +232,10 @@ export default async function AdminPage() {
           <div className="flex items-center justify-between">
             <span>反馈提交</span>
             <span>{totalFeedbacks} 条</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span>正装意向</span>
+            <span>{fullSizeConversions} 条</span>
           </div>
           {totalIntents > 0 && (
             <div className="flex items-center justify-between text-stone-400">

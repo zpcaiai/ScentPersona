@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { View, Text, Button, Progress } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import { QUIZ_QUESTIONS } from "../../data/quizQuestions";
 import { SITE_COPY } from "../../data/copy";
 import { scoreQuizAnswers, matchPersona, recommendProducts } from "../../lib/scoring";
-import { submitQuiz } from "../../lib/request";
+import { submitQuiz, trackEvent } from "../../lib/request";
 import type { QuizAnswerInput } from "../../lib/scoring/types";
 import "./index.scss";
 
@@ -16,6 +16,10 @@ export default function Quiz() {
 
   const total = QUIZ_QUESTIONS.length;
   const question = QUIZ_QUESTIONS[currentIndex];
+
+  useEffect(() => {
+    trackEvent({ eventName: "quiz_start", path: "/pages/quiz/index" });
+  }, []);
 
   const handleSelect = (optionId: string) => {
     const newAnswers = [...answers];
@@ -47,6 +51,12 @@ export default function Quiz() {
       try {
         const apiRes = await submitQuiz(answers);
         sessionId = apiRes.sessionId;
+        trackEvent({
+          eventName: "quiz_complete",
+          path: "/pages/quiz/index",
+          sessionId,
+          personaId: personaResult.personaId,
+        });
       } catch {
         // API may fail in dev; continue with local result
       }

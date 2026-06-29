@@ -5,12 +5,13 @@ import { generateOrderAccessToken, generateOrderNo } from "@/lib/order-utils";
 import { getClientKey, normalizePhone, rateLimit, sanitizeText } from "@/lib/api-guards";
 
 const SUPPORTED_PRODUCT_TYPES = new Set(["three_sample_kit", "sample-set-3"]);
+const SUPPORTED_PLATFORMS = new Set(["web", "weapp", "xhs"]);
 const SAMPLE_KIT_AMOUNT = 2990;
 
 function normalizeProductIds(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   const productIds = new Set(PRODUCTS.map((p) => p.id));
-  return value.filter((id): id is string => typeof id === "string" && productIds.has(id));
+  return Array.from(new Set(value.filter((id): id is string => typeof id === "string" && productIds.has(id))));
 }
 
 export async function POST(request: NextRequest) {
@@ -55,16 +56,26 @@ export async function POST(request: NextRequest) {
     }
 
     const productIds = normalizeProductIds(body.productIds);
-    if (productIds.length === 0) {
+    if (productIds.length !== 3) {
       return NextResponse.json(
-        { error: "Invalid request: at least one valid productId is required" },
+        { error: "Invalid request: exactly three valid productIds are required" },
+        { status: 400 }
+      );
+    }
+
+    const shippingAddress = sanitizeText(body.shippingAddress, 200);
+    if (!shippingAddress) {
+      return NextResponse.json(
+        { error: "Invalid request: shippingAddress is required" },
         { status: 400 }
       );
     }
 
     const orderNo = generateOrderNo();
     const accessToken = generateOrderAccessToken();
-    const platform = body.platform || "weapp";
+    const platform = typeof body.platform === "string" && SUPPORTED_PLATFORMS.has(body.platform)
+      ? body.platform
+      : "weapp";
 
     const order = await db.order.create({
       data: {
@@ -78,7 +89,7 @@ export async function POST(request: NextRequest) {
         platform,
         customerName,
         customerPhone,
-        shippingAddress: sanitizeText(body.shippingAddress, 200),
+        shippingAddress,
         note: sanitizeText(body.note, 300),
       },
     });

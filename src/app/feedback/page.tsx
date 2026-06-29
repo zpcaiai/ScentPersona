@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import PageShell from "@/components/layout/PageShell";
 import { SITE_COPY } from "@/data/copy";
 import { PRODUCTS } from "@/data/products";
+import TrackEvent from "@/components/common/TrackEvent";
 
 function FeedbackContent() {
   const searchParams = useSearchParams();
@@ -142,6 +143,13 @@ function FeedbackContent() {
 
   return (
     <PageShell>
+      <TrackEvent
+        eventName="feedback_view"
+        path="/feedback"
+        sessionId={sessionId}
+        orderId={orderId}
+        personaId={personaId}
+      />
       <div className="py-8">
         <h1 className="text-2xl font-serif text-stone-800 text-center">
           {SITE_COPY.feedback.title}

@@ -3,12 +3,14 @@ import PageShell from "@/components/layout/PageShell";
 import { SITE_COPY } from "@/data/copy";
 import { PERSONAS } from "@/data/personas";
 import { PRODUCTS } from "@/data/products";
+import TrackEvent from "@/components/common/TrackEvent";
 
 const previewPersonas = ["rain-study", "warm-sweater", "white-shirt-morning", "olive-rest"];
 
 export default function LandingPage() {
   return (
     <PageShell>
+      <TrackEvent eventName="page_view" path="/" />
       {/* Hero */}
       <section className="text-center py-12">
         <h1 className="text-3xl font-serif text-stone-800 leading-tight">

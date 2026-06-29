@@ -18,6 +18,7 @@ export default function ProductsPage() {
       <div className="grid gap-4 mt-6">
         {/* Primary offer */}
         <div className="card border-2 border-sage-400">
+          <img src="/products/sample-set.jpg" alt="" className="w-full h-40 object-cover rounded-xl mb-4" loading="lazy" />
           <div className="flex items-start justify-between">
             <div>
               <div className="text-xs text-sage-500 mb-1">推荐</div>
@@ -39,6 +40,7 @@ export default function ProductsPage() {
 
         {/* Secondary offer */}
         <div className="card">
+          <img src="/products/sample-set.jpg" alt="" className="w-full h-40 object-cover rounded-xl mb-4" loading="lazy" />
           <div className="flex items-start justify-between">
             <div>
               <h3 className="font-serif text-lg text-stone-800">
@@ -59,6 +61,7 @@ export default function ProductsPage() {
 
         {/* Gift offer */}
         <div className="card">
+          <img src="/products/gift-box.jpg" alt="" className="w-full h-40 object-cover rounded-xl mb-4" loading="lazy" />
           <div className="flex items-start justify-between">
             <div>
               <h3 className="font-serif text-lg text-stone-800">
@@ -88,6 +91,7 @@ export default function ProductsPage() {
               href={`/products/${product.slug}`}
               className="card hover:border-sage-400 transition-colors"
             >
+              <img src={product.image} alt={product.name} className="w-full aspect-square object-cover rounded-lg mb-2" loading="lazy" />
               <h4 className="font-serif text-stone-800">{product.name}</h4>
               <p className="mt-1 text-xs text-stone-500 line-clamp-2">
                 {product.plainDescription}

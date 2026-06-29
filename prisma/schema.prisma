@@ -120,3 +120,20 @@ model DataDeletionRequest {
 
   @@map("data_deletion_requests")
 }
+
+model AnalyticsEvent {
+  id           String   @id @default(cuid())
+  eventName    String
+  source       String?
+  path         String?
+  sessionId    String?
+  orderId      String?
+  personaId    String?
+  metadataJson String   @default("{}")
+  createdAt    DateTime @default(now())
+
+  @@index([eventName, createdAt])
+  @@index([sessionId])
+  @@index([orderId])
+  @@map("analytics_events")
+}

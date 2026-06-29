@@ -29,6 +29,13 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
         </Link>
       </div>
 
+      <img
+        src={p.image}
+        alt={p.name}
+        className="w-full aspect-[4/3] object-cover rounded-2xl mb-6"
+        loading="lazy"
+      />
+
       <div className="card">
         <h1 className="text-2xl font-serif text-stone-800">{p.name}</h1>
         <div className="mt-2 text-lg text-clay-500">

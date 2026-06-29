@@ -1,0 +1,89 @@
+.profile {
+  padding-bottom: 48rpx;
+}
+.profile-hero {
+  padding: 64rpx 48rpx 40rpx;
+  text-align: center;
+}
+.profile-hero-name {
+  display: block;
+  font-size: 48rpx;
+  font-weight: 600;
+  color: #44403c;
+}
+.profile-hero-tagline {
+  display: block;
+  margin-top: 12rpx;
+  color: #a8a29e;
+  font-size: 26rpx;
+}
+.profile-inline-title {
+  margin: 0 0 16rpx;
+}
+.profile-phone-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.profile-phone-val {
+  font-size: 30rpx;
+  color: #44403c;
+}
+.profile-phone-action {
+  font-size: 28rpx;
+  font-weight: 500;
+}
+.profile-phone-input {
+  background: #f5f0e8;
+  border-radius: 16rpx;
+  padding: 20rpx 24rpx;
+  font-size: 30rpx;
+  margin-bottom: 20rpx;
+}
+.profile-phone-btns {
+  display: flex;
+  gap: 20rpx;
+}
+.profile-phone-btn {
+  flex: 1;
+}
+.profile-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28rpx 0;
+  border-top: 1rpx solid #f0ece4;
+}
+.profile-menu-item-first {
+  border-top: none;
+}
+.profile-menu-label {
+  display: block;
+  font-size: 30rpx;
+  color: #44403c;
+}
+.profile-menu-desc {
+  display: block;
+  font-size: 24rpx;
+  color: #a8a29e;
+  margin-top: 4rpx;
+}
+.profile-menu-arrow {
+  color: #c8c2ba;
+  font-size: 40rpx;
+}
+.profile-about-text {
+  display: block;
+  color: #57534e;
+  font-size: 28rpx;
+}
+.profile-about-contact {
+  display: block;
+  margin-top: 16rpx;
+  color: #7c9070;
+  font-size: 26rpx;
+}
+.profile-footer {
+  text-align: center;
+  margin-top: 32rpx;
+}

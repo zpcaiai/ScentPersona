@@ -25,6 +25,7 @@ export interface Product {
     giftBox?: number;
   };
   ctaText: string;
+  image: string;
 }
 
 const zeroTags = (): Record<ScentTag, number> => ({
@@ -38,6 +39,7 @@ export const PRODUCTS: Product[] = [
     id: "white-tea-morning",
     name: "白茶清晨",
     slug: "white-tea-morning",
+    image: "/products/white-tea-morning.jpg",
     shortName: "白茶清晨",
     category: "perfume",
     personaFit: ["white-shirt-morning", "rain-study", "cool-black"],
@@ -63,6 +65,7 @@ export const PRODUCTS: Product[] = [
     id: "rain-study",
     name: "雨后书房",
     slug: "rain-study",
+    image: "/products/rain-study.jpg",
     shortName: "雨后书房",
     category: "perfume",
     personaFit: ["rain-study", "cool-black", "olive-rest"],
@@ -88,6 +91,7 @@ export const PRODUCTS: Product[] = [
     id: "warm-sweater",
     name: "暖灯毛衣",
     slug: "warm-sweater",
+    image: "/products/warm-sweater.jpg",
     shortName: "暖灯毛衣",
     category: "perfume",
     personaFit: ["warm-sweater", "olive-rest", "midnight-cabin"],
@@ -113,6 +117,7 @@ export const PRODUCTS: Product[] = [
     id: "midnight-cabin",
     name: "深夜木屋",
     slug: "midnight-cabin",
+    image: "/products/midnight-cabin.jpg",
     shortName: "深夜木屋",
     category: "perfume",
     personaFit: ["midnight-cabin", "cool-black", "city-escape"],
@@ -138,6 +143,7 @@ export const PRODUCTS: Product[] = [
     id: "orchard-sunshine",
     name: "果园阳光",
     slug: "orchard-sunshine",
+    image: "/products/orchard-sunshine.jpg",
     shortName: "果园阳光",
     category: "perfume",
     personaFit: ["orchard-sunshine", "city-escape"],
@@ -163,6 +169,7 @@ export const PRODUCTS: Product[] = [
     id: "olive-rest",
     name: "橄榄山安息",
     slug: "olive-rest",
+    image: "/products/olive-rest.jpg",
     shortName: "橄榄山安息",
     category: "perfume",
     personaFit: ["olive-rest", "rain-study", "warm-sweater"],

@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { View, Text, Button } from "@tarojs/components";
-import Taro, { useRouter } from "@tarojs/taro";
+import { View, Text, Button, Image } from "@tarojs/components";
+import Taro, { useRouter, useShareAppMessage } from "@tarojs/taro";
 import { getProductBySlug } from "../../data/products";
 import { getPersonaById } from "../../data/personas";
 import { SCENT_TAG_LABELS } from "../../data/scentTags";
 import { formatPrice } from "../../lib/utils";
+import { assetUrl } from "../../lib/request";
 import type { ScentTag } from "../../lib/scoring/types";
 import "./index.scss";
 
@@ -16,6 +17,12 @@ export default function ProductDetail() {
     const p = getProductBySlug(router.params.slug || "");
     setProduct(p);
   }, [router.params.slug]);
+
+  useShareAppMessage(() => ({
+    title: product ? `${product.name} · ${product.emotionalScene.slice(0, 18)}` : "ScentPersona 香氛",
+    path: product ? `/pages/product-detail/index?slug=${product.slug}` : "/pages/index/index",
+    imageUrl: product ? assetUrl(product.image) : undefined,
+  }));
 
   if (!product) {
     return (
@@ -38,6 +45,7 @@ export default function ProductDetail() {
 
   return (
     <View className="detail">
+      <Image className="detail-hero-img" src={assetUrl(product.image)} mode="aspectFill" />
       <View className="detail-hero">
         <Text className="detail-name">{product.name}</Text>
         <Text className="detail-scene">{product.emotionalScene}</Text>

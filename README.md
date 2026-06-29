@@ -52,8 +52,9 @@ npm run dev
    git push origin main
    ```
    - Vercel 自动触发构建
-   - 构建时执行 `prisma generate && prisma migrate deploy && next build`
+   - 构建时执行 `node scripts/vercel-build.mjs`
    - `prisma migrate deploy` 会自动在 Neon 数据库上创建所有表
+   - 如果 `DATABASE_URL`、`DIRECT_URL` 或 `ADMIN_PASSWORD` 缺失，构建会提前失败并提示去 Vercel Project Settings 配置环境变量
 
 ### 数据库迁移
 
@@ -69,9 +70,10 @@ npm run dev
 ```
 src/
 ├── app/              # Next.js App Router 页面和 API 路由
-│   ├── api/          # API 路由 (quiz/submit, quiz/result, purchase/intent, feedback/submit)
-│   ├── admin/        # 管理后台数据看板
-│   ├── checkout/     # 模拟结账页面
+│   ├── api/          # API 路由 (quiz, order, payment, admin, privacy, feedback)
+│   ├── admin/        # 受保护的运营看板和订单处理
+│   ├── checkout/     # Web 订单结账
+│   ├── order/        # 订单详情和支付状态页
 │   ├── feedback/     # 试香反馈页面
 │   ├── products/     # 产品列表和详情页
 │   ├── quiz/         # 测验页面
@@ -94,6 +96,12 @@ prisma/
 ```bash
 # 单元测试
 npm test
+
+# 类型检查
+npm run typecheck
+
+# 本地 Next 构建校验，不执行数据库迁移
+npm run build:local
 
 # E2E 测试 (需要先启动 dev server)
 npm run test:e2e

@@ -213,6 +213,55 @@ export async function queryWechatOrderByOutTradeNo(orderNo: string): Promise<{
   };
 }
 
+export async function createWechatRefund(params: {
+  orderNo: string;
+  outRefundNo: string;
+  amount: number;
+  reason: string;
+}): Promise<{
+  refundId?: string;
+  status?: string;
+}> {
+  const apiUrl = "/v3/refund/domestic/refunds";
+  const fullUrl = `https://api.mch.weixin.qq.com${apiUrl}`;
+  const body = JSON.stringify({
+    out_trade_no: params.orderNo,
+    out_refund_no: params.outRefundNo,
+    reason: params.reason,
+    amount: {
+      refund: params.amount,
+      total: params.amount,
+      currency: "CNY",
+    },
+  });
+
+  const auth = buildAuthorization("POST", apiUrl, body);
+  const res = await fetch(fullUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: auth,
+      Accept: "application/json",
+    },
+    body,
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`WeChat refund API error: ${res.status} ${errText}`);
+  }
+
+  const data = (await res.json()) as {
+    refund_id?: string;
+    status?: string;
+  };
+
+  return {
+    refundId: data.refund_id,
+    status: data.status,
+  };
+}
+
 export function verifyWechatCallback(
   timestamp: string,
   nonce: string,

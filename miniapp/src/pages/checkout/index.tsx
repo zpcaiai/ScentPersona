@@ -1,10 +1,11 @@
-import { useState } from "react";
-import { View, Text, Input, Button } from "@tarojs/components";
+import { useEffect, useState } from "react";
+import { View, Text, Input, Button, Checkbox, Image } from "@tarojs/components";
 import Taro, { useRouter } from "@tarojs/taro";
 import { getProductById } from "../../data/products";
 import { SITE_COPY } from "../../data/copy";
 import { formatPrice } from "../../lib/utils";
-import { createOrder, loginWechat, requestWechatPay, requestXhsPay } from "../../lib/request";
+import { createOrder, trackEvent, assetUrl } from "../../lib/request";
+import { payWechatOrder, payXhsOrder } from "../../lib/pay";
 import "./index.scss";
 
 const ORDER_TOKEN_STORAGE_KEY = "orderAccessTokens";
@@ -25,7 +26,7 @@ export default function Checkout() {
   const sessionId = router.params.sessionId || "";
 
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState<string>(Taro.getStorageSync("userPhone") || "");
   const [address, setAddress] = useState("");
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,12 +35,31 @@ export default function Checkout() {
   const [orderNo, setOrderNo] = useState("");
   const [orderAccessToken, setOrderAccessToken] = useState("");
   const [payError, setPayError] = useState("");
+  const [privacyAgreed, setPrivacyAgreed] = useState(false);
 
   const products = productIds.map((id) => getProductById(id)).filter(Boolean);
 
+  useEffect(() => {
+    trackEvent({
+      eventName: "checkout_view",
+      path: "/pages/checkout/index",
+      sessionId,
+    });
+  }, [sessionId]);
+
   const handleSubmit = async () => {
-    if (!name.trim() || !phone.trim()) {
-      Taro.showToast({ title: "请填写姓名和手机号", icon: "none" });
+    if (!name.trim() || !/^1\d{10}$/.test(phone.trim())) {
+      Taro.showToast({ title: "请填写正确姓名和手机号", icon: "none" });
+      return;
+    }
+
+    if (!address.trim()) {
+      Taro.showToast({ title: "请填写收货地址", icon: "none" });
+      return;
+    }
+
+    if (!privacyAgreed) {
+      Taro.showToast({ title: "请先同意隐私与订单处理说明", icon: "none" });
       return;
     }
 
@@ -65,6 +85,12 @@ export default function Checkout() {
       setOrderNo(orderRes.orderNo);
       setOrderAccessToken(orderRes.orderAccessToken);
       saveOrderAccessToken(orderRes.orderId, orderRes.orderAccessToken);
+      trackEvent({
+        eventName: "checkout_submit",
+        path: "/pages/checkout/index",
+        sessionId,
+        orderId: orderRes.orderId,
+      });
 
       if (platform === "xhs") {
         await payXhs(orderRes.orderId, orderRes.orderAccessToken);
@@ -81,26 +107,10 @@ export default function Checkout() {
 
   const payWechat = async (oid: string, accessToken: string) => {
     try {
-      const openid = Taro.getStorageSync("openid") || "";
-      let resolvedOpenid = openid;
-
-      if (!resolvedOpenid) {
-        const loginRes = await Taro.login();
-        const authRes = await loginWechat(loginRes.code);
-        resolvedOpenid = authRes.openid;
-        Taro.setStorageSync("openid", resolvedOpenid);
-      }
-
-      const payRes = await requestWechatPay(oid, accessToken, resolvedOpenid);
-
-      await Taro.requestPayment({
-        timeStamp: payRes.timeStamp,
-        nonceStr: payRes.nonceStr,
-        package: payRes.package,
-        signType: payRes.signType as "RSA",
-        paySign: payRes.paySign,
-      });
-
+      await payWechatOrder(oid, accessToken);
+      // persist phone for future autofill / order lookup
+      if (/^1\d{10}$/.test(phone.trim())) Taro.setStorageSync("userPhone", phone.trim());
+      await requestShipSubscribe();
       setSuccess(true);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "支付发起失败";
@@ -114,16 +124,9 @@ export default function Checkout() {
 
   const payXhs = async (oid: string, accessToken: string) => {
     try {
-      const payRes = await requestXhsPay(oid, accessToken);
-
-      await Taro.requestPayment({
-        timeStamp: payRes.timeStamp,
-        nonceStr: payRes.nonceStr,
-        package: payRes.tradeNo,
-        signType: payRes.signType as "RSA",
-        paySign: payRes.paySign,
-      });
-
+      await payXhsOrder(oid, accessToken);
+      if (/^1\d{10}$/.test(phone.trim())) Taro.setStorageSync("userPhone", phone.trim());
+      await requestShipSubscribe();
       setSuccess(true);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "支付发起失败";
@@ -132,6 +135,24 @@ export default function Checkout() {
       } else {
         setPayError(`小红书支付失败: ${msg}`);
       }
+    }
+  };
+
+  const chooseAddress = async () => {
+    try {
+      if (typeof (Taro as any).chooseAddress !== "function") {
+        Taro.showToast({ title: "当前平台不支持地址选择", icon: "none" });
+        return;
+      }
+
+      const result = await (Taro as any).chooseAddress();
+      setName(result.userName || name);
+      setPhone(result.telNumber || phone);
+      setAddress(
+        `${result.provinceName || ""}${result.cityName || ""}${result.countyName || ""}${result.detailInfo || ""}`
+      );
+    } catch {
+      Taro.showToast({ title: "未选择地址", icon: "none" });
     }
   };
 
@@ -170,7 +191,10 @@ export default function Checkout() {
         <Text className="section-title">产品清单</Text>
         {products.map((p) => (
           <View key={p!.id} className="checkout-product">
-            <Text className="checkout-product-name">{p!.name}</Text>
+            <View className="checkout-product-left">
+              <Image className="checkout-product-img" src={assetUrl(p!.image)} mode="aspectFill" />
+              <Text className="checkout-product-name">{p!.name}</Text>
+            </View>
             <Text className="checkout-product-price">
               ¥{formatPrice(p!.price.sample || 0)}
             </Text>
@@ -184,6 +208,9 @@ export default function Checkout() {
 
       <View className="card">
         <Text className="section-title">收货信息</Text>
+        <Button className="btn-secondary" onClick={chooseAddress}>
+          使用微信收货地址
+        </Button>
         <View className="checkout-field">
           <Text className="checkout-field-label">姓名</Text>
           <Input
@@ -222,6 +249,28 @@ export default function Checkout() {
             onInput={(e) => setNote(e.detail.value)}
           />
         </View>
+        <View
+          className="checkout-privacy"
+          onClick={() => setPrivacyAgreed((value) => !value)}
+        >
+          <Checkbox
+            value="privacy-agreed"
+            checked={privacyAgreed}
+          />
+          <Text className="checkout-privacy-text">
+            我已阅读并同意
+            <Text
+              className="checkout-privacy-link"
+              onClick={(e) => {
+                e.stopPropagation();
+                Taro.navigateTo({ url: "/pages/privacy/index" });
+              }}
+            >
+              《隐私政策》
+            </Text>
+            ，并将收货信息用于订单支付、发货和售后处理
+          </Text>
+        </View>
       </View>
 
       {payError && (
@@ -252,4 +301,15 @@ export default function Checkout() {
       </View>
     </View>
   );
+}
+
+async function requestShipSubscribe() {
+  const templateId = process.env.SHIP_SUBSCRIBE_TEMPLATE_ID || "";
+  if ((Taro.getEnv() as string) !== "WEAPP" || !templateId) return;
+
+  try {
+    await (Taro as any).requestSubscribeMessage({ tmplIds: [templateId] });
+  } catch {
+    // Subscription is optional; payment success should not depend on it.
+  }
 }

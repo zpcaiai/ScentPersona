@@ -5,6 +5,7 @@ import PersonaHero from "@/components/result/PersonaHero";
 import ScentProfileCard from "@/components/result/ScentProfileCard";
 import RecommendedSamples from "@/components/result/RecommendedSamples";
 import ShareCard from "@/components/result/ShareCard";
+import TrackEvent from "@/components/common/TrackEvent";
 import { db } from "@/lib/db";
 import { getPersonaById } from "@/data/personas";
 import { getProductById } from "@/data/products";
@@ -77,6 +78,12 @@ export default async function ResultPage({ params }: ResultPageProps) {
 
   return (
     <PageShell>
+      <TrackEvent
+        eventName="result_view"
+        path={`/result/${session.id}`}
+        sessionId={session.id}
+        personaId={session.personaId}
+      />
       <PersonaHero persona={p} confidence={matched.confidence} />
 
       <div className="card mt-4">

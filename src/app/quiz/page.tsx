@@ -10,6 +10,7 @@ import QuizNavigation from "@/components/quiz/QuizNavigation";
 import { QUIZ_QUESTIONS } from "@/data/quizQuestions";
 import { SITE_COPY } from "@/data/copy";
 import type { QuizAnswerInput } from "@/lib/scoring/types";
+import TrackEvent, { trackEvent } from "@/components/common/TrackEvent";
 
 const QUIZ_DRAFT_KEY = "scentpersona:quiz-draft";
 
@@ -57,6 +58,7 @@ export default function QuizPage() {
   const handleStart = () => {
     setStarted(true);
     setCurrentIndex(0);
+    trackEvent({ eventName: "quiz_start", path: "/quiz" });
   };
 
   const handleSelect = (optionId: string) => {
@@ -96,6 +98,11 @@ export default function QuizPage() {
 
       const data = await res.json();
       window.localStorage.removeItem(QUIZ_DRAFT_KEY);
+      trackEvent({
+        eventName: "quiz_complete",
+        path: "/quiz",
+        sessionId: data.sessionId,
+      });
       router.push(`/result/${data.sessionId}`);
     } catch {
       setError(SITE_COPY.quiz.errorText);
@@ -106,6 +113,7 @@ export default function QuizPage() {
   if (!started) {
     return (
       <PageShell>
+        <TrackEvent eventName="page_view" path="/quiz" />
         <QuizIntro onStart={handleStart} />
       </PageShell>
     );

@@ -1,12 +1,17 @@
 import Taro from "@tarojs/taro";
 
-const API_BASE = "https://scentpersona.vercel.app";
+export const API_BASE = process.env.API_BASE || "https://scentpersona.vercel.app";
 
 interface RequestOptions {
   url: string;
   method?: "GET" | "POST";
   data?: Record<string, unknown>;
   header?: Record<string, string>;
+}
+
+export function assetUrl(path?: string): string {
+  if (!path) return "";
+  return path.startsWith("http") ? path : `${API_BASE}${path}`;
 }
 
 export async function request<T = unknown>(options: RequestOptions): Promise<T> {
@@ -36,6 +41,24 @@ export function submitQuiz(answers: { questionId: string; optionId: string }[]) 
     method: "POST",
     data: { answers },
   });
+}
+
+export function trackEvent(data: {
+  eventName: string;
+  path?: string;
+  sessionId?: string;
+  orderId?: string;
+  personaId?: string;
+  metadata?: Record<string, string | number | boolean | null>;
+}) {
+  return request<{ status: string }>({
+    url: "/api/analytics/event",
+    method: "POST",
+    data: {
+      source: (Taro.getEnv() as string) === "XHS" ? "xhs" : "weapp",
+      ...data,
+    },
+  }).catch(() => null);
 }
 
 export function fetchQuizResult(sessionId: string) {
@@ -69,6 +92,8 @@ export function submitPurchaseIntent(data: {
 
 export function submitFeedback(data: {
   sessionId?: string;
+  orderId?: string;
+  orderAccessToken?: string;
   personaId?: string;
   favoriteProductId?: string;
   dislikedProductIds?: string[];
@@ -112,6 +137,7 @@ export function fetchOrder(orderId: string, accessToken: string) {
   return request<{
     orderId: string;
     orderNo: string;
+    sessionId: string | null;
     productType: string;
     productIds: string[];
     amount: number;
@@ -119,12 +145,30 @@ export function fetchOrder(orderId: string, accessToken: string) {
     platform: string;
     customerName: string;
     customerPhone: string;
+    shippingAddress: string | null;
+    trackingNumber: string | null;
     transactionId: string | null;
     paidAt: string | null;
+    shippedAt: string | null;
+    completedAt: string | null;
+    cancelledAt: string | null;
+    refundedAt: string | null;
     createdAt: string;
   }>({
     url: `/api/order/${orderId}?accessToken=${encodeURIComponent(accessToken)}`,
     method: "GET",
+  });
+}
+
+export function cancelOrder(orderId: string, accessToken: string) {
+  return request<{
+    orderId: string;
+    status: string;
+    cancelledAt: string | null;
+  }>({
+    url: `/api/order/${orderId}/cancel`,
+    method: "POST",
+    data: { accessToken },
   });
 }
 
@@ -159,6 +203,14 @@ export function requestWechatPay(orderId: string, accessToken: string, openid: s
     url: "/api/payment/wechat",
     method: "POST",
     data: { orderId, accessToken, openid },
+  });
+}
+
+export function requestWechatPayStatus(orderId: string, accessToken: string) {
+  return request<{ status: string; tradeState?: string }>({
+    url: "/api/payment/wechat/status",
+    method: "POST",
+    data: { orderId, accessToken },
   });
 }
 

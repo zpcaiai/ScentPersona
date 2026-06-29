@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { View, Text, Button, ScrollView } from "@tarojs/components";
-import Taro from "@tarojs/taro";
+import { View, Text, Button, ScrollView, Image } from "@tarojs/components";
+import Taro, { useShareAppMessage, useShareTimeline } from "@tarojs/taro";
 import { getPersonaById } from "../../data/personas";
 import { getProductById } from "../../data/products";
 import { SCENT_TAG_LABELS } from "../../data/scentTags";
 import { SITE_COPY } from "../../data/copy";
 import { generateResultSummary } from "../../lib/scoring";
+import { trackEvent, assetUrl } from "../../lib/request";
 import type { PersonaId, TagScores, ProductRecommendation } from "../../lib/scoring/types";
 import "./index.scss";
 
@@ -27,10 +28,25 @@ export default function Result() {
     const data = Taro.getStorageSync("quizResult");
     if (data) {
       setResult(data);
+      trackEvent({
+        eventName: "result_view",
+        path: "/pages/result/index",
+        sessionId: data.sessionId,
+        personaId: data.personaId,
+      });
     } else {
       Taro.redirectTo({ url: "/pages/quiz/index" });
     }
   }, []);
+
+  const sharedPersona = result ? getPersonaById(result.personaId) : null;
+  useShareAppMessage(() => ({
+    title: sharedPersona ? `我的气味人格是「${sharedPersona.name}」，你的呢？` : "测测你的气味人格 | ScentPersona",
+    path: "/pages/index/index",
+  }));
+  useShareTimeline(() => ({
+    title: sharedPersona ? `我的气味人格是「${sharedPersona.name}」` : "测测你的气味人格",
+  }));
 
   if (!result) return null;
 
@@ -49,7 +65,7 @@ export default function Result() {
     });
   };
 
-  const goToProducts = () => Taro.navigateTo({ url: "/pages/products/index" });
+  const goToProducts = () => Taro.switchTab({ url: "/pages/products/index" });
 
   const goToFeedback = () => {
     Taro.navigateTo({
@@ -147,6 +163,7 @@ export default function Result() {
               className="result-rec"
               onClick={() => Taro.navigateTo({ url: `/pages/product-detail/index?slug=${product.slug}` })}
             >
+              <Image className="result-rec-img" src={assetUrl(product.image)} mode="aspectFill" />
               <View className="result-rec-info">
                 <Text className="result-rec-role">{rec.role}</Text>
                 <Text className="result-rec-name">{product.name}</Text>

@@ -45,6 +45,7 @@ export default function RecommendedSamples({ recommendations, sessionId }: Recom
 
           return (
             <div key={`${product.id}-${i}`} className="card">
+              <img src={product.image} alt={product.name} className="w-full h-36 object-cover rounded-lg mb-3" loading="lazy" />
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
                   <div className="flex items-center gap-2">

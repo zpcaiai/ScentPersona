@@ -23,6 +23,10 @@
   background: rgba(124, 144, 112, 0.08);
 }
 
+.order-banner-processing {
+  background: rgba(124, 144, 112, 0.08);
+}
+
 .order-banner-shipped {
   background: rgba(59, 130, 246, 0.06);
 }
@@ -32,6 +36,10 @@
 }
 
 .order-banner-cancelled {
+  background: rgba(168, 162, 158, 0.08);
+}
+
+.order-banner-refunded {
   background: rgba(168, 162, 158, 0.08);
 }
 
@@ -112,4 +120,18 @@
   background: #ffffff;
   padding: 24rpx 32rpx;
   box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+
+.order-detail-product-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+.order-detail-product-img {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 12rpx;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+  background: #f5f0e8;
 }

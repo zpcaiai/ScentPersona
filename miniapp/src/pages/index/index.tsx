@@ -1,12 +1,26 @@
+import { useEffect } from "react";
 import { View, Text, Button } from "@tarojs/components";
-import Taro from "@tarojs/taro";
+import Taro, { useShareAppMessage, useShareTimeline } from "@tarojs/taro";
 import { SITE_COPY } from "../../data/copy";
 import { PERSONAS } from "../../data/personas";
+import { trackEvent } from "../../lib/request";
 import "./index.scss";
 
 export default function Index() {
+  useEffect(() => {
+    trackEvent({ eventName: "page_view", path: "/pages/index/index" });
+  }, []);
+
   const goToQuiz = () => Taro.navigateTo({ url: "/pages/quiz/index" });
-  const goToProducts = () => Taro.navigateTo({ url: "/pages/products/index" });
+  const goToProducts = () => Taro.switchTab({ url: "/pages/products/index" });
+
+  useShareAppMessage(() => ({
+    title: "先测再闻，找到你的本命香 | ScentPersona",
+    path: "/pages/index/index",
+  }));
+  useShareTimeline(() => ({
+    title: "先测再闻，找到你的本命香 | ScentPersona",
+  }));
 
   return (
     <View className="index">

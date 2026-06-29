@@ -1,15 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { View, Text, Textarea, Button, Radio, Checkbox, Picker } from "@tarojs/components";
 import Taro, { useRouter } from "@tarojs/taro";
 import { PRODUCTS } from "../../data/products";
 import { SITE_COPY } from "../../data/copy";
-import { submitFeedback } from "../../lib/request";
+import { submitFeedback, trackEvent } from "../../lib/request";
 import "./index.scss";
 
 export default function Feedback() {
   const router = useRouter();
   const sessionId = router.params.sessionId || "";
   const personaId = router.params.personaId || "";
+  const orderId = router.params.orderId || "";
+  const orderAccessToken = router.params.orderAccessToken || "";
 
   const [favoriteProduct, setFavoriteProduct] = useState("");
   const [dislikedProducts, setDislikedProducts] = useState<string[]>([]);
@@ -18,8 +20,19 @@ export default function Feedback() {
   const [buyFullSize, setBuyFullSize] = useState(false);
   const [fullSizeProduct, setFullSizeProduct] = useState("");
   const [comment, setComment] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    trackEvent({
+      eventName: "feedback_view",
+      path: "/pages/feedback/index",
+      sessionId,
+      orderId,
+      personaId,
+    });
+  }, [sessionId, orderId, personaId]);
 
   const toggleDisliked = (id: string) => {
     setDislikedProducts((prev) =>
@@ -27,15 +40,27 @@ export default function Feedback() {
     );
   };
 
-  const setRating = (productId: string, score: number) => {
-    setRatings((prev) => ({ ...prev, [productId]: score }));
+  const setRating = (key: string, score: number) => {
+    setRatings((prev) => ({ ...prev, [key]: score }));
   };
 
   const handleSubmit = async () => {
+    setError("");
+    if (!favoriteProduct) {
+      setError("请选择最喜欢的一支");
+      return;
+    }
+    if (!ratings.accuracy || !ratings.satisfaction || !ratings.packaging) {
+      setError("请完成推荐准确度、整体满意度和包装体验评分");
+      return;
+    }
+
     setLoading(true);
     try {
       await submitFeedback({
         sessionId,
+        orderId: orderId || undefined,
+        orderAccessToken: orderAccessToken || undefined,
         personaId,
         favoriteProductId: favoriteProduct,
         dislikedProductIds: dislikedProducts,
@@ -44,10 +69,11 @@ export default function Feedback() {
         boughtFullSize: buyFullSize,
         fullSizeProductId: fullSizeProduct,
       });
-    } catch {
-      // API may fail; still show success for MVP
-    } finally {
       setSubmitted(true);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "提交失败";
+      setError(msg);
+    } finally {
       setLoading(false);
     }
   };
@@ -102,15 +128,19 @@ export default function Feedback() {
       {/* Ratings */}
       <View className="card">
         <Text className="section-title">{SITE_COPY.feedback.ratingLabel}</Text>
-        {PRODUCTS.map((p) => (
-          <View key={p.id} className="feedback-rating">
-            <Text className="feedback-rating-name">{p.shortName}</Text>
+        {[
+          { key: "accuracy", label: "推荐准确度" },
+          { key: "satisfaction", label: "整体满意度" },
+          { key: "packaging", label: "包装体验" },
+        ].map((item) => (
+          <View key={item.key} className="feedback-rating">
+            <Text className="feedback-rating-name">{item.label}</Text>
             <View className="feedback-rating-stars">
               {[1, 2, 3, 4, 5].map((score) => (
                 <Text
                   key={score}
-                  className={`feedback-star ${(ratings[p.id] || 0) >= score ? "feedback-star-active" : ""}`}
-                  onClick={() => setRating(p.id, score)}
+                  className={`feedback-star ${(ratings[item.key] || 0) >= score ? "feedback-star-active" : ""}`}
+                  onClick={() => setRating(item.key, score)}
                 >
                   ★
                 </Text>
@@ -177,6 +207,12 @@ export default function Feedback() {
           maxlength={500}
         />
       </View>
+
+      {error && (
+        <View className="feedback-error">
+          <Text>{error}</Text>
+        </View>
+      )}
 
       <View className="feedback-submit">
         <Button

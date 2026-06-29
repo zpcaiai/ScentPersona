@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import PageShell from "@/components/layout/PageShell";
 import { SITE_COPY } from "@/data/copy";
 import { PRODUCTS, getProductById } from "@/data/products";
+import TrackEvent, { trackEvent } from "@/components/common/TrackEvent";
 
 function CheckoutContent() {
   const router = useRouter();
@@ -35,9 +36,13 @@ function CheckoutContent() {
     }
   }, [sessionId]);
 
-  const checkoutProductIds = selectedProductIds
-    ? selectedProductIds.split(",").filter((id) => getProductById(id)).slice(0, 3)
-    : recommendedIds;
+  const selectedValidProductIds = selectedProductIds
+    ? selectedProductIds.split(",").filter((id) => getProductById(id))
+    : [];
+  const checkoutProductIds = Array.from(new Set([
+    ...(selectedValidProductIds.length > 0 ? selectedValidProductIds : recommendedIds),
+    ...PRODUCTS.map((product) => product.id),
+  ])).slice(0, 3);
 
   const recommendedProducts = checkoutProductIds
     .map((id) => getProductById(id))
@@ -76,6 +81,12 @@ function CheckoutContent() {
 
       const data = await res.json();
       window.localStorage.setItem(`orderAccessToken:${data.orderId}`, data.orderAccessToken);
+      trackEvent({
+        eventName: "checkout_submit",
+        path: "/checkout",
+        sessionId,
+        orderId: data.orderId,
+      });
       router.push(`/order/${data.orderId}?accessToken=${encodeURIComponent(data.orderAccessToken)}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "订单创建失败，请稍后重试");
@@ -86,6 +97,11 @@ function CheckoutContent() {
 
   return (
     <PageShell>
+      <TrackEvent
+        eventName="checkout_view"
+        path="/checkout"
+        sessionId={sessionId}
+      />
       <div className="py-8">
         <h1 className="text-2xl font-serif text-stone-800 text-center">
           {SITE_COPY.checkout.title}
@@ -141,9 +157,10 @@ function CheckoutContent() {
             />
           </div>
           <div>
-            <label className="text-sm text-stone-600 block mb-1">收货地址（选填）</label>
+            <label className="text-sm text-stone-600 block mb-1">收货地址 *</label>
             <input
               type="text"
+              required
               value={form.address}
               onChange={(e) => setForm({ ...form, address: e.target.value })}
               className="w-full rounded-xl border border-cream-200 bg-white px-4 py-2 text-sm focus:outline-none focus:border-sage-400"

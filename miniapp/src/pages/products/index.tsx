@@ -1,8 +1,9 @@
-import { View, Text, Button } from "@tarojs/components";
+import { View, Text, Button, Image } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import { PRODUCTS } from "../../data/products";
 import { SITE_COPY } from "../../data/copy";
 import { formatPrice } from "../../lib/utils";
+import { assetUrl } from "../../lib/request";
 import "./index.scss";
 
 export default function Products() {
@@ -25,6 +26,7 @@ export default function Products() {
 
       {/* Offers */}
       <View className="card">
+        <Image className="offer-img" src={assetUrl("/products/sample-set.jpg")} mode="aspectFill" />
         <Text className="offer-title">{SITE_COPY.products.primaryOfferTitle}</Text>
         <Text className="offer-desc">{SITE_COPY.products.primaryOfferDesc}</Text>
         <Text className="offer-price">{SITE_COPY.products.primaryOfferPrice}</Text>
@@ -37,6 +39,7 @@ export default function Products() {
       </View>
 
       <View className="card">
+        <Image className="offer-img" src={assetUrl("/products/sample-set.jpg")} mode="aspectFill" />
         <Text className="offer-title">{SITE_COPY.products.secondaryOfferTitle}</Text>
         <Text className="offer-desc">{SITE_COPY.products.secondaryOfferDesc}</Text>
         <Text className="offer-price">{SITE_COPY.products.secondaryOfferPrice}</Text>
@@ -49,6 +52,7 @@ export default function Products() {
       </View>
 
       <View className="card">
+        <Image className="offer-img" src={assetUrl("/products/gift-box.jpg")} mode="aspectFill" />
         <Text className="offer-title">{SITE_COPY.products.giftOfferTitle}</Text>
         <Text className="offer-desc">{SITE_COPY.products.giftOfferDesc}</Text>
         <Text className="offer-price">{SITE_COPY.products.giftOfferPrice}</Text>
@@ -68,6 +72,7 @@ export default function Products() {
           className="product-card"
           onClick={() => goToDetail(product.slug)}
         >
+          <Image className="product-card-img" src={assetUrl(product.image)} mode="aspectFill" />
           <Text className="product-name">{product.name}</Text>
           <Text className="product-desc">{product.plainDescription}</Text>
           <View className="product-footer">
