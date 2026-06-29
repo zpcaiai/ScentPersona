@@ -1,46 +1,93 @@
 page {
-  background-color: #faf8f5;
-  color: #44403c;
+  /* ---------- 设计令牌：默认 = 微信主题（素雅·沉静） ---------- */
+  --brand: #7c9070;
+  --brand-strong: #6a7d5f;
+  --brand-soft: rgba(124, 144, 112, 0.14);
+  --accent: #c4845c;
+  --accent-soft: rgba(196, 132, 92, 0.15);
+  --on-brand: #ffffff;
+  --bg: #faf8f5;
+  --surface: #ffffff;
+  --ink: #44403c;
+  --muted: #a8a29e;
+  --line: #f0ece4;
+  --card-radius: 26rpx;
+  --btn-radius: 48rpx;
+  --shadow: 0 6rpx 24rpx rgba(68, 64, 60, 0.06);
+  --shadow-brand: 0 12rpx 28rpx rgba(124, 144, 112, 0.26);
+  --hero-grad: linear-gradient(160deg, rgba(124, 144, 112, 0.20), rgba(245, 240, 232, 0.65));
+
+  background-color: var(--bg);
+  color: var(--ink);
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
   font-size: 28rpx;
   line-height: 1.6;
 }
 
+/* 微信主题（默认占位） */
+.theme-weapp {
+  min-height: 100vh;
+  background-color: var(--bg);
+}
+
+/* 小红书主题：更明快、更暖、更社交 */
+.theme-xhs {
+  --brand: #ff5a5f;
+  --brand-strong: #ff2e4d;
+  --brand-soft: rgba(255, 90, 95, 0.12);
+  --accent: #ff8a3d;
+  --accent-soft: rgba(255, 138, 61, 0.16);
+  --bg: #fff7f4;
+  --line: #ffe7e0;
+  --card-radius: 32rpx;
+  --shadow: 0 8rpx 26rpx rgba(255, 90, 95, 0.10);
+  --shadow-brand: 0 14rpx 30rpx rgba(255, 46, 77, 0.30);
+  --hero-grad: linear-gradient(160deg, rgba(255, 90, 95, 0.16), rgba(255, 198, 150, 0.26));
+
+  min-height: 100vh;
+  background-color: var(--bg);
+}
+
 .card {
-  background: #ffffff;
-  border-radius: 24rpx;
+  background: var(--surface);
+  border-radius: var(--card-radius);
   padding: 32rpx;
   margin: 24rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow);
 }
 
 .btn-primary {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #7c9070;
-  color: #ffffff;
-  border-radius: 48rpx;
-  padding: 24rpx 48rpx;
+  background: linear-gradient(135deg, var(--brand), var(--brand-strong));
+  color: var(--on-brand);
+  border-radius: var(--btn-radius);
+  padding: 26rpx 48rpx;
   font-size: 30rpx;
-  font-weight: 500;
+  font-weight: 600;
+  box-shadow: var(--shadow-brand);
+}
+
+.btn-primary:active {
+  opacity: 0.92;
 }
 
 .btn-secondary {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f0e8;
-  color: #7c9070;
-  border-radius: 48rpx;
-  padding: 24rpx 48rpx;
+  background: var(--brand-soft);
+  color: var(--brand);
+  border-radius: var(--btn-radius);
+  padding: 26rpx 48rpx;
   font-size: 30rpx;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .tag {
   display: inline-block;
-  background: #f5f0e8;
+  background: var(--brand-soft);
   color: #57534e;
   padding: 8rpx 20rpx;
   border-radius: 24rpx;
@@ -49,31 +96,31 @@ page {
 }
 
 .tag-sage {
-  background: rgba(124, 144, 112, 0.15);
-  color: #7c9070;
+  background: var(--brand-soft);
+  color: var(--brand);
 }
 
 .tag-clay {
-  background: rgba(196, 132, 92, 0.15);
-  color: #c4845c;
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .section-title {
   font-size: 36rpx;
-  font-weight: 600;
-  color: #44403c;
+  font-weight: 700;
+  color: var(--ink);
   margin: 32rpx 24rpx 16rpx;
 }
 
 .text-muted {
-  color: #a8a29e;
+  color: var(--muted);
   font-size: 26rpx;
 }
 
 .text-sage {
-  color: #7c9070;
+  color: var(--brand);
 }
 
 .text-clay {
-  color: #c4845c;
+  color: var(--accent);
 }

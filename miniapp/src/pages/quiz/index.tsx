@@ -6,6 +6,7 @@ import { SITE_COPY } from "../../data/copy";
 import { scoreQuizAnswers, matchPersona, recommendProducts } from "../../lib/scoring";
 import { submitQuiz, trackEvent } from "../../lib/request";
 import type { QuizAnswerInput } from "../../lib/scoring/types";
+import { THEME_CLASS, IS_XHS } from "../../lib/theme";
 import "./index.scss";
 
 export default function Quiz() {
@@ -89,17 +90,17 @@ export default function Quiz() {
 
   if (loading) {
     return (
-      <View className="quiz-loading">
+      <View className={`quiz-loading ${THEME_CLASS}`}>
         <Text className="quiz-loading-text">{SITE_COPY.quiz.loadingText}</Text>
       </View>
     );
   }
 
   return (
-    <View className="quiz">
+    <View className={`quiz ${THEME_CLASS}`}>
       {/* Progress */}
       <View className="quiz-progress">
-        <Progress percent={progress} activeColor="#7c9070" strokeWidth={4} />
+        <Progress percent={progress} activeColor={IS_XHS ? "#ff2e4d" : "#7c9070"} strokeWidth={4} />
         <Text className="quiz-progress-text">{currentIndex + 1} / {total}</Text>
       </View>
 

@@ -4,6 +4,7 @@ import { PRODUCTS } from "../../data/products";
 import { SITE_COPY } from "../../data/copy";
 import { formatPrice } from "../../lib/utils";
 import { assetUrl } from "../../lib/request";
+import { THEME_CLASS } from "../../lib/theme";
 import "./index.scss";
 
 export default function Products() {
@@ -18,7 +19,7 @@ export default function Products() {
   };
 
   return (
-    <View className="products">
+    <View className={`products ${THEME_CLASS}`}>
       <View className="products-header">
         <Text className="products-title">{SITE_COPY.products.title}</Text>
         <Text className="products-subtitle">{SITE_COPY.products.subtitle}</Text>

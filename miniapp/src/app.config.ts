@@ -1,3 +1,7 @@
+const isXhs = process.env.TARO_ENV === "xhs";
+const brandSelected = isXhs ? "#ff2e4d" : "#7c9070";
+const barBg = isXhs ? "#fff7f4" : "#faf8f5";
+
 export default defineAppConfig({
   pages: [
     "pages/index/index",
@@ -14,7 +18,7 @@ export default defineAppConfig({
   ],
   tabBar: {
     color: "#9a948c",
-    selectedColor: "#7c9070",
+    selectedColor: brandSelected,
     backgroundColor: "#ffffff",
     borderStyle: "white",
     list: [
@@ -26,8 +30,9 @@ export default defineAppConfig({
   },
   window: {
     backgroundTextStyle: "light",
-    navigationBarBackgroundColor: "#faf8f5",
+    navigationBarBackgroundColor: barBg,
     navigationBarTitleText: "ScentPersona",
     navigationBarTextStyle: "black",
+    backgroundColor: barBg,
   },
 });

@@ -48,8 +48,9 @@
 }
 
 .quiz-option-selected {
-  border-color: #7c9070;
-  background: rgba(124, 144, 112, 0.06);
+  border-color: var(--brand);
+  background: var(--brand-soft);
+  box-shadow: var(--shadow-brand);
 }
 
 .quiz-option-label {
@@ -89,7 +90,7 @@
 
 .quiz-loading-text {
   font-size: 32rpx;
-  color: #7c9070;
+  color: var(--brand);
 }
 
 .quiz-error {

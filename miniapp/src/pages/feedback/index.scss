@@ -33,7 +33,7 @@
 }
 
 .feedback-check-active {
-  color: #c4845c;
+  color: var(--accent);
 }
 
 .feedback-rating {
@@ -59,7 +59,7 @@
 }
 
 .feedback-star-active {
-  color: #c4845c;
+  color: var(--accent);
 }
 
 .feedback-picker {
@@ -94,8 +94,8 @@
 }
 
 .feedback-radio-active {
-  background: rgba(124, 144, 112, 0.15);
-  color: #7c9070;
+  background: var(--brand-soft);
+  color: var(--brand);
   font-weight: 600;
 }
 
@@ -160,7 +160,7 @@
 .feedback-success-title {
   font-size: 36rpx;
   font-weight: 600;
-  color: #7c9070;
+  color: var(--brand);
   margin-bottom: 16rpx;
 }
 

@@ -35,7 +35,7 @@
 
 .checkout-product-price {
   font-size: 28rpx;
-  color: #c4845c;
+  color: var(--accent);
   font-weight: 600;
 }
 
@@ -57,7 +57,7 @@
 .checkout-total-price {
   font-size: 36rpx;
   font-weight: 700;
-  color: #c4845c;
+  color: var(--accent);
 }
 
 .checkout-field {
@@ -119,7 +119,7 @@
 .checkout-bottom-amount {
   font-size: 36rpx;
   font-weight: 700;
-  color: #c4845c;
+  color: var(--accent);
 }
 
 .checkout-submit {
@@ -139,7 +139,7 @@
 .checkout-success-title {
   font-size: 36rpx;
   font-weight: 600;
-  color: #7c9070;
+  color: var(--brand);
   margin-bottom: 16rpx;
 }
 
@@ -165,7 +165,7 @@
 .checkout-order-info {
   margin: 16rpx 24rpx;
   padding: 24rpx;
-  background: rgba(124, 144, 112, 0.08);
+  background: var(--brand-soft);
   border-radius: 12rpx;
 }
 
@@ -179,7 +179,7 @@
 .checkout-order-tip {
   display: block;
   font-size: 24rpx;
-  color: #7c9070;
+  color: var(--brand);
   margin-top: 8rpx;
 }
 
@@ -198,5 +198,5 @@
 }
 
 .checkout-privacy-link {
-  color: #7c9070;
+  color: var(--brand);
 }

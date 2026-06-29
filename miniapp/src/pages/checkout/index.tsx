@@ -6,6 +6,7 @@ import { SITE_COPY } from "../../data/copy";
 import { formatPrice } from "../../lib/utils";
 import { createOrder, trackEvent, assetUrl } from "../../lib/request";
 import { payWechatOrder, payXhsOrder } from "../../lib/pay";
+import { THEME_CLASS } from "../../lib/theme";
 import "./index.scss";
 
 const ORDER_TOKEN_STORAGE_KEY = "orderAccessTokens";
@@ -158,7 +159,7 @@ export default function Checkout() {
 
   if (success) {
     return (
-      <View className="checkout-success">
+      <View className={`checkout-success ${THEME_CLASS}`}>
         <Text className="checkout-success-title">支付成功</Text>
         <Text className="checkout-success-desc">
           订单号: {orderNo}
@@ -181,7 +182,7 @@ export default function Checkout() {
   }
 
   return (
-    <View className="checkout">
+    <View className={`checkout ${THEME_CLASS}`}>
       <View className="checkout-header">
         <Text className="checkout-title">{SITE_COPY.checkout.title}</Text>
         <Text className="checkout-subtitle">{SITE_COPY.checkout.subtitle}</Text>

@@ -2,8 +2,10 @@
   padding-bottom: 48rpx;
 }
 .profile-hero {
-  padding: 64rpx 48rpx 40rpx;
+  padding: 72rpx 48rpx 48rpx;
   text-align: center;
+  background: var(--hero-grad);
+  border-radius: 0 0 44rpx 44rpx;
 }
 .profile-hero-name {
   display: block;
@@ -80,7 +82,7 @@
 .profile-about-contact {
   display: block;
   margin-top: 16rpx;
-  color: #7c9070;
+  color: var(--brand);
   font-size: 26rpx;
 }
 .profile-footer {

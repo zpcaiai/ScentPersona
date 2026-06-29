@@ -3,24 +3,49 @@
 }
 
 .hero {
-  padding: 64rpx 32rpx 48rpx;
+  padding: 72rpx 40rpx 56rpx;
   text-align: center;
+  background: var(--hero-grad);
+  border-radius: 0 0 48rpx 48rpx;
+}
+
+.hero-eyebrow {
+  display: inline-block;
+  font-size: 22rpx;
+  font-weight: 600;
+  letter-spacing: 1rpx;
+  color: var(--brand);
+  background: var(--surface);
+  padding: 8rpx 22rpx;
+  border-radius: 999rpx;
+  margin-bottom: 24rpx;
+  box-shadow: var(--shadow);
 }
 
 .hero-title {
   display: block;
-  font-size: 44rpx;
-  font-weight: 700;
-  color: #44403c;
+  font-size: 50rpx;
+  font-weight: 800;
+  color: var(--ink);
   margin-bottom: 16rpx;
+  line-height: 1.35;
 }
 
 .hero-subtitle {
   display: block;
   font-size: 28rpx;
   color: #78716c;
-  margin-bottom: 40rpx;
+  margin-bottom: 32rpx;
   line-height: 1.6;
+}
+
+.hero-img {
+  width: 100%;
+  height: 360rpx;
+  border-radius: 28rpx;
+  margin-bottom: 32rpx;
+  box-shadow: var(--shadow);
+  background: var(--surface);
 }
 
 .hero .btn-primary {
@@ -34,7 +59,7 @@
 }
 
 .problem-dot {
-  color: #c4845c;
+  color: var(--accent);
   font-size: 36rpx;
   margin-right: 12rpx;
 }
@@ -49,7 +74,7 @@
   width: 56rpx;
   height: 56rpx;
   border-radius: 50%;
-  background: rgba(124, 144, 112, 0.15);
+  background: var(--brand-soft);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -58,7 +83,7 @@
 }
 
 .step-num-text {
-  color: #7c9070;
+  color: var(--brand);
   font-weight: 700;
   font-size: 28rpx;
 }
@@ -71,7 +96,7 @@
   display: block;
   font-size: 30rpx;
   font-weight: 600;
-  color: #44403c;
+  color: var(--ink);
 }
 
 .step-desc {
@@ -89,23 +114,25 @@
 
 .persona-chip {
   width: calc(50% - 8rpx);
-  background: #f5f0e8;
-  border-radius: 16rpx;
-  padding: 20rpx;
+  background: var(--surface);
+  border-radius: 20rpx;
+  padding: 22rpx 24rpx;
+  border-left: 6rpx solid var(--brand);
+  box-shadow: var(--shadow);
 }
 
 .persona-chip-name {
   display: block;
   font-size: 28rpx;
-  font-weight: 600;
-  color: #44403c;
+  font-weight: 700;
+  color: var(--ink);
 }
 
 .persona-chip-title {
   display: block;
   font-size: 22rpx;
-  color: #a8a29e;
-  margin-top: 4rpx;
+  color: var(--muted);
+  margin-top: 6rpx;
 }
 
 .trust-item {
@@ -116,14 +143,14 @@
 
 .final-cta {
   text-align: center;
-  background: linear-gradient(135deg, rgba(124, 144, 112, 0.08), #f5f0e8);
+  background: var(--hero-grad);
 }
 
 .final-cta-title {
   display: block;
   font-size: 36rpx;
   font-weight: 600;
-  color: #44403c;
+  color: var(--ink);
   margin-bottom: 32rpx;
 }
 

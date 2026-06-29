@@ -1,4 +1,5 @@
 import { View, Text } from "@tarojs/components";
+import { THEME_CLASS } from "../../lib/theme";
 import "./index.scss";
 
 const CONTACT_EMAIL = "zpchoney@gmail.com";
@@ -74,7 +75,7 @@ const SECTIONS: { title: string; paragraphs: string[] }[] = [
 
 export default function Privacy() {
   return (
-    <View className="privacy">
+    <View className={`privacy ${THEME_CLASS}`}>
       <View className="privacy-header">
         <Text className="privacy-title">隐私政策</Text>
         <Text className="privacy-updated">最近更新：{UPDATED}</Text>

@@ -10,6 +10,7 @@ import { assetUrl } from "../../lib/request";
 import { payOrder } from "../../lib/pay";
 import { getProductById } from "../../data/products";
 import { formatPrice } from "../../lib/utils";
+import { THEME_CLASS } from "../../lib/theme";
 import "./index.scss";
 
 const ORDER_TOKEN_STORAGE_KEY = "orderAccessTokens";
@@ -128,7 +129,7 @@ export default function OrderDetail() {
 
   if (loading) {
     return (
-      <View className="order-detail-loading">
+      <View className={`order-detail-loading ${THEME_CLASS}`}>
         <Text>加载中...</Text>
       </View>
     );
@@ -136,7 +137,7 @@ export default function OrderDetail() {
 
   if (!order) {
     return (
-      <View className="order-detail-loading">
+      <View className={`order-detail-loading ${THEME_CLASS}`}>
         <Text>订单不存在</Text>
       </View>
     );
@@ -145,7 +146,7 @@ export default function OrderDetail() {
   const products = order.productIds.map((id) => getProductById(id)).filter(Boolean);
 
   return (
-    <View className="order-detail">
+    <View className={`order-detail ${THEME_CLASS}`}>
       {/* Status banner */}
       <View className={`order-detail-banner order-banner-${order.status}`}>
         <Text className="order-detail-status">

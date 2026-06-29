@@ -3,6 +3,7 @@ import { View, Text, Button, Input } from "@tarojs/components";
 import Taro, { useDidShow, usePullDownRefresh } from "@tarojs/taro";
 import { fetchOrder, fetchOrders } from "../../lib/request";
 import { formatPrice } from "../../lib/utils";
+import { THEME_CLASS } from "../../lib/theme";
 import "./index.scss";
 
 const ORDER_TOKEN_STORAGE_KEY = "orderAccessTokens";
@@ -134,7 +135,7 @@ export default function Orders() {
   };
 
   return (
-    <View className="orders">
+    <View className={`orders ${THEME_CLASS}`}>
       <View className="orders-header">
         <Text className="orders-title">我的订单</Text>
         <Text className="orders-subtitle">输入手机号可同步在所有设备上的订单</Text>

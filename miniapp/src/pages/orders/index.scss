@@ -56,18 +56,18 @@
 }
 
 .order-status-pending {
-  background: rgba(196, 132, 92, 0.12);
-  color: #c4845c;
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .order-status-paid {
-  background: rgba(124, 144, 112, 0.12);
-  color: #7c9070;
+  background: var(--brand-soft);
+  color: var(--brand);
 }
 
 .order-status-processing {
-  background: rgba(124, 144, 112, 0.12);
-  color: #7c9070;
+  background: var(--brand-soft);
+  color: var(--brand);
 }
 
 .order-status-shipped {
@@ -76,8 +76,8 @@
 }
 
 .order-status-completed {
-  background: rgba(124, 144, 112, 0.12);
-  color: #7c9070;
+  background: var(--brand-soft);
+  color: var(--brand);
 }
 
 .order-status-cancelled {
@@ -114,7 +114,7 @@
 .order-card-amount {
   font-size: 32rpx;
   font-weight: 700;
-  color: #c4845c;
+  color: var(--accent);
 }
 
 .orders-header {

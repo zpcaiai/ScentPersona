@@ -12,7 +12,7 @@
 
 .detail-hero {
   padding: 48rpx 32rpx;
-  background: linear-gradient(135deg, rgba(124, 144, 112, 0.08), #f5f0e8);
+  background: var(--hero-grad);
 }
 
 .detail-name {
@@ -50,7 +50,7 @@
   display: block;
   font-size: 26rpx;
   font-weight: 600;
-  color: #7c9070;
+  color: var(--brand);
   margin-top: 16rpx;
 }
 
@@ -75,7 +75,7 @@
 .detail-not-suitable-label {
   display: block;
   font-size: 26rpx;
-  color: #c4845c;
+  color: var(--accent);
   margin-top: 16rpx;
   margin-bottom: 4rpx;
 }
@@ -101,7 +101,7 @@
 .detail-price {
   font-size: 34rpx;
   font-weight: 700;
-  color: #c4845c;
+  color: var(--accent);
 }
 
 .detail-price-full {

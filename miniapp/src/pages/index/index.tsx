@@ -1,9 +1,10 @@
 import { useEffect } from "react";
-import { View, Text, Button } from "@tarojs/components";
+import { View, Text, Button, Image } from "@tarojs/components";
 import Taro, { useShareAppMessage, useShareTimeline } from "@tarojs/taro";
 import { SITE_COPY } from "../../data/copy";
 import { PERSONAS } from "../../data/personas";
-import { trackEvent } from "../../lib/request";
+import { trackEvent, assetUrl } from "../../lib/request";
+import { THEME_CLASS } from "../../lib/theme";
 import "./index.scss";
 
 export default function Index() {
@@ -23,12 +24,14 @@ export default function Index() {
   }));
 
   return (
-    <View className="index">
+    <View className={`index ${THEME_CLASS}`}>
       {/* Hero */}
       <View className="hero">
+        <Text className="hero-eyebrow">中文香水人格测试 · 8 种气味人格</Text>
         <Text className="hero-title">{SITE_COPY.landing.heroTitle}</Text>
         <Text className="hero-subtitle">{SITE_COPY.landing.heroSubtitle}</Text>
-        <Button className="btn-primary" onClick={goToQuiz}>
+        <Image className="hero-img" src={assetUrl("/products/sample-set.jpg")} mode="aspectFill" />
+        <Button className="btn-primary hero-cta" onClick={goToQuiz}>
           {SITE_COPY.landing.heroCtaPrimary}
         </Button>
         <Button className="btn-secondary" onClick={goToProducts}>

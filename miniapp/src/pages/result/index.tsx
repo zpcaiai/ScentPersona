@@ -8,6 +8,7 @@ import { SITE_COPY } from "../../data/copy";
 import { generateResultSummary } from "../../lib/scoring";
 import { trackEvent, assetUrl } from "../../lib/request";
 import type { PersonaId, TagScores, ProductRecommendation } from "../../lib/scoring/types";
+import { THEME_CLASS } from "../../lib/theme";
 import "./index.scss";
 
 interface QuizResultData {
@@ -90,7 +91,7 @@ export default function Result() {
   };
 
   return (
-    <View className="result">
+    <View className={`result ${THEME_CLASS}`}>
       {/* Persona Hero */}
       <View className="result-hero">
         <Text className="result-hero-label">你的气味人格</Text>

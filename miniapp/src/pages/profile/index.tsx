@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { View, Text, Button, Input } from "@tarojs/components";
 import Taro, { useDidShow } from "@tarojs/taro";
 import { SITE_COPY } from "../../data/copy";
+import { THEME_CLASS } from "../../lib/theme";
 import "./index.scss";
 
 const PHONE_KEY = "userPhone";
@@ -58,7 +59,7 @@ export default function Profile() {
   ];
 
   return (
-    <View className="profile">
+    <View className={`profile ${THEME_CLASS}`}>
       <View className="profile-hero">
         <Text className="profile-hero-name">{SITE_COPY.brand.name}</Text>
         <Text className="profile-hero-tagline">{SITE_COPY.brand.tagline}</Text>

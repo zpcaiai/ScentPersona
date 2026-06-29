@@ -7,6 +7,7 @@ import { SCENT_TAG_LABELS } from "../../data/scentTags";
 import { formatPrice } from "../../lib/utils";
 import { assetUrl } from "../../lib/request";
 import type { ScentTag } from "../../lib/scoring/types";
+import { THEME_CLASS } from "../../lib/theme";
 import "./index.scss";
 
 export default function ProductDetail() {
@@ -26,7 +27,7 @@ export default function ProductDetail() {
 
   if (!product) {
     return (
-      <View className="detail-empty">
+      <View className={`detail-empty ${THEME_CLASS}`}>
         <Text>产品不存在</Text>
       </View>
     );
@@ -44,7 +45,7 @@ export default function ProductDetail() {
     .slice(0, 5);
 
   return (
-    <View className="detail">
+    <View className={`detail ${THEME_CLASS}`}>
       <Image className="detail-hero-img" src={assetUrl(product.image)} mode="aspectFill" />
       <View className="detail-hero">
         <Text className="detail-name">{product.name}</Text>

@@ -4,6 +4,7 @@ import Taro, { useRouter } from "@tarojs/taro";
 import { PRODUCTS } from "../../data/products";
 import { SITE_COPY } from "../../data/copy";
 import { submitFeedback, trackEvent } from "../../lib/request";
+import { THEME_CLASS } from "../../lib/theme";
 import "./index.scss";
 
 export default function Feedback() {
@@ -80,7 +81,7 @@ export default function Feedback() {
 
   if (submitted) {
     return (
-      <View className="feedback-success">
+      <View className={`feedback-success ${THEME_CLASS}`}>
         <Text className="feedback-success-title">{SITE_COPY.feedback.thankYouTitle}</Text>
         <Text className="feedback-success-desc">{SITE_COPY.feedback.thankYouDesc}</Text>
         <Button
@@ -94,7 +95,7 @@ export default function Feedback() {
   }
 
   return (
-    <View className="feedback">
+    <View className={`feedback ${THEME_CLASS}`}>
       <View className="feedback-header">
         <Text className="feedback-title">{SITE_COPY.feedback.title}</Text>
         <Text className="feedback-subtitle">{SITE_COPY.feedback.subtitle}</Text>
