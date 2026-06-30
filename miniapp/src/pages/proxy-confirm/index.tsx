@@ -3,7 +3,7 @@ import { View, Text, Input, Button } from "@tarojs/components";
 import Taro, { useRouter } from "@tarojs/taro";
 import { proxyDetail, proxyConfirm, proxyPay, proxyMockPay, proxyPayWechat, proxyPayXhs } from "../../lib/proxy";
 import { resolveOpenid } from "../../lib/pay";
-import { useLang, pick } from "../../lib/i18n";
+import { useLang, pick, useNavTitle } from "../../lib/i18n";
 import { THEME_CLASS } from "../../lib/theme";
 import "../proxy-search/index.scss";
 
@@ -11,6 +11,7 @@ const yuan = (c?: number | null) => (c == null ? "—" : `¥${(c / 100).toFixed(
 
 export default function ProxyConfirm() {
   const { locale } = useLang();
+  useNavTitle("确认代下单", "Confirm proxy order");
   const router = useRouter();
   const orderId = router.params.orderId || "";
   const token = router.params.token || "";

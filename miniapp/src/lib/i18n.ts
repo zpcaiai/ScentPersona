@@ -80,3 +80,15 @@ export function useLang(): {
 export function pick(locale: Locale, zh: string, en: string): string {
   return locale === "en" ? en : zh;
 }
+
+/** Set the native navigation bar title to match the active locale (per page). */
+export function useNavTitle(zh: string, en: string): void {
+  const { locale } = useLang();
+  useEffect(() => {
+    try {
+      Taro.setNavigationBarTitle({ title: locale === "en" ? en : zh });
+    } catch {
+      /* ignore */
+    }
+  }, [locale, zh, en]);
+}

@@ -10,7 +10,7 @@ import { assetUrl } from "../../lib/request";
 import { payOrder } from "../../lib/pay";
 import { getProductById } from "../../data/products";
 import { formatPrice } from "../../lib/utils";
-import { useLang, pick, type Locale } from "../../lib/i18n";
+import { useLang, pick, type Locale, useNavTitle } from "../../lib/i18n";
 import { THEME_CLASS } from "../../lib/theme";
 import "./index.scss";
 
@@ -39,6 +39,7 @@ const STATUS_LABELS: Record<Locale, Record<string, string>> = {
 
 export default function OrderDetail() {
   const { locale } = useLang();
+  useNavTitle("订单详情", "Order details");
   const router = useRouter();
   const orderId = router.params.orderId || "";
   const accessToken = router.params.accessToken || getStoredOrderAccessToken(orderId);

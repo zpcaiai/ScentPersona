@@ -1,5 +1,5 @@
 import { View, Text } from "@tarojs/components";
-import { useLang, pick } from "../../lib/i18n";
+import { useLang, pick, useNavTitle } from "../../lib/i18n";
 import { THEME_CLASS } from "../../lib/theme";
 import "./index.scss";
 
@@ -148,6 +148,7 @@ const SECTIONS_EN: Section[] = [
 
 export default function Privacy() {
   const { locale } = useLang();
+  useNavTitle("隐私政策", "Privacy Policy");
   const sections = locale === "en" ? SECTIONS_EN : SECTIONS_ZH;
   const updated = pick(locale, "2026年6月", "June 2026");
 

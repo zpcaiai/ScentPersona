@@ -9,7 +9,7 @@ import { generateResultSummary } from "../../lib/scoring";
 import { getRoleLabel } from "../../lib/scoring/recommendProducts";
 import { trackEvent, assetUrl } from "../../lib/request";
 import type { PersonaId, TagScores, ProductRecommendation } from "../../lib/scoring/types";
-import { useLang, pick } from "../../lib/i18n";
+import { useLang, pick, useNavTitle } from "../../lib/i18n";
 import { THEME_CLASS } from "../../lib/theme";
 import "./index.scss";
 
@@ -25,6 +25,7 @@ interface QuizResultData {
 
 export default function Result() {
   const { locale } = useLang();
+  useNavTitle("你的气味人格", "Your scent persona");
   const copy = getSiteCopy(locale);
   const tagLabels = getScentTagLabels(locale);
   const [result, setResult] = useState<QuizResultData | null>(null);

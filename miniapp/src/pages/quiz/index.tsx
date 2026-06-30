@@ -6,12 +6,13 @@ import { getSiteCopy } from "../../data/copy";
 import { scoreQuizAnswers, matchPersona, recommendProducts } from "../../lib/scoring";
 import { submitQuiz, trackEvent } from "../../lib/request";
 import type { QuizAnswerInput } from "../../lib/scoring/types";
-import { useLang, pick } from "../../lib/i18n";
+import { useLang, pick, useNavTitle } from "../../lib/i18n";
 import { THEME_CLASS, IS_XHS } from "../../lib/theme";
 import "./index.scss";
 
 export default function Quiz() {
   const { locale } = useLang();
+  useNavTitle("气味人格测试", "Scent persona quiz");
   const copy = getSiteCopy(locale);
   const questions = getQuizQuestions(locale);
   const [currentIndex, setCurrentIndex] = useState(0);

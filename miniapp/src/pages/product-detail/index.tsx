@@ -7,13 +7,14 @@ import { getScentTagLabels } from "../../data/scentTags";
 import { formatPrice } from "../../lib/utils";
 import { assetUrl } from "../../lib/request";
 import type { ScentTag } from "../../lib/scoring/types";
-import { useLang, pick } from "../../lib/i18n";
+import { useLang, pick, useNavTitle } from "../../lib/i18n";
 import { THEME_CLASS } from "../../lib/theme";
 import "./index.scss";
 
 export default function ProductDetail() {
   const router = useRouter();
   const { locale } = useLang();
+  useNavTitle("产品详情", "Product details");
   const tagLabels = getScentTagLabels(locale);
   const [product, setProduct] = useState(getProductBySlug(router.params.slug || "", locale));
 

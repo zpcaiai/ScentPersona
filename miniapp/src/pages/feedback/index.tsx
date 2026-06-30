@@ -4,12 +4,13 @@ import Taro, { useRouter } from "@tarojs/taro";
 import { getProducts } from "../../data/products";
 import { getSiteCopy } from "../../data/copy";
 import { submitFeedback, trackEvent } from "../../lib/request";
-import { useLang, pick } from "../../lib/i18n";
+import { useLang, pick, useNavTitle } from "../../lib/i18n";
 import { THEME_CLASS } from "../../lib/theme";
 import "./index.scss";
 
 export default function Feedback() {
   const { locale } = useLang();
+  useNavTitle("试香反馈", "Scent feedback");
   const copy = getSiteCopy(locale);
   const products = getProducts(locale);
   const router = useRouter();

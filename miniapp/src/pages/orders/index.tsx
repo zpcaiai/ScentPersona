@@ -3,7 +3,7 @@ import { View, Text, Button, Input } from "@tarojs/components";
 import Taro, { useDidShow, usePullDownRefresh } from "@tarojs/taro";
 import { fetchOrder, fetchOrders } from "../../lib/request";
 import { formatPrice } from "../../lib/utils";
-import { useLang, pick, type Locale } from "../../lib/i18n";
+import { useLang, pick, type Locale, useNavTitle } from "../../lib/i18n";
 import { THEME_CLASS } from "../../lib/theme";
 import "./index.scss";
 
@@ -69,6 +69,7 @@ function saveToken(orderId: string, token: string) {
 
 export default function Orders() {
   const { locale } = useLang();
+  useNavTitle("我的订单", "My orders");
   const [orders, setOrders] = useState<OrderItem[]>([]);
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(true);

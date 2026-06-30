@@ -3,7 +3,7 @@ import { View, Text, Button, Input } from "@tarojs/components";
 import Taro, { useDidShow } from "@tarojs/taro";
 import { getSiteCopy } from "../../data/copy";
 import { THEME_CLASS } from "../../lib/theme";
-import { useLang, pick } from "../../lib/i18n";
+import { useLang, pick, useNavTitle } from "../../lib/i18n";
 import "./index.scss";
 
 const PHONE_KEY = "userPhone";
@@ -12,6 +12,7 @@ const CONTACT_EMAIL = "zpchoney@gmail.com";
 
 export default function Profile() {
   const { locale, setLocale } = useLang();
+  useNavTitle("我的", "Me");
   const copy = getSiteCopy(locale);
   const [phone, setPhone] = useState("");
   const [editing, setEditing] = useState(false);

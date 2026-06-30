@@ -4,12 +4,13 @@ import { getProducts } from "../../data/products";
 import { getSiteCopy } from "../../data/copy";
 import { formatPrice } from "../../lib/utils";
 import { assetUrl } from "../../lib/request";
-import { useLang, pick } from "../../lib/i18n";
+import { useLang, pick, useNavTitle } from "../../lib/i18n";
 import { THEME_CLASS } from "../../lib/theme";
 import "./index.scss";
 
 export default function Products() {
   const { locale } = useLang();
+  useNavTitle("小样套装", "Sample kits");
   const copy = getSiteCopy(locale);
   const products = getProducts(locale);
 

@@ -3,12 +3,13 @@ import { View, Text, Input, Button, Image } from "@tarojs/components";
 import Taro, { useRouter } from "@tarojs/taro";
 import { proxySearch, proxyQuote, type ProxyOffer } from "../../lib/proxy";
 import { assetUrl } from "../../lib/request";
-import { useLang, pick } from "../../lib/i18n";
+import { useLang, pick, useNavTitle } from "../../lib/i18n";
 import { THEME_CLASS } from "../../lib/theme";
 import "./index.scss";
 
 export default function ProxySearch() {
   const { locale } = useLang();
+  useNavTitle("多平台比价 · 代下单", "Compare & proxy order");
   const router = useRouter();
   const initial = router.params.q ? decodeURIComponent(router.params.q) : "";
   const [q, setQ] = useState(initial);

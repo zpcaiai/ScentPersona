@@ -5,11 +5,12 @@ import { getSiteCopy } from "../../data/copy";
 import { getPersonas } from "../../data/personas";
 import { trackEvent, assetUrl } from "../../lib/request";
 import { THEME_CLASS } from "../../lib/theme";
-import { useLang, pick } from "../../lib/i18n";
+import { useLang, pick, useNavTitle } from "../../lib/i18n";
 import "./index.scss";
 
 export default function Index() {
   const { locale } = useLang();
+  useNavTitle("ScentPersona 气味人格测试", "ScentPersona Quiz");
   const copy = getSiteCopy(locale);
   const personas = getPersonas(locale);
 

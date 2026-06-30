@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { View, Text, Button } from "@tarojs/components";
 import Taro, { useRouter } from "@tarojs/taro";
 import { proxyDetail, proxyAction } from "../../lib/proxy";
-import { useLang, pick } from "../../lib/i18n";
+import { useLang, pick, useNavTitle } from "../../lib/i18n";
 import { THEME_CLASS } from "../../lib/theme";
 import "../proxy-search/index.scss";
 
@@ -10,6 +10,7 @@ const yuan = (c?: number | null) => (c == null ? "—" : `¥${(c / 100).toFixed(
 
 export default function ProxyOrder() {
   const { locale } = useLang();
+  useNavTitle("我的代下单", "My proxy orders");
   const router = useRouter();
   const orderNo = router.params.orderNo || "";
   const token = router.params.token || Taro.getStorageSync(`proxyToken:${orderNo}`) || "";
