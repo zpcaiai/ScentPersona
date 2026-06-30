@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyOrderLookup } from "@/lib/orders/orderLookup";
+import { getUserIdFromRequest } from "@/lib/auth/session";
 import { isOrderStatus, type OrderStatus } from "@/lib/orders/orderStatus";
 import { proxyStatusCopy } from "@/data/proxyOrderCopy";
 import { maskName, maskPhone, maskAddressLine } from "@/lib/privacy/masking";
@@ -33,7 +34,9 @@ export async function GET(request: Request) {
   if (!order || order.orderType !== "proxy") {
     return NextResponse.json({ error: "order_not_found" }, { status: 404 });
   }
-  if (!verifyOrderLookup(order, { token, phoneLast4 })) {
+  const reqUserId = getUserIdFromRequest(request);
+  const authorized = verifyOrderLookup(order, { token, phoneLast4 }) || (!!reqUserId && order.userId === reqUserId);
+  if (!authorized) {
     return NextResponse.json({ error: "unauthorized" }, { status: 403 });
   }
 

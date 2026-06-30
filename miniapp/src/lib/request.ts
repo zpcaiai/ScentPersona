@@ -2,9 +2,19 @@ import Taro from "@tarojs/taro";
 
 export const API_BASE = process.env.API_BASE || "https://scentpersona.vercel.app";
 
+export function getUserToken(): string {
+  return Taro.getStorageSync("sp_user_token") || "";
+}
+export function setUserToken(token: string): void {
+  Taro.setStorageSync("sp_user_token", token);
+}
+export function clearUserToken(): void {
+  Taro.removeStorageSync("sp_user_token");
+}
+
 interface RequestOptions {
   url: string;
-  method?: "GET" | "POST";
+  method?: "GET" | "POST" | "PUT" | "DELETE";
   data?: Record<string, unknown>;
   header?: Record<string, string>;
 }
@@ -24,6 +34,7 @@ export async function request<T = unknown>(options: RequestOptions): Promise<T> 
     data,
     header: {
       "Content-Type": "application/json",
+      ...(getUserToken() ? { Authorization: `Bearer ${getUserToken()}` } : {}),
       ...header,
     },
   });

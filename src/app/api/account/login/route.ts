@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { rateLimit, getClientKey, normalizePhone, sanitizeText } from "@/lib/api-guards";
-import { buildSessionCookie } from "@/lib/auth/session";
+import { buildSessionCookie, signSession } from "@/lib/auth/session";
 import { mergeAnonymous } from "@/lib/account/mergeAnonymous";
 import { maskPhone } from "@/lib/privacy/masking";
 

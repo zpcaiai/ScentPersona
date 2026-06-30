@@ -87,3 +87,4 @@
   - 小红书：`xhsPaymentProvider`（HMAC-SHA256 签名、回调验签、退款）接入支付 provider 注册表；`POST /api/proxy-orders/[id]/pay/xhs` 返回 `xhs.requestPayment` 参数；小程序 `proxy-confirm` 在 XHS 环境走真实支付（`xhs.requestPayment`，回退 `Taro.requestPayment`），未配置回退演示 mock。
   - 微信服务号：`wechatTemplateProvider`（access_token 内存缓存 + 模板消息发送）接入通知 wechat 渠道；收件人用 OA openid（经通知 `data.openid` 传入）。
   - 至此支付覆盖：Web 扫码(微信 Native)/支付宝跳转 + 微信小程序 JSAPI + 微信 H5 + 小红书小程序；通知覆盖：站内/邮件(Resend)/短信(阿里云+Twilio)/微信服务号模板。
+- ✅ **小程序 C 端与 Web 对齐**：token 鉴权（`/api/account/*` 支持 Bearer，登录返回 token，小程序自动携带）；新增 16 个小程序页面（账户中心/气味资产/地址簿/衣橱/券/邀请/会员/通知/发票/隐私/客服+会话/售后/试香反馈/专题/法务），tabBar「我的」改为账户中心，proxy-order 增加售后与试香反馈入口；新增 `/api/content/[slug]`、`/api/legal/[slug]`。微信/小红书双端同一套 Taro 代码。

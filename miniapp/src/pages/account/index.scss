@@ -1,0 +1,16 @@
+.acc { padding: 24rpx; min-height: 100vh; }
+.acc-h { font-size: 40rpx; font-family: Georgia, serif; color: #556648; display: block; }
+.acc-sub { color: #9a948c; font-size: 24rpx; display: block; margin: 8rpx 0 4rpx; line-height: 1.5; }
+.acc-card { background: #fff; border: 1px solid #f0e9da; border-radius: 16rpx; padding: 20rpx; margin-top: 16rpx; }
+.acc-row { display: flex; justify-content: space-between; align-items: center; padding: 14rpx 0; }
+.acc-input { width: 100%; box-sizing: border-box; background: #fff; border: 1px solid #e4d8c0; border-radius: 12rpx; padding: 16rpx; font-size: 28rpx; margin-top: 12rpx; }
+.acc-btn { background: #6b7d5e; color: #fff; border-radius: 14rpx; padding: 18rpx; text-align: center; margin-top: 16rpx; }
+.acc-btn-ghost { border: 1px solid #c4a882; color: #967449; border-radius: 14rpx; padding: 14rpx; text-align: center; margin-top: 12rpx; }
+.acc-grid { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 16rpx; }
+.acc-tile { flex: 1 1 28%; background: #fff; border: 1px solid #f0e9da; border-radius: 14rpx; padding: 18rpx; text-align: center; }
+.acc-chip { border: 1px solid #e4d8c0; border-radius: 999rpx; padding: 10rpx 22rpx; font-size: 24rpx; color: #6b7d5e; }
+.acc-muted { color: #9a948c; font-size: 24rpx; }
+.acc-tag { background: rgba(107,125,94,.12); color: #556648; border-radius: 8rpx; padding: 4rpx 12rpx; font-size: 22rpx; }
+.acc-bar-wrap { height: 12rpx; background: #f9f5ee; border-radius: 999rpx; overflow: hidden; flex: 1; }
+.acc-bar { height: 100%; background: #6b7d5e; }
+.acc-bar-row { display: flex; align-items: center; gap: 12rpx; margin-top: 10rpx; font-size: 22rpx; color: #6b7d5e; }

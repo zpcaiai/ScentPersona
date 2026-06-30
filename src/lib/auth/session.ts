@@ -33,6 +33,12 @@ export function verifySession(token: string): string | null {
 
 /** For route handlers (reads the raw Cookie header). */
 export function getUserIdFromRequest(request: Request): string | null {
+  // Mini-programs don't send cookies — accept a Bearer token too.
+  const auth = request.headers.get("authorization");
+  if (auth && auth.startsWith("Bearer ")) {
+    const id = verifySession(auth.slice(7).trim());
+    if (id) return id;
+  }
   const cookie = request.headers.get("cookie") || "";
   const m = cookie.match(/(?:^|;\s*)sp_user=([^;]+)/);
   if (!m) return null;

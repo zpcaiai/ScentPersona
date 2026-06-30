@@ -76,6 +76,13 @@ export default function ProxyOrder() {
         {(d.timeline || []).map((e: any, i: number) => <Text key={i} className="proxy-tl">· {e.title}</Text>)}
       </View>
 
+      {["shipped", "delivered", "after_sales"].includes(d.status) && (
+        <Button className="btn-secondary" onClick={() => Taro.navigateTo({ url: `/pages/after-sales/index?orderNo=${orderNo}&token=${token}` })}>遇到问题？申请售后</Button>
+      )}
+      {d.status === "delivered" && (
+        <Button className="btn-primary" onClick={() => Taro.navigateTo({ url: `/pages/sample-feedback/index?orderNo=${orderNo}&token=${token}` })}>填写试香反馈，领正装抵扣券</Button>
+      )}
+
       {["paid", "purchasing", "out_of_stock", "price_changed"].includes(d.status) &&
         !(d.refunds || []).some((r: any) => r.status === "requested") && (
           <Button className="btn-secondary" loading={busy} onClick={() => act("refund-request", { reason: "用户申请退款" })}>{pick(locale, "申请退款", "Request refund")}</Button>

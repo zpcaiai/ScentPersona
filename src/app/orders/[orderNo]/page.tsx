@@ -168,7 +168,7 @@ function OrderInner() {
       </section>
 
       {detail.status === "delivered" && (
-        <a href={`/orders/${detail.orderNo}/feedback?token=${encodeURIComponent(token)}`} className="block rounded-xl bg-sage-500 py-2.5 text-center text-sm text-white">已签收？来填写试香反馈，领正装抵扣券</a>
+        <a href={`/orders/${detail.orderNo}/feedback?token=${encodeURIComponent(token)}`} className="block rounded-xl bg-sage-500 py-2.5 text-center text-sm text-white">{pick(locale, "已签收？来填写试香反馈，领正装抵扣券", "Delivered? Share your scent feedback and get a full-bottle credit")}</a>
       )}
 
       {["shipped", "delivered", "after_sales"].includes(detail.status) && (

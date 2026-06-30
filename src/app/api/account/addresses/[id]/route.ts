@@ -41,3 +41,8 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
   await db.userAddress.delete({ where: { id: params.id } });
   return NextResponse.json({ ok: true });
 }
+
+// wx.request has no PATCH — accept POST as an alias.
+export async function POST(request: Request, ctx: { params: { id: string } }) {
+  return PATCH(request, ctx);
+}
