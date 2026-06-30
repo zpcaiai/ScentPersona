@@ -68,10 +68,16 @@ model Feedback {
   @@map("feedbacks")
 }
 
+// Unified order model. orderType discriminates between the existing
+// "sample_kit" purchase flow and the new "proxy" (代下单) fulfillment flow.
+// Sample-kit orders keep using their original columns; proxy orders use the
+// snapshot/quote columns plus the related Order* tables below.
 model Order {
   id              String    @id @default(cuid())
   orderNo         String    @unique
   accessToken     String    @unique
+  orderType       String    @default("sample_kit")
+  userId          String?
   sessionId       String?
   productType     String
   productIdsJson  String    @default("[]")
@@ -85,6 +91,32 @@ model Order {
   shippingAddress String?
   trackingNumber  String?
   note            String?
+
+  // --- proxy-order product snapshot ---
+  sourcePlatform          String?
+  sourceOfferId           String?
+  sourceProductUrl        String?
+  productTitle            String?
+  productImageUrl         String?
+  productBrand            String?
+  productSpec             String?
+  quantity                Int      @default(1)
+
+  // --- proxy-order money breakdown (cents) ---
+  productPriceCents        Int?
+  serviceFeeCents          Int?
+  domesticShippingFeeCents Int?
+  estimatedTotalCents      Int?
+  finalTotalCents          Int?
+  currency                 String  @default("CNY")
+
+  // --- proxy-order quote / risk ---
+  quoteExpiresAt    DateTime?
+  priceSnapshotJson String    @default("{}")
+  riskFlagsJson     String    @default("[]")
+  userNote          String?
+  adminNote         String?
+
   paidAt          DateTime?
   shippedAt       DateTime?
   completedAt     DateTime?
@@ -93,7 +125,148 @@ model Order {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
+  address          OrderAddress?
+  purchase         OrderPurchase?
+  shipment         OrderShipment?
+  payments         OrderPayment[]
+  refunds          OrderRefund[]
+  priceAdjustments OrderPriceAdjustment[]
+  events           OrderEvent[]
+
+  @@index([orderType, status])
+  @@index([userId])
   @@map("orders")
+}
+
+model OrderAddress {
+  id                  String   @id @default(cuid())
+  orderId             String   @unique
+  recipientName       String
+  phone               String
+  province            String
+  city                String
+  district            String
+  addressLine1        String
+  addressLine2        String?
+  postalCode          String?
+  encryptedRawAddress String?
+  createdAt           DateTime @default(now())
+  order               Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("order_addresses")
+}
+
+model OrderPayment {
+  id                  String        @id @default(cuid())
+  orderId             String
+  provider            String
+  providerPaymentId   String?
+  status              String        @default("created")
+  purpose             String        @default("order")
+  amountCents         Int
+  currency            String        @default("CNY")
+  paidAt              DateTime?
+  refundedAmountCents Int           @default(0)
+  rawDataJson         String        @default("{}")
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  order               Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  refunds             OrderRefund[]
+
+  @@index([orderId])
+  @@index([provider, providerPaymentId])
+  @@map("order_payments")
+}
+
+model OrderPurchase {
+  id                   String    @id @default(cuid())
+  orderId              String    @unique
+  platform             String
+  platformOrderNo      String?
+  purchaseAccountLabel String?
+  purchaseStatus       String    @default("pending")
+  purchasedAt          DateTime?
+  purchaseCostCents    Int?
+  screenshotUrl        String?
+  rawDataJson          String    @default("{}")
+  adminNote            String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  order                Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("order_purchases")
+}
+
+model OrderShipment {
+  id                 String    @id @default(cuid())
+  orderId            String    @unique
+  carrierCode        String?
+  carrierName        String?
+  trackingNo         String?
+  shippingStatus     String    @default("pending")
+  shippedAt          DateTime?
+  deliveredAt        DateTime?
+  latestTrackingText String?
+  trackingRawJson    String    @default("{}")
+  lastSyncedAt       DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  order              Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("order_shipments")
+}
+
+model OrderRefund {
+  id               String        @id @default(cuid())
+  orderId          String
+  paymentId        String?
+  status           String        @default("requested")
+  reason           String
+  amountCents      Int
+  providerRefundId String?
+  processedAt      DateTime?
+  rawDataJson      String        @default("{}")
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  order            Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  payment          OrderPayment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@map("order_refunds")
+}
+
+model OrderPriceAdjustment {
+  id            String    @id @default(cuid())
+  orderId       String
+  oldTotalCents Int
+  newTotalCents Int
+  diffCents     Int
+  reason        String
+  status        String    @default("pending")
+  expiresAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  order         Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId, status])
+  @@map("order_price_adjustments")
+}
+
+model OrderEvent {
+  id           String   @id @default(cuid())
+  orderId      String
+  eventType    String
+  fromStatus   String?
+  toStatus     String?
+  title        String
+  message      String?
+  operatorId   String?
+  metadataJson String   @default("{}")
+  createdAt    DateTime @default(now())
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId, createdAt])
+  @@map("order_events")
 }
 
 model AdminMetricSnapshot {
@@ -111,6 +284,7 @@ model AdminMetricSnapshot {
 
 model DataDeletionRequest {
   id          String   @id @default(cuid())
+  userId      String?
   contact    String
   identifier String
   reason     String?
@@ -119,6 +293,147 @@ model DataDeletionRequest {
   resolvedAt  DateTime?
 
   @@map("data_deletion_requests")
+}
+
+model Product {
+  id                 String       @id @default(cuid())
+  normalizedName     String
+  brand              String?
+  mainImageUrl       String?
+  category           String?      @default("fragrance")
+  concentration      String?
+  volumeMl           Int?
+  gender             String?
+  scentFamily        String?
+  topNotesJson       String       @default("[]")
+  middleNotesJson    String       @default("[]")
+  baseNotesJson      String       @default("[]")
+  scentTagsJson      String       @default("{}")
+  suitableScenesJson String       @default("[]")
+  reviewStatus       String       @default("pending")
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  offers             ProductOffer[]
+  matchCandidates    ProductMatchCandidate[]
+  events             UserProductEvent[]
+
+  @@index([normalizedName])
+  @@index([brand])
+  @@map("catalog_products")
+}
+
+model ProductOffer {
+  id                 String       @id @default(cuid())
+  productId          String
+  platform           String
+  platformProductId  String?
+  title              String
+  brand              String?
+  shopName           String?
+  shopType           String?
+  priceCents         Int?
+  originalPriceCents Int?
+  currency           String       @default("CNY")
+  rating             Float?
+  reviewCount        Int?
+  salesCount         Int?
+  imageUrl           String?
+  sourceUrl          String
+  affiliateUrl       String?
+  couponInfoJson     String       @default("{}")
+  rawDataJson        String       @default("{}")
+  riskFlagsJson      String       @default("[]")
+  qualityScore       Int          @default(0)
+  reviewStatus       String       @default("needs_review")
+  fetchedAt          DateTime
+  isAvailable        Boolean      @default(true)
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  product            Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  priceHistory       PriceHistory[]
+  matchCandidates    ProductMatchCandidate[]
+  events             UserProductEvent[]
+
+  @@unique([platform, platformProductId])
+  @@index([platform, fetchedAt])
+  @@index([productId])
+  @@map("product_offers")
+}
+
+model ProductSource {
+  id           String   @id @default(cuid())
+  platform     String
+  sourceType   String
+  query        String?
+  status       String   @default("idle")
+  lastRunAt    DateTime?
+  errorMessage String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([platform, sourceType])
+  @@map("product_sources")
+}
+
+model PriceHistory {
+  id                 String       @id @default(cuid())
+  productOfferId     String
+  priceCents         Int?
+  originalPriceCents Int?
+  couponInfoJson     String       @default("{}")
+  fetchedAt          DateTime
+  productOffer       ProductOffer @relation(fields: [productOfferId], references: [id], onDelete: Cascade)
+
+  @@index([productOfferId, fetchedAt])
+  @@map("price_history")
+}
+
+model ProductMatchCandidate {
+  id             String       @id @default(cuid())
+  productId      String
+  productOfferId String
+  matchScore     Int
+  matchReason    String
+  status         String       @default("pending")
+  createdAt      DateTime     @default(now())
+  product        Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productOffer   ProductOffer @relation(fields: [productOfferId], references: [id], onDelete: Cascade)
+
+  @@index([productId, status])
+  @@map("product_match_candidates")
+}
+
+model ProductSyncJob {
+  id           String    @id @default(cuid())
+  type         String
+  platform     String?
+  query        String?
+  status       String    @default("pending")
+  startedAt    DateTime?
+  finishedAt   DateTime?
+  errorMessage String?
+  resultJson   String    @default("{}")
+  createdAt    DateTime  @default(now())
+
+  @@index([type, status, createdAt])
+  @@map("product_sync_jobs")
+}
+
+model UserProductEvent {
+  id             String        @id @default(cuid())
+  sessionId      String?
+  productId      String?
+  productOfferId String?
+  eventType      String
+  eventValueJson String        @default("{}")
+  createdAt      DateTime      @default(now())
+  product        Product?      @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productOffer   ProductOffer? @relation(fields: [productOfferId], references: [id], onDelete: SetNull)
+
+  @@index([eventType, createdAt])
+  @@index([sessionId])
+  @@index([productId])
+  @@map("user_product_events")
 }
 
 model AnalyticsEvent {
@@ -136,4 +451,849 @@ model AnalyticsEvent {
   @@index([sessionId])
   @@index([orderId])
   @@map("analytics_events")
+}
+
+// ───────────────────────────── Commercial Batch 1 ─────────────────────────────
+// Skill 38: user accounts + scent asset center
+
+model User {
+  id           String                @id @default(cuid())
+  email        String?               @unique
+  phone        String?               @unique
+  displayName  String?
+  avatarUrl    String?
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+  profile      UserProfile?
+  scentProfile UserScentProfile?
+  addresses    UserAddress[]
+  favorites    UserFavoriteProduct[]
+  consents     PrivacyConsent[]
+
+  @@map("users")
+}
+
+model UserProfile {
+  id                      String   @id @default(cuid())
+  userId                  String   @unique
+  gender                  String?
+  birthday                DateTime?
+  preferredBudgetMinCents Int?
+  preferredBudgetMaxCents Int?
+  favoriteScenesJson      String   @default("[]")
+  dislikedScentTagsJson   String   @default("[]")
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+model UserAddress {
+  id            String   @id @default(cuid())
+  userId        String
+  recipientName String
+  phone         String
+  province      String
+  city          String
+  district      String
+  addressLine1  String
+  addressLine2  String?
+  postalCode    String?
+  isDefault     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("user_addresses")
+}
+
+model UserScentProfile {
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  currentPersonaId       String?
+  scentScoresJson        String   @default("{}")
+  likedProductIdsJson    String   @default("[]")
+  dislikedProductIdsJson String   @default("[]")
+  likedTagsJson          String   @default("[]")
+  dislikedTagsJson       String   @default("[]")
+  lastQuizSessionId      String?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_scent_profiles")
+}
+
+model UserFavoriteProduct {
+  id             String   @id @default(cuid())
+  userId         String
+  productId      String
+  productOfferId String?
+  note           String?
+  createdAt      DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([userId])
+  @@map("user_favorite_products")
+}
+
+// Skill 39: order profit accounting
+
+model OrderProfitSnapshot {
+  id                       String   @id @default(cuid())
+  orderId                  String
+  orderType                String
+  revenueCents             Int
+  productCostCents         Int
+  serviceFeeRevenueCents   Int
+  shippingRevenueCents     Int
+  shippingCostCents        Int
+  paymentFeeCents          Int
+  couponCostCents          Int
+  refundCostCents          Int
+  laborCostCents           Int
+  affiliateCommissionCents Int
+  grossProfitCents         Int
+  netProfitCents           Int
+  grossMargin              Float
+  netMargin                Float
+  profitStatus             String   @default("complete")
+  calculatedAt             DateTime @default(now())
+  metadataJson             String   @default("{}")
+
+  @@index([orderId, calculatedAt])
+  @@map("order_profit_snapshots")
+}
+
+model CostRule {
+  id        String   @id @default(cuid())
+  name      String
+  type      String
+  ruleJson  String   @default("{}")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("cost_rules")
+}
+
+// Skill 41: privacy consent + data access audit + admin RBAC
+
+model PrivacyConsent {
+  id          String    @id @default(cuid())
+  userId      String?
+  sessionId   String?
+  consentType String
+  version     String
+  acceptedAt  DateTime  @default(now())
+  revokedAt   DateTime?
+  ip          String?
+  userAgent   String?
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@map("privacy_consents")
+}
+
+model DataAccessLog {
+  id           String   @id @default(cuid())
+  adminUserId  String?
+  targetUserId String?
+  resourceType String
+  resourceId   String
+  action       String
+  fieldsJson   String   @default("[]")
+  reason       String?
+  createdAt    DateTime @default(now())
+
+  @@index([resourceType, resourceId])
+  @@index([adminUserId, createdAt])
+  @@map("data_access_logs")
+}
+
+model AdminUser {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String?
+  role         String    @default("operator")
+  status       String    @default("active")
+  passwordHash String?
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("admin_users")
+}
+
+model AdminRolePermission {
+  id         String   @id @default(cuid())
+  role       String
+  permission String
+  createdAt  DateTime @default(now())
+
+  @@unique([role, permission])
+  @@map("admin_role_permissions")
+}
+
+// ───────────────────── Skill 40: legal entity / agreements / invoices ─────────────────────
+
+model BusinessEntityProfile {
+  id               String   @id @default(cuid())
+  legalName        String
+  displayName      String
+  businessLicenseNo String?
+  taxNo            String?
+  address          String?
+  contactEmail     String?
+  contactPhone     String?
+  serviceScopeJson String   @default("[]")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("business_entity_profiles")
+}
+
+model LegalDocument {
+  id          String    @id @default(cuid())
+  type        String
+  version     String
+  title       String
+  content     String
+  isActive    Boolean   @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([type, isActive])
+  @@map("legal_documents")
+}
+
+model OrderContractSnapshot {
+  id                   String   @id @default(cuid())
+  orderId              String
+  legalDocumentType    String
+  legalDocumentVersion String
+  acceptedAt           DateTime @default(now())
+  acceptedIp           String?
+  acceptedUserAgent    String?
+  contentSnapshot      String
+  createdAt            DateTime @default(now())
+
+  @@index([orderId])
+  @@map("order_contract_snapshots")
+}
+
+model InvoiceRequest {
+  id          String    @id @default(cuid())
+  userId      String?
+  orderId     String
+  invoiceType String    @default("personal")
+  title       String
+  taxNo       String?
+  email       String
+  amountCents Int
+  status      String    @default("requested")
+  issuedAt    DateTime?
+  invoiceUrl  String?
+  note        String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([orderId])
+  @@index([userId])
+  @@map("invoice_requests")
+}
+
+// ───────────────────── Skill 42: offer trust score ─────────────────────
+
+model ProductOfferTrustScore {
+  id                       String   @id @default(cuid())
+  productOfferId           String   @unique
+  score                    Int
+  level                    String
+  reasonsJson              String   @default("[]")
+  riskFlagsJson            String   @default("[]")
+  recommendationPolicyJson String   @default("{}")
+  reviewStatus             String   @default("auto")
+  reviewedBy               String?
+  calculatedAt             DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  @@map("product_offer_trust_scores")
+}
+
+// ───────────────────── Skill 43: cosmetic compliance ─────────────────────
+
+model CosmeticComplianceCheck {
+  id                String    @id @default(cuid())
+  productId         String    @unique
+  productOfferId    String?
+  checkStatus       String    @default("pending")
+  filingNo          String?
+  manufacturer      String?
+  importer          String?
+  originCountry     String?
+  ingredientListJson String   @default("[]")
+  allergenNotice    String?
+  batchNo           String?
+  shelfLife         String?
+  labelImageUrlsJson String   @default("[]")
+  riskFlagsJson     String    @default("[]")
+  reviewNote        String?
+  reviewedBy        String?
+  reviewedAt        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@map("cosmetic_compliance_checks")
+}
+
+// ───────────────────── Skill 44: after-sales evidence + anti-fraud ─────────────────────
+
+model AfterSalesCase {
+  id              String              @id @default(cuid())
+  caseNo          String              @unique
+  orderId         String
+  userId          String?
+  type            String
+  status          String              @default("submitted")
+  riskScore       Int                 @default(0)
+  riskFlagsJson   String              @default("[]")
+  userDescription String
+  adminConclusion String?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  closedAt        DateTime?
+  evidence        AfterSalesEvidence[]
+
+  @@index([orderId])
+  @@index([status])
+  @@map("after_sales_cases")
+}
+
+model AfterSalesEvidence {
+  id           String         @id @default(cuid())
+  caseId       String
+  evidenceType String
+  fileUrl      String?
+  text         String?
+  metadataJson String         @default("{}")
+  uploadedBy   String         @default("user")
+  createdAt    DateTime       @default(now())
+  case         AfterSalesCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+  @@map("after_sales_evidence")
+}
+
+model UserRiskFlag {
+  id        String   @id @default(cuid())
+  userId    String?
+  phoneHash String?
+  riskType  String
+  reason    String
+  severity  String   @default("low")
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([phoneHash])
+  @@map("user_risk_flags")
+}
+
+model OrderRiskFlag {
+  id        String   @id @default(cuid())
+  orderId   String
+  riskType  String
+  reason    String
+  severity  String   @default("low")
+  resolved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+  @@map("order_risk_flags")
+}
+
+// ───────────────────── Skill 45: risk rules + assessments ─────────────────────
+
+model RiskRule {
+  id        String   @id @default(cuid())
+  name      String
+  type      String
+  ruleJson  String   @default("{}")
+  severity  String   @default("medium")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("risk_rules")
+}
+
+model RiskAssessment {
+  id            String   @id @default(cuid())
+  targetType    String
+  targetId      String
+  score         Int
+  level         String
+  riskFlagsJson String   @default("[]")
+  reasonsJson   String   @default("[]")
+  createdAt     DateTime @default(now())
+
+  @@index([targetType, targetId])
+  @@map("risk_assessments")
+}
+
+model ManualRiskReview {
+  id           String    @id @default(cuid())
+  assessmentId String
+  status       String    @default("pending")
+  reviewedBy   String?
+  reviewNote   String?
+  reviewedAt   DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([assessmentId])
+  @@map("manual_risk_reviews")
+}
+
+// ───────────────────── Skill 46: support tickets ─────────────────────
+
+model SupportTicket {
+  id            String          @id @default(cuid())
+  ticketNo      String          @unique
+  userId        String?
+  orderId       String?
+  category      String
+  priority      String          @default("normal")
+  status        String          @default("open")
+  subject       String
+  latestMessage String?
+  assignedTo    String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  closedAt      DateTime?
+  messages      SupportMessage[]
+
+  @@index([status])
+  @@index([userId])
+  @@map("support_tickets")
+}
+
+model SupportMessage {
+  id              String        @id @default(cuid())
+  ticketId        String
+  senderType      String
+  senderId        String?
+  message         String
+  attachmentsJson String        @default("[]")
+  createdAt       DateTime      @default(now())
+  ticket          SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@map("support_messages")
+}
+
+model SupportTemplate {
+  id        String   @id @default(cuid())
+  category  String
+  title     String
+  content   String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("support_templates")
+}
+
+// ───────────────────── Skill 47: notifications ─────────────────────
+
+model Notification {
+  id           String            @id @default(cuid())
+  userId       String?
+  sessionId    String?
+  orderId      String?
+  channel      String            @default("in_app")
+  type         String
+  title        String
+  content      String
+  status       String            @default("pending")
+  scheduledAt  DateTime?
+  sentAt       DateTime?
+  readAt       DateTime?
+  metadataJson String            @default("{}")
+  createdAt    DateTime          @default(now())
+  logs         NotificationLog[]
+
+  @@index([userId, status])
+  @@index([orderId])
+  @@map("notifications")
+}
+
+model NotificationTemplate {
+  id              String   @id @default(cuid())
+  type            String
+  channel         String
+  titleTemplate   String
+  contentTemplate String
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([type, channel])
+  @@map("notification_templates")
+}
+
+model NotificationPreference {
+  id        String   @id @default(cuid())
+  userId    String
+  channel   String
+  type      String
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, channel, type])
+  @@map("notification_preferences")
+}
+
+model NotificationLog {
+  id                String       @id @default(cuid())
+  notificationId    String
+  provider          String
+  providerMessageId String?
+  status            String
+  errorMessage      String?
+  rawDataJson       String       @default("{}")
+  createdAt         DateTime     @default(now())
+  notification      Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  @@index([notificationId])
+  @@map("notification_logs")
+}
+
+// ───────────────────── Skill 48: self-op sample inventory ─────────────────────
+
+model InventorySku {
+  id                String          @id @default(cuid())
+  skuCode           String          @unique
+  name              String
+  productId         String?
+  type              String
+  volumeMl          Int?
+  batchNo           String?
+  expirationDate    DateTime?
+  stockQuantity     Int             @default(0)
+  reservedQuantity  Int             @default(0)
+  availableQuantity Int             @default(0)
+  costCents         Int             @default(0)
+  status            String          @default("active")
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  movements         StockMovement[]
+
+  @@map("inventory_skus")
+}
+
+model StockMovement {
+  id             String       @id @default(cuid())
+  skuId          String
+  type           String
+  quantity       Int
+  reason         String
+  relatedOrderId String?
+  createdBy      String?
+  createdAt      DateTime     @default(now())
+  sku            InventorySku @relation(fields: [skuId], references: [id], onDelete: Cascade)
+
+  @@index([skuId, createdAt])
+  @@map("stock_movements")
+}
+
+model SampleKit {
+  id                  String   @id @default(cuid())
+  name                String
+  kitType             String
+  priceCents          Int
+  includedSkuRulesJson String  @default("[]")
+  status              String   @default("active")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@map("sample_kits")
+}
+
+model KitAssemblyOrder {
+  id        String   @id @default(cuid())
+  orderId   String
+  kitId     String
+  status    String   @default("pending")
+  itemsJson String   @default("[]")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderId])
+  @@map("kit_assembly_orders")
+}
+
+// ───────────────────── Skill 49: pick / pack / ship ─────────────────────
+
+model FulfillmentOrder {
+  id            String            @id @default(cuid())
+  orderId       String
+  fulfillmentNo String            @unique
+  type          String
+  status        String            @default("pending")
+  warehouse     String?
+  assignedTo    String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  items         FulfillmentItem[]
+  packingSlip   PackingSlip?
+
+  @@index([orderId])
+  @@index([status])
+  @@map("fulfillment_orders")
+}
+
+model FulfillmentItem {
+  id                 String           @id @default(cuid())
+  fulfillmentOrderId String
+  skuId              String?
+  skuName            String
+  quantity           Int
+  pickedQuantity     Int              @default(0)
+  status             String           @default("pending")
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  fulfillmentOrder   FulfillmentOrder @relation(fields: [fulfillmentOrderId], references: [id], onDelete: Cascade)
+
+  @@index([fulfillmentOrderId])
+  @@map("fulfillment_items")
+}
+
+model PackingSlip {
+  id                 String           @id @default(cuid())
+  fulfillmentOrderId String           @unique
+  slipNo             String
+  contentJson        String           @default("{}")
+  printedAt          DateTime?
+  createdAt          DateTime         @default(now())
+  fulfillmentOrder   FulfillmentOrder @relation(fields: [fulfillmentOrderId], references: [id], onDelete: Cascade)
+
+  @@map("packing_slips")
+}
+
+// ───────────────────── Skill 50: content CMS / landing pages ─────────────────────
+
+model ContentPage {
+  id               String    @id @default(cuid())
+  slug             String    @unique
+  title            String
+  subtitle         String?
+  pageType         String    @default("landing")
+  status           String    @default("draft")
+  heroImageUrl     String?
+  contentBlocksJson String   @default("[]")
+  seoTitle         String?
+  seoDescription   String?
+  publishedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([status])
+  @@map("content_pages")
+}
+
+model Campaign {
+  id            String    @id @default(cuid())
+  name          String
+  slug          String    @unique
+  source        String?
+  medium        String?
+  landingPageId String?
+  startAt       DateTime?
+  endAt         DateTime?
+  status        String    @default("active")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("campaigns")
+}
+
+// ───────────────────── Skill 51: coupons / referral / membership ─────────────────────
+
+model Coupon {
+  id                String              @id @default(cuid())
+  code              String              @unique
+  type              String
+  value             Int
+  minOrderAmountCents Int?
+  maxDiscountCents  Int?
+  scope             String              @default("all")
+  startsAt          DateTime?
+  expiresAt         DateTime?
+  usageLimit        Int?
+  perUserLimit      Int?
+  usedCount         Int                 @default(0)
+  status            String              @default("active")
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  redemptions       CouponRedemption[]
+
+  @@map("coupons")
+}
+
+model CouponRedemption {
+  id           String   @id @default(cuid())
+  couponId     String
+  userId       String?
+  orderId      String?
+  discountCents Int
+  redeemedAt   DateTime @default(now())
+  coupon       Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+
+  @@index([couponId])
+  @@index([userId])
+  @@map("coupon_redemptions")
+}
+
+model ReferralCode {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  code      String   @unique
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+
+  @@map("referral_codes")
+}
+
+model ReferralReward {
+  id              String   @id @default(cuid())
+  referrerUserId  String
+  referredUserId  String?
+  referralCode    String
+  rewardType      String
+  rewardValue     Int
+  status          String   @default("pending")
+  createdAt       DateTime @default(now())
+
+  @@index([referrerUserId])
+  @@map("referral_rewards")
+}
+
+model MembershipTier {
+  id          String   @id @default(cuid())
+  name        String
+  level       Int      @unique
+  benefitsJson String  @default("[]")
+  minSpendCents Int
+  createdAt   DateTime @default(now())
+
+  @@map("membership_tiers")
+}
+
+model UserMembership {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  tierId         String?
+  points         Int      @default(0)
+  totalSpendCents Int     @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("user_memberships")
+}
+
+// ───────────────────── Skill 52: sample feedback → full-size conversion ─────────────────────
+
+model SampleFeedbackFlow {
+  id                         String   @id @default(cuid())
+  orderId                    String   @unique
+  userId                     String?
+  status                     String   @default("pending")
+  recommendedFullSizeProductId String?
+  conversionOrderId          String?
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+
+  @@map("sample_feedback_flows")
+}
+
+model ScentFeedback {
+  id             String   @id @default(cuid())
+  userId         String?
+  orderId        String?
+  productId      String
+  rating         Int      @default(0)
+  likeLevel      String   @default("neutral")
+  tooSweet       Boolean  @default(false)
+  tooStrong      Boolean  @default(false)
+  tooCold        Boolean  @default(false)
+  tooLight       Boolean  @default(false)
+  goodForSceneJson String @default("[]")
+  comment        String?
+  createdAt      DateTime @default(now())
+
+  @@index([userId])
+  @@index([productId])
+  @@map("scent_feedbacks")
+}
+
+model FullSizeRecommendation {
+  id              String   @id @default(cuid())
+  userId          String?
+  sourceOrderId   String
+  productId       String
+  reason          String
+  discountCouponId String?
+  status          String   @default("recommended")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+  @@map("full_size_recommendations")
+}
+
+// ───────────────────── Skill 53: repurchase + scent wardrobe ─────────────────────
+
+model ScentWardrobe {
+  id        String              @id @default(cuid())
+  userId    String              @unique
+  name      String              @default("我的香味衣橱")
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+  items     ScentWardrobeItem[]
+
+  @@map("scent_wardrobes")
+}
+
+model ScentWardrobeItem {
+  id             String        @id @default(cuid())
+  wardrobeId     String
+  productId      String
+  role           String
+  source         String        @default("manual")
+  usageFrequency String?
+  note           String?
+  createdAt      DateTime      @default(now())
+  wardrobe       ScentWardrobe @relation(fields: [wardrobeId], references: [id], onDelete: Cascade)
+
+  @@index([wardrobeId])
+  @@map("scent_wardrobe_items")
+}
+
+model RepurchaseReminder {
+  id           String   @id @default(cuid())
+  userId       String
+  productId    String
+  orderId      String?
+  reminderType String
+  scheduledAt  DateTime
+  status       String   @default("pending")
+  createdAt    DateTime @default(now())
+
+  @@index([userId, status])
+  @@map("repurchase_reminders")
 }

@@ -67,3 +67,6 @@ export interface ResultSummary {
   avoidTags: ScentTag[];
   summary: string;
 }
+
+/** Shared UI locale (i18n). */
+export type Locale = "zh" | "en";

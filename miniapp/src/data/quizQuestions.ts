@@ -1,4 +1,10 @@
-import type { ScentTag, PersonaId, PartialTagScores, PartialPersonaScores } from "@/lib/scoring/types";
+import type {
+  ScentTag,
+  PersonaId,
+  PartialTagScores,
+  PartialPersonaScores,
+  Locale,
+} from "@/lib/scoring/types";
 
 export interface QuizOption {
   id: string;
@@ -333,3 +339,127 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     ],
   },
 ];
+
+interface QuizQuestionText {
+  question: string;
+  subtitle?: string;
+  options: Record<string, { label: string; description?: string }>;
+}
+
+const QUIZ_TEXT_EN: Record<string, QuizQuestionText> = {
+  q1: {
+    question: "Over the past week, what state have you been in most?",
+    subtitle: "Don't overthink it — pick what feels most like you lately.",
+    options: {
+      q1a: { label: "Busy but fulfilled, always on the go", description: "Work or study takes up most of my time" },
+      q1b: { label: "A little tired, wanting a rest", description: "Feeling like I need to breathe" },
+      q1c: { label: "Calm, enjoying time alone", description: "Being on my own feels just right" },
+      q1d: { label: "Wanting to get out and change the scenery", description: "A bit stuffy, wanting some air" },
+    },
+  },
+  q2: {
+    question: "If someone described you in three words, which would you most want?",
+    options: {
+      q2a: { label: "Clean, crisp, easygoing" },
+      q2b: { label: "Quiet, deep, not simple" },
+      q2c: { label: "Warm, gentle, reassuring" },
+      q2d: { label: "Fun, energetic, easy to be near" },
+    },
+  },
+  q3: {
+    question: "When do you use fragrance most?",
+    options: {
+      q3a: { label: "Before heading out, for work or a date" },
+      q3b: { label: "At home, before bed or while relaxing" },
+      q3c: { label: "While reading, meditating, or alone" },
+      q3d: { label: "Parties, dates, going out" },
+    },
+  },
+  q4: {
+    question: "Which scene appeals to you most?",
+    options: {
+      q4a: { label: "Morning sun in the room, a white shirt on the hanger" },
+      q4b: { label: "A rainy afternoon, tea and an old book in the study" },
+      q4c: { label: "A winter night, a sweater and an old film under a warm lamp" },
+      q4d: { label: "A sunlit orchard, the air sweet with fruit" },
+    },
+  },
+  q5: {
+    question: "Which scent experience can you least stand?",
+    options: {
+      q5a: { label: "Too sweet, like walking into a candy store" },
+      q5b: { label: "Too strong, the whole building can smell it" },
+      q5c: { label: "Too cold, like disinfectant" },
+      q5d: { label: "Too ordinary, forgotten as soon as you smell it" },
+    },
+  },
+  q6: {
+    question: "How many people do you want to notice your scent?",
+    options: {
+      q6a: { label: "Only those up close — understated" },
+      q6b: { label: "A roomful of people, but never sharp" },
+      q6c: { label: "Noticed the moment you enter the room" },
+      q6d: { label: "Just for me to smell is enough" },
+    },
+  },
+  q7: {
+    question: "What matters most when you buy fragrance?",
+    options: {
+      q7a: { label: "Everyday and versatile, hard to get wrong" },
+      q7b: { label: "Has a story, not mainstream" },
+      q7c: { label: "Lifts the mood, sets a mood" },
+      q7d: { label: "Just smells good — no need for complexity" },
+    },
+  },
+  q8: {
+    question: "Which is closest to your style of dress?",
+    options: {
+      q8a: { label: "Simple and clean, mostly basics" },
+      q8b: { label: "Dark tones, a little cool" },
+      q8c: { label: "Comfort first, soft and loose" },
+      q8d: { label: "Colorful, with personality" },
+    },
+  },
+  q9: {
+    question: "If you could buy one fragrance product now, which would it be?",
+    options: {
+      q9a: { label: "An everyday perfume to wear" },
+      q9b: { label: "A bedtime diffuser or mist" },
+      q9c: { label: "A diffuser for the study or living room" },
+      q9d: { label: "A perfume for dates and going out" },
+    },
+  },
+  q10: {
+    question: "Pick a word for your current life chapter",
+    options: {
+      q10a: { label: "Moving steadily" },
+      q10b: { label: "Needing quiet" },
+      q10c: { label: "Wanting warmth" },
+      q10d: { label: "Wanting a new way to live" },
+    },
+  },
+};
+
+function localizeQuizQuestion(q: QuizQuestion, locale: Locale): QuizQuestion {
+  if (locale !== "en") return q;
+  const t = QUIZ_TEXT_EN[q.id];
+  if (!t) return q;
+  return {
+    ...q,
+    question: t.question,
+    subtitle: t.subtitle ?? q.subtitle,
+    options: q.options.map((o) => {
+      const ot = t.options[o.id];
+      if (!ot) return o;
+      return {
+        ...o,
+        label: ot.label,
+        ...(ot.description !== undefined ? { description: ot.description } : {}),
+      };
+    }),
+  };
+}
+
+export function getQuizQuestions(locale: Locale = "zh"): QuizQuestion[] {
+  return QUIZ_QUESTIONS.map((q) => localizeQuizQuestion(q, locale));
+}

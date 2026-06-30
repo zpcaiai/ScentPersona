@@ -8,14 +8,34 @@ import type {
   RecommendProductsResult,
   ScentTag,
   RecommendationRole,
+  Locale,
 } from "./types";
+
+/** Localized display label for a recommendation role (the role itself is a stable zh key). */
+const ROLE_LABELS: Record<Locale, Record<RecommendationRole, string>> = {
+  zh: {
+    本命香候选: "本命香候选",
+    安全款: "安全款",
+    惊喜尝试: "惊喜尝试",
+  },
+  en: {
+    本命香候选: "Signature pick",
+    安全款: "Safe pick",
+    惊喜尝试: "Surprise pick",
+  },
+};
+
+export function getRoleLabel(role: RecommendationRole, locale: Locale = "zh"): string {
+  return (ROLE_LABELS[locale] ?? ROLE_LABELS.zh)[role] ?? role;
+}
 
 export function recommendProducts(input: {
   personaId: PersonaId;
   tagScores: TagScores;
   limit?: number;
+  locale?: Locale;
 }): RecommendProductsResult {
-  const { personaId, tagScores, limit = 3 } = input;
+  const { personaId, tagScores, limit = 3, locale = "zh" } = input;
   const persona = getPersonaById(personaId);
 
   const scored = PRODUCTS.map((product) => {
@@ -59,7 +79,7 @@ export function recommendProducts(input: {
       productId: top.product.id,
       score: top.score,
       role: "本命香候选",
-      reason: buildReason(top.product.id, "本命香候选", personaId, tagScores),
+      reason: buildReason(top.product.id, "本命香候选", personaId, tagScores, locale),
     });
     usedIds.add(top.product.id);
   }
@@ -70,7 +90,7 @@ export function recommendProducts(input: {
       productId: safeCandidate.product.id,
       score: safeCandidate.score,
       role: "安全款",
-      reason: buildReason(safeCandidate.product.id, "安全款", personaId, tagScores),
+      reason: buildReason(safeCandidate.product.id, "安全款", personaId, tagScores, locale),
     });
     usedIds.add(safeCandidate.product.id);
   } else {
@@ -80,7 +100,7 @@ export function recommendProducts(input: {
         productId: fallback.product.id,
         score: fallback.score,
         role: "安全款",
-        reason: buildReason(fallback.product.id, "安全款", personaId, tagScores),
+        reason: buildReason(fallback.product.id, "安全款", personaId, tagScores, locale),
       });
       usedIds.add(fallback.product.id);
     }
@@ -92,7 +112,7 @@ export function recommendProducts(input: {
       productId: exploratory.product.id,
       score: exploratory.score,
       role: "惊喜尝试",
-      reason: buildReason(exploratory.product.id, "惊喜尝试", personaId, tagScores),
+      reason: buildReason(exploratory.product.id, "惊喜尝试", personaId, tagScores, locale),
     });
     usedIds.add(exploratory.product.id);
   }
@@ -104,7 +124,7 @@ export function recommendProducts(input: {
       productId: next.product.id,
       score: next.score,
       role: "惊喜尝试",
-      reason: buildReason(next.product.id, "惊喜尝试", personaId, tagScores),
+      reason: buildReason(next.product.id, "惊喜尝试", personaId, tagScores, locale),
     });
     usedIds.add(next.product.id);
   }
@@ -116,11 +136,25 @@ function buildReason(
   productId: string,
   role: RecommendationRole,
   personaId: PersonaId,
-  tagScores: TagScores
+  tagScores: TagScores,
+  locale: Locale = "zh"
 ): string {
-  const product = getProductById(productId);
-  const persona = getPersonaById(personaId);
-  if (!product) return "推荐尝试";
+  const product = getProductById(productId, locale);
+  const persona = getPersonaById(personaId, locale);
+  if (!product) return locale === "en" ? "Worth a try" : "推荐尝试";
+
+  if (locale === "en") {
+    if (role === "本命香候选") {
+      if (persona && persona.recommendedProductIds.includes(productId)) {
+        return `“${product.name}” is a signature-scent pick for “${persona.name}” and a strong match for your scent preferences. ${product.emotionalScene}`;
+      }
+      return `“${product.name}” is the closest match to your scent preferences. ${product.emotionalScene}`;
+    }
+    if (role === "安全款") {
+      return `“${product.name}” is a safe pick — gentle and easy to like. ${product.plainDescription}`;
+    }
+    return `“${product.name}”, as a surprise pick, might open up new possibilities. ${product.emotionalScene}`;
+  }
 
   if (role === "本命香候选") {
     if (persona && persona.recommendedProductIds.includes(productId)) {
@@ -139,19 +173,21 @@ function buildReason(
 export function generateResultSummary(input: {
   personaId: PersonaId;
   tagScores: TagScores;
+  locale?: Locale;
 }): {
   personaName: string;
   topTags: ScentTag[];
   avoidTags: ScentTag[];
   summary: string;
 } {
-  const persona = getPersonaById(input.personaId);
+  const locale = input.locale ?? "zh";
+  const persona = getPersonaById(input.personaId, locale);
   if (!persona) {
     return {
-      personaName: "未知",
+      personaName: locale === "en" ? "Unknown" : "未知",
       topTags: [],
       avoidTags: [],
-      summary: "无法生成报告",
+      summary: locale === "en" ? "Could not generate a report" : "无法生成报告",
     };
   }
 

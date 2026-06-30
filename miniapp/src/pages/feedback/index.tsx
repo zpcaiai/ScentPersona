@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
 import { View, Text, Textarea, Button, Radio, Checkbox, Picker } from "@tarojs/components";
 import Taro, { useRouter } from "@tarojs/taro";
-import { PRODUCTS } from "../../data/products";
-import { SITE_COPY } from "../../data/copy";
+import { getProducts } from "../../data/products";
+import { getSiteCopy } from "../../data/copy";
 import { submitFeedback, trackEvent } from "../../lib/request";
+import { useLang, pick } from "../../lib/i18n";
 import { THEME_CLASS } from "../../lib/theme";
 import "./index.scss";
 
 export default function Feedback() {
+  const { locale } = useLang();
+  const copy = getSiteCopy(locale);
+  const products = getProducts(locale);
   const router = useRouter();
   const sessionId = router.params.sessionId || "";
   const personaId = router.params.personaId || "";
@@ -48,11 +52,11 @@ export default function Feedback() {
   const handleSubmit = async () => {
     setError("");
     if (!favoriteProduct) {
-      setError("请选择最喜欢的一支");
+      setError(pick(locale, "请选择最喜欢的一支", "Please pick your favorite"));
       return;
     }
     if (!ratings.accuracy || !ratings.satisfaction || !ratings.packaging) {
-      setError("请完成推荐准确度、整体满意度和包装体验评分");
+      setError(pick(locale, "请完成推荐准确度、整体满意度和包装体验评分", "Please rate recommendation accuracy, overall satisfaction, and packaging"));
       return;
     }
 
@@ -72,7 +76,7 @@ export default function Feedback() {
       });
       setSubmitted(true);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "提交失败";
+      const msg = err instanceof Error ? err.message : pick(locale, "提交失败", "Submission failed");
       setError(msg);
     } finally {
       setLoading(false);
@@ -82,13 +86,13 @@ export default function Feedback() {
   if (submitted) {
     return (
       <View className={`feedback-success ${THEME_CLASS}`}>
-        <Text className="feedback-success-title">{SITE_COPY.feedback.thankYouTitle}</Text>
-        <Text className="feedback-success-desc">{SITE_COPY.feedback.thankYouDesc}</Text>
+        <Text className="feedback-success-title">{copy.feedback.thankYouTitle}</Text>
+        <Text className="feedback-success-desc">{copy.feedback.thankYouDesc}</Text>
         <Button
           className="btn-primary"
           onClick={() => Taro.switchTab({ url: "/pages/index/index" })}
         >
-          返回首页
+          {pick(locale, "返回首页", "Back to home")}
         </Button>
       </View>
     );
@@ -97,15 +101,15 @@ export default function Feedback() {
   return (
     <View className={`feedback ${THEME_CLASS}`}>
       <View className="feedback-header">
-        <Text className="feedback-title">{SITE_COPY.feedback.title}</Text>
-        <Text className="feedback-subtitle">{SITE_COPY.feedback.subtitle}</Text>
+        <Text className="feedback-title">{copy.feedback.title}</Text>
+        <Text className="feedback-subtitle">{copy.feedback.subtitle}</Text>
       </View>
 
       {/* Favorite */}
       <View className="card">
-        <Text className="section-title">{SITE_COPY.feedback.favoriteLabel}</Text>
+        <Text className="section-title">{copy.feedback.favoriteLabel}</Text>
         <RadioGroup
-          options={PRODUCTS.map((p) => ({ label: p.name, value: p.id }))}
+          options={products.map((p) => ({ label: p.name, value: p.id }))}
           value={favoriteProduct}
           onChange={(e) => setFavoriteProduct(e.detail.value)}
         />
@@ -113,8 +117,8 @@ export default function Feedback() {
 
       {/* Disliked */}
       <View className="card">
-        <Text className="section-title">{SITE_COPY.feedback.dislikedLabel}</Text>
-        {PRODUCTS.map((p) => (
+        <Text className="section-title">{copy.feedback.dislikedLabel}</Text>
+        {products.map((p) => (
           <View
             key={p.id}
             className={`feedback-check ${dislikedProducts.includes(p.id) ? "feedback-check-active" : ""}`}
@@ -128,11 +132,11 @@ export default function Feedback() {
 
       {/* Ratings */}
       <View className="card">
-        <Text className="section-title">{SITE_COPY.feedback.ratingLabel}</Text>
+        <Text className="section-title">{copy.feedback.ratingLabel}</Text>
         {[
-          { key: "accuracy", label: "推荐准确度" },
-          { key: "satisfaction", label: "整体满意度" },
-          { key: "packaging", label: "包装体验" },
+          { key: "accuracy", label: pick(locale, "推荐准确度", "Recommendation accuracy") },
+          { key: "satisfaction", label: pick(locale, "整体满意度", "Overall satisfaction") },
+          { key: "packaging", label: pick(locale, "包装体验", "Packaging experience") },
         ].map((item) => (
           <View key={item.key} className="feedback-rating">
             <Text className="feedback-rating-name">{item.label}</Text>
@@ -153,15 +157,15 @@ export default function Feedback() {
 
       {/* Feeling */}
       <View className="card">
-        <Text className="section-title">{SITE_COPY.feedback.feelingLabel}</Text>
+        <Text className="section-title">{copy.feedback.feelingLabel}</Text>
         <Picker
           mode="selector"
-          range={SITE_COPY.feedback.feelingOptions}
-          onChange={(e) => setFeeling(SITE_COPY.feedback.feelingOptions[Number(e.detail.value)])}
+          range={copy.feedback.feelingOptions}
+          onChange={(e) => setFeeling(copy.feedback.feelingOptions[Number(e.detail.value)])}
         >
           <View className="feedback-picker">
             <Text className={feeling ? "" : "text-muted"}>
-              {feeling || "请选择..."}
+              {feeling || pick(locale, "请选择...", "Please select...")}
             </Text>
             <Text className="feedback-picker-arrow">›</Text>
           </View>
@@ -170,26 +174,26 @@ export default function Feedback() {
 
       {/* Buy full size */}
       <View className="card">
-        <Text className="section-title">{SITE_COPY.feedback.buyFullSizeLabel}</Text>
+        <Text className="section-title">{copy.feedback.buyFullSizeLabel}</Text>
         <View className="feedback-radio-row">
           <View
             className={`feedback-radio ${buyFullSize ? "feedback-radio-active" : ""}`}
             onClick={() => setBuyFullSize(true)}
           >
-            <Text>是</Text>
+            <Text>{pick(locale, "是", "Yes")}</Text>
           </View>
           <View
             className={`feedback-radio ${!buyFullSize ? "feedback-radio-active" : ""}`}
             onClick={() => setBuyFullSize(false)}
           >
-            <Text>否</Text>
+            <Text>{pick(locale, "否", "No")}</Text>
           </View>
         </View>
         {buyFullSize && (
           <>
-            <Text className="feedback-sub-label">{SITE_COPY.feedback.fullSizeProductLabel}</Text>
+            <Text className="feedback-sub-label">{copy.feedback.fullSizeProductLabel}</Text>
             <RadioGroup
-              options={PRODUCTS.map((p) => ({ label: p.name, value: p.id }))}
+              options={products.map((p) => ({ label: p.name, value: p.id }))}
               value={fullSizeProduct}
               onChange={(e) => setFullSizeProduct(e.detail.value)}
             />
@@ -199,10 +203,10 @@ export default function Feedback() {
 
       {/* Comment */}
       <View className="card">
-        <Text className="section-title">{SITE_COPY.feedback.commentLabel}</Text>
+        <Text className="section-title">{copy.feedback.commentLabel}</Text>
         <Textarea
           className="feedback-textarea"
-          placeholder="其他想说的..."
+          placeholder={pick(locale, "其他想说的...", "Anything else you'd like to share...")}
           value={comment}
           onInput={(e) => setComment(e.detail.value)}
           maxlength={500}
@@ -221,7 +225,7 @@ export default function Feedback() {
           disabled={loading}
           onClick={handleSubmit}
         >
-          {loading ? "提交中..." : SITE_COPY.feedback.submitButton}
+          {loading ? pick(locale, "提交中...", "Submitting...") : copy.feedback.submitButton}
         </Button>
       </View>
     </View>

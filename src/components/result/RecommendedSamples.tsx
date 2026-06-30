@@ -4,7 +4,10 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import type { ProductRecommendation, RecommendationRole } from "@/lib/scoring/types";
 import { PRODUCTS, getProductById } from "@/data/products";
-import { SITE_COPY } from "@/data/copy";
+import { getSiteCopy } from "@/data/copy";
+import { getRoleLabel } from "@/lib/scoring/recommendProducts";
+import { useLang } from "@/lib/i18n/LangProvider";
+import { pick } from "@/lib/i18n/config";
 
 interface RecommendedSamplesProps {
   recommendations: ProductRecommendation[];
@@ -14,6 +17,8 @@ interface RecommendedSamplesProps {
 const FALLBACK_ROLES: RecommendationRole[] = ["本命香候选", "安全款", "惊喜尝试"];
 
 export default function RecommendedSamples({ recommendations, sessionId }: RecommendedSamplesProps) {
+  const { locale } = useLang();
+  const copy = getSiteCopy(locale);
   const initialIds = useMemo(() => recommendations.map((rec) => rec.productId), [recommendations]);
   const [selectedIds, setSelectedIds] = useState(initialIds);
 
@@ -35,13 +40,16 @@ export default function RecommendedSamples({ recommendations, sessionId }: Recom
 
   return (
     <div className="mt-6">
-      <h3 className="font-serif text-lg text-stone-800 mb-4">为你推荐的3支小样</h3>
+      <h3 className="font-serif text-lg text-stone-800 mb-4">
+        {pick(locale, "为你推荐的3支小样", "3 samples picked for you")}
+      </h3>
       <div className="grid gap-4">
         {selectedIds.map((productId, i) => {
-          const product = getProductById(productId);
+          const product = getProductById(productId, locale);
           if (!product) return null;
           const rec = recommendations.find((item) => item.productId === productId);
           const role = rec?.role || FALLBACK_ROLES[i] || "惊喜尝试";
+          const roleLabel = getRoleLabel(role, locale);
 
           return (
             <div key={`${product.id}-${i}`} className="card">
@@ -53,7 +61,7 @@ export default function RecommendedSamples({ recommendations, sessionId }: Recom
                     <h4 className="font-serif text-stone-800">{product.name}</h4>
                   </div>
                   <span className="inline-block mt-1 text-xs bg-sage-400/20 text-sage-600 px-2 py-0.5 rounded-full">
-                    {role}
+                    {roleLabel}
                   </span>
                 </div>
                 <button
@@ -61,7 +69,7 @@ export default function RecommendedSamples({ recommendations, sessionId }: Recom
                   onClick={() => replaceProduct(i)}
                   className="rounded-full border border-cream-200 px-3 py-1 text-xs text-stone-500 transition-colors hover:border-sage-400 hover:text-sage-600"
                 >
-                  换一支
+                  {pick(locale, "换一支", "Swap")}
                 </button>
               </div>
 
@@ -72,7 +80,12 @@ export default function RecommendedSamples({ recommendations, sessionId }: Recom
                 {product.plainDescription}
               </p>
               <div className="mt-3 text-xs text-sage-500 bg-sage-400/10 rounded-lg p-3">
-                {rec?.reason || `${product.name}会作为这套试香组合里的${role}，帮你确认真实上身感。`}
+                {rec?.reason ||
+                  pick(
+                    locale,
+                    `${product.name}会作为这套试香组合里的${roleLabel}，帮你确认真实上身感。`,
+                    `${product.name} is the ${roleLabel} in this sample set — it helps you confirm how it really wears on you.`
+                  )}
               </div>
 
               <div className="mt-3 flex flex-wrap gap-1">
@@ -99,13 +112,13 @@ export default function RecommendedSamples({ recommendations, sessionId }: Recom
 
       <div className="card mt-6 text-center bg-gradient-to-br from-sage-400/10 to-cream-100">
         <h3 className="font-serif text-lg text-stone-800">
-          {SITE_COPY.result.sampleCtaTitle}
+          {copy.result.sampleCtaTitle}
         </h3>
         <p className="mt-2 text-sm text-stone-600">
-          {SITE_COPY.result.sampleCtaCopy}
+          {copy.result.sampleCtaCopy}
         </p>
         <Link href={checkoutHref} className="btn-primary mt-4 inline-flex">
-          {SITE_COPY.result.sampleCtaButton}
+          {copy.result.sampleCtaButton}
         </Link>
       </div>
     </div>

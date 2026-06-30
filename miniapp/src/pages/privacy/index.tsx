@@ -1,11 +1,16 @@
 import { View, Text } from "@tarojs/components";
+import { useLang, pick } from "../../lib/i18n";
 import { THEME_CLASS } from "../../lib/theme";
 import "./index.scss";
 
 const CONTACT_EMAIL = "zpchoney@gmail.com";
-const UPDATED = "2026年6月";
 
-const SECTIONS: { title: string; paragraphs: string[] }[] = [
+interface Section {
+  title: string;
+  paragraphs: string[];
+}
+
+const SECTIONS_ZH: Section[] = [
   {
     title: "引言",
     paragraphs: [
@@ -73,14 +78,86 @@ const SECTIONS: { title: string; paragraphs: string[] }[] = [
   },
 ];
 
+const SECTIONS_EN: Section[] = [
+  {
+    title: "Introduction",
+    paragraphs: [
+      "The ScentPersona team (“we”) takes your privacy seriously. This policy explains how we collect, use, store, and protect your personal information when you use the ScentPersona WeChat / Xiaohongshu Mini Program and related services.",
+      "By using our services, you confirm that you have read and agree to this policy.",
+    ],
+  },
+  {
+    title: "Information We Collect",
+    paragraphs: [
+      "Quiz information: the answers you choose in the scent persona quiz, used to generate your persona report and fragrance recommendations.",
+      "Order and shipping information: the recipient name, phone number, shipping address, and order notes collected when you place an order.",
+      "Payment information: to complete payment, WeChat / Xiaohongshu processes the necessary payment credentials; we do not store your bank card or payment password.",
+      "Feedback: the scent trial ratings and written feedback you choose to submit.",
+      "Device and local cache: to maintain your sign-in and checkout experience, the Mini Program caches a session identifier (such as your WeChat openid), order access tokens, and your linked phone number locally.",
+    ],
+  },
+  {
+    title: "How We Use Information",
+    paragraphs: [
+      "To generate your scent persona report and personalized recommendations;",
+      "To create and fulfill orders, arrange shipping, and provide after-sales support;",
+      "To improve our products and recommendation algorithm, with your consent;",
+      "To safeguard account and transaction security and prevent fraud.",
+    ],
+  },
+  {
+    title: "Information Sharing",
+    paragraphs: [
+      "Payment services: when you pay for an order, the relevant order information is transmitted to WeChat Pay or Xiaohongshu Pay to complete the transaction.",
+      "We do not sell your personal information. We share only the information necessary when required by law, or to deliver a service you have requested.",
+    ],
+  },
+  {
+    title: "Storage and Security",
+    paragraphs: [
+      "Data is transmitted over encrypted channels and stored in databases protected by access controls.",
+      "We retain your information only for as long as necessary to fulfill the purposes above; once that period passes or you request deletion, we delete or anonymize it.",
+    ],
+  },
+  {
+    title: "Your Rights",
+    paragraphs: [
+      "You have the right to access, correct, or delete your personal information.",
+      `To delete your data, contact us within the Mini Program or email ${CONTACT_EMAIL}, and we will handle your request within a reasonable time.`,
+    ],
+  },
+  {
+    title: "Minors",
+    paragraphs: [
+      "Our services are intended for adults. If you are a minor, please use them under the guidance of a guardian and provide personal information only with your guardian's consent.",
+    ],
+  },
+  {
+    title: "Policy Updates",
+    paragraphs: [
+      "We may update this policy from time to time. Significant changes will be highlighted within the Mini Program. Continued use means you accept the updated policy.",
+    ],
+  },
+  {
+    title: "Contact Us",
+    paragraphs: [
+      `If you have any questions about this privacy policy, please contact: ${CONTACT_EMAIL}`,
+    ],
+  },
+];
+
 export default function Privacy() {
+  const { locale } = useLang();
+  const sections = locale === "en" ? SECTIONS_EN : SECTIONS_ZH;
+  const updated = pick(locale, "2026年6月", "June 2026");
+
   return (
     <View className={`privacy ${THEME_CLASS}`}>
       <View className="privacy-header">
-        <Text className="privacy-title">隐私政策</Text>
-        <Text className="privacy-updated">最近更新：{UPDATED}</Text>
+        <Text className="privacy-title">{pick(locale, "隐私政策", "Privacy Policy")}</Text>
+        <Text className="privacy-updated">{pick(locale, "最近更新：", "Last updated: ")}{updated}</Text>
       </View>
-      {SECTIONS.map((sec, i) => (
+      {sections.map((sec, i) => (
         <View key={i} className="card privacy-section">
           <Text className="privacy-section-title">{sec.title}</Text>
           {sec.paragraphs.map((p, j) => (
@@ -89,7 +166,7 @@ export default function Privacy() {
         </View>
       ))}
       <View className="privacy-footer">
-        <Text className="text-muted">ScentPersona 团队</Text>
+        <Text className="text-muted">{pick(locale, "ScentPersona 团队", "The ScentPersona Team")}</Text>
       </View>
     </View>
   );

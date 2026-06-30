@@ -10,22 +10,35 @@ import { assetUrl } from "../../lib/request";
 import { payOrder } from "../../lib/pay";
 import { getProductById } from "../../data/products";
 import { formatPrice } from "../../lib/utils";
+import { useLang, pick, type Locale } from "../../lib/i18n";
 import { THEME_CLASS } from "../../lib/theme";
 import "./index.scss";
 
 const ORDER_TOKEN_STORAGE_KEY = "orderAccessTokens";
 
-const STATUS_LABELS: Record<string, string> = {
-  pending: "待支付",
-  paid: "已支付",
-  processing: "备货中",
-  shipped: "已发货",
-  completed: "已完成",
-  cancelled: "已取消",
-  refunded: "已退款",
+const STATUS_LABELS: Record<Locale, Record<string, string>> = {
+  zh: {
+    pending: "待支付",
+    paid: "已支付",
+    processing: "备货中",
+    shipped: "已发货",
+    completed: "已完成",
+    cancelled: "已取消",
+    refunded: "已退款",
+  },
+  en: {
+    pending: "Unpaid",
+    paid: "Paid",
+    processing: "Preparing",
+    shipped: "Shipped",
+    completed: "Completed",
+    cancelled: "Cancelled",
+    refunded: "Refunded",
+  },
 };
 
 export default function OrderDetail() {
+  const { locale } = useLang();
   const router = useRouter();
   const orderId = router.params.orderId || "";
   const accessToken = router.params.accessToken || getStoredOrderAccessToken(orderId);
@@ -72,7 +85,7 @@ export default function OrderDetail() {
       const res = await fetchOrder(orderId, accessToken);
       setOrder(res);
     } catch {
-      Taro.showToast({ title: "加载失败", icon: "none" });
+      Taro.showToast({ title: pick(locale, "加载失败", "Failed to load"), icon: "none" });
     } finally {
       setLoading(false);
     }
@@ -82,11 +95,11 @@ export default function OrderDetail() {
     if (!order) return;
     setPaying(true);
     try {
-      await payOrder(order.platform, order.orderId, accessToken);
+      await payOrder(order.platform, order.orderId, accessToken, locale);
       await requestShipSubscribe();
       await loadOrder();
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "支付失败";
+      const msg = err instanceof Error ? err.message : pick(locale, "支付失败", "Payment failed");
       Taro.showToast({ title: msg, icon: "none" });
     } finally {
       setPaying(false);
@@ -101,7 +114,7 @@ export default function OrderDetail() {
       }
       await loadOrder();
     } catch {
-      Taro.showToast({ title: "刷新失败", icon: "none" });
+      Taro.showToast({ title: pick(locale, "刷新失败", "Failed to refresh"), icon: "none" });
     }
   };
 
@@ -111,9 +124,9 @@ export default function OrderDetail() {
     try {
       await cancelOrder(order.orderId, accessToken);
       await loadOrder();
-      Taro.showToast({ title: "订单已取消", icon: "success" });
+      Taro.showToast({ title: pick(locale, "订单已取消", "Order cancelled"), icon: "success" });
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "取消失败";
+      const msg = err instanceof Error ? err.message : pick(locale, "取消失败", "Cancellation failed");
       Taro.showToast({ title: msg, icon: "none" });
     } finally {
       setCancelling(false);
@@ -130,7 +143,7 @@ export default function OrderDetail() {
   if (loading) {
     return (
       <View className={`order-detail-loading ${THEME_CLASS}`}>
-        <Text>加载中...</Text>
+        <Text>{pick(locale, "加载中...", "Loading...")}</Text>
       </View>
     );
   }
@@ -138,30 +151,30 @@ export default function OrderDetail() {
   if (!order) {
     return (
       <View className={`order-detail-loading ${THEME_CLASS}`}>
-        <Text>订单不存在</Text>
+        <Text>{pick(locale, "订单不存在", "Order not found")}</Text>
       </View>
     );
   }
 
-  const products = order.productIds.map((id) => getProductById(id)).filter(Boolean);
+  const products = order.productIds.map((id) => getProductById(id, locale)).filter(Boolean);
 
   return (
     <View className={`order-detail ${THEME_CLASS}`}>
       {/* Status banner */}
       <View className={`order-detail-banner order-banner-${order.status}`}>
         <Text className="order-detail-status">
-          {STATUS_LABELS[order.status] || order.status}
+          {STATUS_LABELS[locale][order.status] || order.status}
         </Text>
         {order.paidAt && (
           <Text className="order-detail-paid-time">
-            支付时间: {new Date(order.paidAt).toLocaleString("zh-CN")}
+            {pick(locale, "支付时间", "Paid at")}: {new Date(order.paidAt).toLocaleString(pick(locale, "zh-CN", "en-US"))}
           </Text>
         )}
       </View>
 
       {/* Products */}
       <View className="card">
-        <Text className="section-title">商品</Text>
+        <Text className="section-title">{pick(locale, "商品", "Items")}</Text>
         {products.map((p) => (
           <View key={p!.id} className="order-detail-product">
             <View className="order-detail-product-left">
@@ -174,53 +187,53 @@ export default function OrderDetail() {
           </View>
         ))}
         <View className="order-detail-total">
-          <Text>合计</Text>
+          <Text>{pick(locale, "合计", "Total")}</Text>
           <Text className="order-detail-amount">¥{formatPrice(order.amount)}</Text>
         </View>
       </View>
 
       {/* Info */}
       <View className="card">
-        <Text className="section-title">订单信息</Text>
+        <Text className="section-title">{pick(locale, "订单信息", "Order details")}</Text>
         <View className="order-detail-row">
-          <Text className="order-detail-label">订单号</Text>
+          <Text className="order-detail-label">{pick(locale, "订单号", "Order number")}</Text>
           <Text className="order-detail-value">{order.orderNo}</Text>
         </View>
         <View className="order-detail-row">
-          <Text className="order-detail-label">下单时间</Text>
+          <Text className="order-detail-label">{pick(locale, "下单时间", "Order placed")}</Text>
           <Text className="order-detail-value">
-            {new Date(order.createdAt).toLocaleString("zh-CN")}
+            {new Date(order.createdAt).toLocaleString(pick(locale, "zh-CN", "en-US"))}
           </Text>
         </View>
         <View className="order-detail-row">
-          <Text className="order-detail-label">收货人</Text>
+          <Text className="order-detail-label">{pick(locale, "收货人", "Recipient")}</Text>
           <Text className="order-detail-value">{order.customerName}</Text>
         </View>
         <View className="order-detail-row">
-          <Text className="order-detail-label">手机号</Text>
+          <Text className="order-detail-label">{pick(locale, "手机号", "Phone number")}</Text>
           <Text className="order-detail-value">{order.customerPhone}</Text>
         </View>
         {order.shippingAddress && (
           <View className="order-detail-row">
-            <Text className="order-detail-label">收货地址</Text>
+            <Text className="order-detail-label">{pick(locale, "收货地址", "Shipping address")}</Text>
             <Text className="order-detail-value">{order.shippingAddress}</Text>
           </View>
         )}
         {order.trackingNumber && (
           <View className="order-detail-row">
-            <Text className="order-detail-label">物流单号</Text>
+            <Text className="order-detail-label">{pick(locale, "物流单号", "Tracking number")}</Text>
             <Text className="order-detail-value">{order.trackingNumber}</Text>
           </View>
         )}
         <View className="order-detail-row">
-          <Text className="order-detail-label">平台</Text>
+          <Text className="order-detail-label">{pick(locale, "平台", "Platform")}</Text>
           <Text className="order-detail-value">
-            {order.platform === "xhs" ? "小红书" : "微信"}
+            {order.platform === "xhs" ? pick(locale, "小红书", "Xiaohongshu") : pick(locale, "微信", "WeChat")}
           </Text>
         </View>
         {order.transactionId && (
           <View className="order-detail-row">
-            <Text className="order-detail-label">交易号</Text>
+            <Text className="order-detail-label">{pick(locale, "交易号", "Transaction ID")}</Text>
             <Text className="order-detail-value">{order.transactionId}</Text>
           </View>
         )}
@@ -234,24 +247,24 @@ export default function OrderDetail() {
             disabled={paying}
             onClick={handlePay}
           >
-            {paying ? "支付中..." : "立即支付"}
+            {paying ? pick(locale, "支付中...", "Paying...") : pick(locale, "立即支付", "Pay now")}
           </Button>
           <Button
             className="btn-secondary"
             disabled={cancelling}
             onClick={handleCancel}
           >
-            {cancelling ? "取消中..." : "取消订单"}
+            {cancelling ? pick(locale, "取消中...", "Cancelling...") : pick(locale, "取消订单", "Cancel order")}
           </Button>
         </View>
       )}
       <View className="order-detail-pay">
         <Button className="btn-secondary" onClick={handleRefresh}>
-          刷新订单
+          {pick(locale, "刷新订单", "Refresh order")}
         </Button>
         {order.status !== "pending" && order.status !== "cancelled" && order.status !== "refunded" && (
           <Button className="btn-primary" onClick={goToFeedback}>
-            填写试香反馈
+            {pick(locale, "填写试香反馈", "Share scent feedback")}
           </Button>
         )}
       </View>

@@ -7,8 +7,9 @@ import QuizIntro from "@/components/quiz/QuizIntro";
 import QuizQuestion from "@/components/quiz/QuizQuestion";
 import QuizProgress from "@/components/quiz/QuizProgress";
 import QuizNavigation from "@/components/quiz/QuizNavigation";
-import { QUIZ_QUESTIONS } from "@/data/quizQuestions";
-import { SITE_COPY } from "@/data/copy";
+import { getQuizQuestions } from "@/data/quizQuestions";
+import { getSiteCopy } from "@/data/copy";
+import { useLang } from "@/lib/i18n/LangProvider";
 import type { QuizAnswerInput } from "@/lib/scoring/types";
 import TrackEvent, { trackEvent } from "@/components/common/TrackEvent";
 
@@ -16,14 +17,17 @@ const QUIZ_DRAFT_KEY = "scentpersona:quiz-draft";
 
 export default function QuizPage() {
   const router = useRouter();
+  const { locale } = useLang();
+  const copy = getSiteCopy(locale);
+  const questions = getQuizQuestions(locale);
   const [started, setStarted] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const total = QUIZ_QUESTIONS.length;
-  const currentQuestion = QUIZ_QUESTIONS[currentIndex];
+  const total = questions.length;
+  const currentQuestion = questions[currentIndex];
   const selectedOptionId = answers[currentQuestion?.id] ?? null;
 
   useEffect(() => {
@@ -105,7 +109,7 @@ export default function QuizPage() {
       });
       router.push(`/result/${data.sessionId}`);
     } catch {
-      setError(SITE_COPY.quiz.errorText);
+      setError(copy.quiz.errorText);
       setLoading(false);
     }
   };
@@ -147,7 +151,7 @@ export default function QuizPage() {
 
       {loading && (
         <div className="mt-8 text-center text-sm text-stone-500">
-          {SITE_COPY.quiz.loadingText}
+          {copy.quiz.loadingText}
         </div>
       )}
     </PageShell>

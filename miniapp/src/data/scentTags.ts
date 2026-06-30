@@ -1,4 +1,4 @@
-import type { ScentTag } from "@/lib/scoring/types";
+import type { ScentTag, Locale } from "@/lib/scoring/types";
 
 export const SCENT_TAGS: ScentTag[] = [
   "clean",
@@ -36,6 +36,24 @@ export const SCENT_TAG_LABELS: Record<ScentTag, string> = {
   escape: "逃离",
 };
 
+export const SCENT_TAG_LABELS_EN: Record<ScentTag, string> = {
+  clean: "Clean",
+  cold: "Cool",
+  sweet: "Sweet",
+  woody: "Woody",
+  soft: "Soft",
+  presence: "Presence",
+  sleep: "Bedtime",
+  commute: "Commute",
+  date: "Date",
+  gift: "Gifting",
+  spiritual: "Meditative",
+  bright: "Bright",
+  mature: "Mature",
+  cozy: "Cozy",
+  escape: "Escape",
+};
+
 export const SCENT_TAG_DESCRIPTIONS: Record<ScentTag, string> = {
   clean: "像刚洗好的白衬衫，清爽不张扬",
   cold: "冷调、克制、有距离感",
@@ -53,3 +71,49 @@ export const SCENT_TAG_DESCRIPTIONS: Record<ScentTag, string> = {
   cozy: "温暖、舒适、有包裹感",
   escape: "逃离感、像在别处",
 };
+
+export const SCENT_TAG_DESCRIPTIONS_EN: Record<ScentTag, string> = {
+  clean: "Like a freshly washed white shirt — crisp and understated",
+  cold: "Cool, restrained, with a sense of distance",
+  sweet: "Sweet, warm, and approachable",
+  woody: "Woody, steady, and deep",
+  soft: "Skin-close, gentle, never sharp",
+  presence: "Commanding and easy to remember",
+  sleep: "Calm and relaxing, good before bed",
+  commute: "Easy for daily commutes, never out of place",
+  date: "Attractive, good for a date",
+  gift: "Widely liked, good for gifting",
+  spiritual: "Meditative, good for reading and quiet time",
+  bright: "Bright, lively, and full of energy",
+  mature: "Mature, composed, and seasoned",
+  cozy: "Warm, comforting, and enveloping",
+  escape: "A sense of escape, like being somewhere else",
+};
+
+const LABELS_BY_LOCALE: Record<Locale, Record<ScentTag, string>> = {
+  zh: SCENT_TAG_LABELS,
+  en: SCENT_TAG_LABELS_EN,
+};
+
+const DESCRIPTIONS_BY_LOCALE: Record<Locale, Record<ScentTag, string>> = {
+  zh: SCENT_TAG_DESCRIPTIONS,
+  en: SCENT_TAG_DESCRIPTIONS_EN,
+};
+
+export function getScentTagLabels(locale: Locale = "zh"): Record<ScentTag, string> {
+  return LABELS_BY_LOCALE[locale] ?? SCENT_TAG_LABELS;
+}
+
+export function getScentTagDescriptions(
+  locale: Locale = "zh"
+): Record<ScentTag, string> {
+  return DESCRIPTIONS_BY_LOCALE[locale] ?? SCENT_TAG_DESCRIPTIONS;
+}
+
+export function getScentTagLabel(tag: ScentTag, locale: Locale = "zh"): string {
+  return getScentTagLabels(locale)[tag];
+}
+
+export function getScentTagDescription(tag: ScentTag, locale: Locale = "zh"): string {
+  return getScentTagDescriptions(locale)[tag];
+}

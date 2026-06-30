@@ -1,4 +1,4 @@
-import { PERSONAS } from "@/data/personas";
+import { PERSONAS, getPersonaById } from "@/data/personas";
 import { SCENT_TAGS } from "@/data/scentTags";
 import { PRODUCTS } from "@/data/products";
 import type {
@@ -7,13 +7,15 @@ import type {
   MatchPersonaResult,
   PersonaId,
   ScentTag,
+  Locale,
 } from "./types";
 
 export function matchPersona(input: {
   tagScores: TagScores;
   personaScores: PersonaScores;
+  locale?: Locale;
 }): MatchPersonaResult {
-  const { tagScores, personaScores } = input;
+  const { tagScores, personaScores, locale = "zh" } = input;
 
   const ranked = PERSONAS.map((persona) => {
     let score = personaScores[persona.id] || 0;
@@ -48,6 +50,12 @@ export function matchPersona(input: {
     ? Math.min(1, Math.max(0, best.score) / totalScore)
     : 0.5;
 
+  const en = locale === "en";
+  const bestName = getPersonaById(best.persona.id, locale)?.name ?? best.persona.name;
+  const secondName = second
+    ? getPersonaById(second.persona.id, locale)?.name ?? second.persona.name
+    : "";
+
   const reasons: string[] = [];
 
   if (best.tagOverlap > 0) {
@@ -55,24 +63,42 @@ export function matchPersona(input: {
       .filter((t) => (tagScores[t as ScentTag] || 0) > 0)
       .slice(0, 3);
     if (topTagNames.length > 0) {
-      reasons.push(`你的气味偏好和「${best.persona.name}」的核心标签高度匹配`);
+      reasons.push(
+        en
+          ? `Your scent preferences strongly match the core traits of “${bestName}”`
+          : `你的气味偏好和「${bestName}」的核心标签高度匹配`
+      );
     }
   }
 
   if ((personaScores[best.persona.id] || 0) > 0) {
-    reasons.push("你的生活方式选择直接指向这个人格类型");
+    reasons.push(
+      en
+        ? "Your lifestyle answers point directly to this persona"
+        : "你的生活方式选择直接指向这个人格类型"
+    );
   }
 
   if (best.productCoverage > 0) {
-    reasons.push(`这个人格有 ${best.productCoverage} 支推荐产品可以匹配`);
+    reasons.push(
+      en
+        ? `This persona has ${best.productCoverage} recommended ${best.productCoverage === 1 ? "product" : "products"} to match`
+        : `这个人格有 ${best.productCoverage} 支推荐产品可以匹配`
+    );
   }
 
   if (second && best.score - second.score < 1) {
-    reasons.push(`和「${second.persona.name}」也比较接近，但综合评分略高`);
+    reasons.push(
+      en
+        ? `It's also close to “${secondName}”, but scores slightly higher overall`
+        : `和「${secondName}」也比较接近，但综合评分略高`
+    );
   }
 
   if (reasons.length === 0) {
-    reasons.push("根据你的回答综合匹配得出");
+    reasons.push(
+      en ? "Matched from the overall pattern of your answers" : "根据你的回答综合匹配得出"
+    );
   }
 
   return {

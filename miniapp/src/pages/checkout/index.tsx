@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { View, Text, Input, Button, Checkbox, Image } from "@tarojs/components";
 import Taro, { useRouter } from "@tarojs/taro";
 import { getProductById } from "../../data/products";
-import { SITE_COPY } from "../../data/copy";
+import { getSiteCopy } from "../../data/copy";
 import { formatPrice } from "../../lib/utils";
 import { createOrder, trackEvent, assetUrl } from "../../lib/request";
 import { payWechatOrder, payXhsOrder } from "../../lib/pay";
+import { useLang, pick } from "../../lib/i18n";
 import { THEME_CLASS } from "../../lib/theme";
 import "./index.scss";
 
@@ -26,6 +27,9 @@ export default function Checkout() {
   const price = parseInt(router.params.price || "2990", 10);
   const sessionId = router.params.sessionId || "";
 
+  const { locale } = useLang();
+  const copy = getSiteCopy(locale);
+
   const [name, setName] = useState("");
   const [phone, setPhone] = useState<string>(Taro.getStorageSync("userPhone") || "");
   const [address, setAddress] = useState("");
@@ -38,7 +42,7 @@ export default function Checkout() {
   const [payError, setPayError] = useState("");
   const [privacyAgreed, setPrivacyAgreed] = useState(false);
 
-  const products = productIds.map((id) => getProductById(id)).filter(Boolean);
+  const products = productIds.map((id) => getProductById(id, locale)).filter(Boolean);
 
   useEffect(() => {
     trackEvent({
@@ -50,17 +54,17 @@ export default function Checkout() {
 
   const handleSubmit = async () => {
     if (!name.trim() || !/^1\d{10}$/.test(phone.trim())) {
-      Taro.showToast({ title: "请填写正确姓名和手机号", icon: "none" });
+      Taro.showToast({ title: pick(locale, "请填写正确姓名和手机号", "Please enter a valid name and phone number"), icon: "none" });
       return;
     }
 
     if (!address.trim()) {
-      Taro.showToast({ title: "请填写收货地址", icon: "none" });
+      Taro.showToast({ title: pick(locale, "请填写收货地址", "Please enter a shipping address"), icon: "none" });
       return;
     }
 
     if (!privacyAgreed) {
-      Taro.showToast({ title: "请先同意隐私与订单处理说明", icon: "none" });
+      Taro.showToast({ title: pick(locale, "请先同意隐私与订单处理说明", "Please agree to the privacy and order terms first"), icon: "none" });
       return;
     }
 
@@ -99,7 +103,7 @@ export default function Checkout() {
         await payWechat(orderRes.orderId, orderRes.orderAccessToken);
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "下单失败";
+      const msg = err instanceof Error ? err.message : pick(locale, "下单失败", "Order failed");
       setPayError(msg);
     } finally {
       setLoading(false);
@@ -108,33 +112,33 @@ export default function Checkout() {
 
   const payWechat = async (oid: string, accessToken: string) => {
     try {
-      await payWechatOrder(oid, accessToken);
+      await payWechatOrder(oid, accessToken, locale);
       // persist phone for future autofill / order lookup
       if (/^1\d{10}$/.test(phone.trim())) Taro.setStorageSync("userPhone", phone.trim());
       await requestShipSubscribe();
       setSuccess(true);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "支付发起失败";
+      const msg = err instanceof Error ? err.message : pick(locale, "支付发起失败", "Could not start payment");
       if (msg.includes("cancel")) {
-        setPayError("支付已取消");
+        setPayError(pick(locale, "支付已取消", "Payment cancelled"));
       } else {
-        setPayError(`微信支付失败: ${msg}`);
+        setPayError(pick(locale, `微信支付失败: ${msg}`, `WeChat Pay failed: ${msg}`));
       }
     }
   };
 
   const payXhs = async (oid: string, accessToken: string) => {
     try {
-      await payXhsOrder(oid, accessToken);
+      await payXhsOrder(oid, accessToken, locale);
       if (/^1\d{10}$/.test(phone.trim())) Taro.setStorageSync("userPhone", phone.trim());
       await requestShipSubscribe();
       setSuccess(true);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "支付发起失败";
+      const msg = err instanceof Error ? err.message : pick(locale, "支付发起失败", "Could not start payment");
       if (msg.includes("cancel")) {
-        setPayError("支付已取消");
+        setPayError(pick(locale, "支付已取消", "Payment cancelled"));
       } else {
-        setPayError(`小红书支付失败: ${msg}`);
+        setPayError(pick(locale, `小红书支付失败: ${msg}`, `Xiaohongshu Pay failed: ${msg}`));
       }
     }
   };
@@ -142,7 +146,7 @@ export default function Checkout() {
   const chooseAddress = async () => {
     try {
       if (typeof (Taro as any).chooseAddress !== "function") {
-        Taro.showToast({ title: "当前平台不支持地址选择", icon: "none" });
+        Taro.showToast({ title: pick(locale, "当前平台不支持地址选择", "Address picker is not supported on this platform"), icon: "none" });
         return;
       }
 
@@ -153,29 +157,29 @@ export default function Checkout() {
         `${result.provinceName || ""}${result.cityName || ""}${result.countyName || ""}${result.detailInfo || ""}`
       );
     } catch {
-      Taro.showToast({ title: "未选择地址", icon: "none" });
+      Taro.showToast({ title: pick(locale, "未选择地址", "No address selected"), icon: "none" });
     }
   };
 
   if (success) {
     return (
       <View className={`checkout-success ${THEME_CLASS}`}>
-        <Text className="checkout-success-title">支付成功</Text>
+        <Text className="checkout-success-title">{pick(locale, "支付成功", "Payment successful")}</Text>
         <Text className="checkout-success-desc">
-          订单号: {orderNo}
+          {pick(locale, "订单号", "Order number")}: {orderNo}
         </Text>
-        <Text className="checkout-success-desc">我们将在3个工作日内发货</Text>
+        <Text className="checkout-success-desc">{pick(locale, "我们将在3个工作日内发货", "We'll ship within 3 business days")}</Text>
         <Button
           className="btn-primary"
           onClick={() => Taro.redirectTo({ url: `/pages/order-detail/index?orderId=${orderId}&accessToken=${orderAccessToken}` })}
         >
-          查看订单
+          {pick(locale, "查看订单", "View order")}
         </Button>
         <Button
           className="btn-secondary"
           onClick={() => Taro.reLaunch({ url: "/pages/index/index" })}
         >
-          返回首页
+          {pick(locale, "返回首页", "Back to home")}
         </Button>
       </View>
     );
@@ -184,12 +188,12 @@ export default function Checkout() {
   return (
     <View className={`checkout ${THEME_CLASS}`}>
       <View className="checkout-header">
-        <Text className="checkout-title">{SITE_COPY.checkout.title}</Text>
-        <Text className="checkout-subtitle">{SITE_COPY.checkout.subtitle}</Text>
+        <Text className="checkout-title">{copy.checkout.title}</Text>
+        <Text className="checkout-subtitle">{copy.checkout.subtitle}</Text>
       </View>
 
       <View className="card">
-        <Text className="section-title">产品清单</Text>
+        <Text className="section-title">{pick(locale, "产品清单", "Order summary")}</Text>
         {products.map((p) => (
           <View key={p!.id} className="checkout-product">
             <View className="checkout-product-left">
@@ -202,30 +206,30 @@ export default function Checkout() {
           </View>
         ))}
         <View className="checkout-total">
-          <Text className="checkout-total-label">合计</Text>
+          <Text className="checkout-total-label">{pick(locale, "合计", "Total")}</Text>
           <Text className="checkout-total-price">¥{formatPrice(price)}</Text>
         </View>
       </View>
 
       <View className="card">
-        <Text className="section-title">收货信息</Text>
+        <Text className="section-title">{pick(locale, "收货信息", "Shipping details")}</Text>
         <Button className="btn-secondary" onClick={chooseAddress}>
-          使用微信收货地址
+          {pick(locale, "使用微信收货地址", "Use WeChat shipping address")}
         </Button>
         <View className="checkout-field">
-          <Text className="checkout-field-label">姓名</Text>
+          <Text className="checkout-field-label">{pick(locale, "姓名", "Name")}</Text>
           <Input
             className="checkout-input"
-            placeholder="请输入收货人姓名"
+            placeholder={pick(locale, "请输入收货人姓名", "Enter recipient name")}
             value={name}
             onInput={(e) => setName(e.detail.value)}
           />
         </View>
         <View className="checkout-field">
-          <Text className="checkout-field-label">手机号</Text>
+          <Text className="checkout-field-label">{pick(locale, "手机号", "Phone number")}</Text>
           <Input
             className="checkout-input"
-            placeholder="请输入手机号"
+            placeholder={pick(locale, "请输入手机号", "Enter phone number")}
             type="number"
             maxlength={11}
             value={phone}
@@ -233,19 +237,19 @@ export default function Checkout() {
           />
         </View>
         <View className="checkout-field">
-          <Text className="checkout-field-label">收货地址</Text>
+          <Text className="checkout-field-label">{pick(locale, "收货地址", "Shipping address")}</Text>
           <Input
             className="checkout-input"
-            placeholder="请输入收货地址"
+            placeholder={pick(locale, "请输入收货地址", "Enter shipping address")}
             value={address}
             onInput={(e) => setAddress(e.detail.value)}
           />
         </View>
         <View className="checkout-field">
-          <Text className="checkout-field-label">备注</Text>
+          <Text className="checkout-field-label">{pick(locale, "备注", "Note")}</Text>
           <Input
             className="checkout-input"
-            placeholder="选填"
+            placeholder={pick(locale, "选填", "Optional")}
             value={note}
             onInput={(e) => setNote(e.detail.value)}
           />
@@ -259,7 +263,7 @@ export default function Checkout() {
             checked={privacyAgreed}
           />
           <Text className="checkout-privacy-text">
-            我已阅读并同意
+            {pick(locale, "我已阅读并同意", "I have read and agree to the ")}
             <Text
               className="checkout-privacy-link"
               onClick={(e) => {
@@ -267,9 +271,9 @@ export default function Checkout() {
                 Taro.navigateTo({ url: "/pages/privacy/index" });
               }}
             >
-              《隐私政策》
+              {pick(locale, "《隐私政策》", "Privacy Policy")}
             </Text>
-            ，并将收货信息用于订单支付、发货和售后处理
+            {pick(locale, "，并将收货信息用于订单支付、发货和售后处理", ", and consent to my shipping details being used for payment, shipping, and after-sales.")}
           </Text>
         </View>
       </View>
@@ -282,14 +286,14 @@ export default function Checkout() {
 
       {orderNo && !success && (
         <View className="checkout-order-info">
-          <Text className="checkout-order-no">订单号: {orderNo}</Text>
-          <Text className="checkout-order-tip">订单已创建，请完成支付</Text>
+          <Text className="checkout-order-no">{pick(locale, "订单号", "Order number")}: {orderNo}</Text>
+          <Text className="checkout-order-tip">{pick(locale, "订单已创建，请完成支付", "Order created — please complete payment")}</Text>
         </View>
       )}
 
       <View className="checkout-bottom">
         <View className="checkout-bottom-price">
-          <Text className="checkout-bottom-label">应付</Text>
+          <Text className="checkout-bottom-label">{pick(locale, "应付", "Amount due")}</Text>
           <Text className="checkout-bottom-amount">¥{formatPrice(price)}</Text>
         </View>
         <Button
@@ -297,7 +301,7 @@ export default function Checkout() {
           disabled={loading}
           onClick={handleSubmit}
         >
-          {loading ? "处理中..." : "下单并支付"}
+          {loading ? pick(locale, "处理中...", "Processing...") : pick(locale, "下单并支付", "Place order & pay")}
         </Button>
       </View>
     </View>

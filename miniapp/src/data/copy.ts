@@ -1,8 +1,26 @@
-export const SITE_COPY = {
+import type { Locale } from "@/lib/scoring/types";
+
+const SITE_COPY_ZH = {
   brand: {
     name: "ScentPersona",
     tagline: "测出你当下人生阶段的味道",
     promise: "先测，再闻，找到你的本命香。",
+  },
+  common: {
+    loading: "加载中...",
+    submit: "提交",
+    confirm: "确认",
+    cancel: "取消",
+    save: "保存",
+    back: "返回",
+    retry: "重试",
+    next: "下一步",
+    prev: "上一步",
+    close: "关闭",
+    copy: "复制",
+    copied: "已复制",
+    yes: "是",
+    no: "否",
   },
   landing: {
     heroTitle: "测出你当下人生阶段的味道",
@@ -98,6 +116,145 @@ export const SITE_COPY = {
     emptyState: "还没有测试数据。先完成一次测试看看。",
   },
 };
+
+export type SiteCopy = typeof SITE_COPY_ZH;
+
+const SITE_COPY_EN: SiteCopy = {
+  brand: {
+    name: "ScentPersona",
+    tagline: "Find the scent of your current life chapter",
+    promise: "Test first, then smell — and find your signature scent.",
+  },
+  common: {
+    loading: "Loading...",
+    submit: "Submit",
+    confirm: "Confirm",
+    cancel: "Cancel",
+    save: "Save",
+    back: "Back",
+    retry: "Retry",
+    next: "Next",
+    prev: "Back",
+    close: "Close",
+    copy: "Copy",
+    copied: "Copied",
+    yes: "Yes",
+    no: "No",
+  },
+  landing: {
+    heroTitle: "Find the scent of your current life chapter",
+    heroSubtitle:
+      "No need to know fragrance notes. Answer a few lifestyle questions to find your scent persona and 3 samples picked for you.",
+    heroCtaPrimary: "Start the quiz",
+    heroCtaSecondary: "See sample kits",
+    problemTitle:
+      "The hardest part of buying perfume isn't the price — it's not knowing what suits you.",
+    problemPoints: [
+      "Can't read top, heart and base notes",
+      "Afraid of a blind-buy regret",
+      "Worried it's too sweet, too heavy, too ordinary",
+      "Want to smell like yourself, not like someone else",
+    ],
+    howItWorksTitle: "Four steps to your signature scent",
+    steps: [
+      { title: "Take the quiz", desc: "10 lifestyle questions, done in 3 minutes" },
+      { title: "Read your report", desc: "Your scent persona and the notes that suit you" },
+      { title: "Try the samples", desc: "Get 3 matched samples for ¥29.9" },
+      { title: "Choose your scent", desc: "Pick your favorite after trying them" },
+    ],
+    trustTitle: "Why try before you buy?",
+    trustPoints: [
+      "Try before you buy — no blind picks",
+      "Sample cost is credited toward a full bottle",
+      "Recommended from your results, no guessing",
+    ],
+    finalCtaTitle: "Take 3 minutes to find your scent persona.",
+    finalCtaButton: "Start the quiz",
+  },
+  quiz: {
+    introTitle: "Find the scent of your current life chapter",
+    introSubtitle:
+      "No need to know fragrance notes. Answer a few lifestyle questions to find your scent persona.",
+    introCta: "Start the quiz",
+    microcopy: "Don't overthink it — pick what feels most like you lately.",
+    loadingText: "Generating your scent persona report...",
+    errorText: "We couldn't generate your result. Please try again later.",
+  },
+  result: {
+    sampleCtaTitle: "Before buying a full bottle, give it a smell.",
+    sampleCtaCopy:
+      "For ¥29.9, get 3 samples matched to you. The cost is credited toward a full bottle.",
+    sampleCtaButton: "Claim my scent samples",
+    retakeCta: "Retake the quiz",
+    shareTitle: "My scent persona",
+    shareCta: "Find your scent persona too",
+    copyButton: "Copy my result",
+    copiedText: "Copied",
+  },
+  products: {
+    title: "Sample kits",
+    subtitle:
+      "Perfume shouldn't be a blind buy. Try three first, then decide which one is your signature scent.",
+    primaryOfferTitle: "Scent Persona sample kit",
+    primaryOfferDesc:
+      "Three 1.5ml samples, recommended from your results. ¥29.9, credited toward a full bottle.",
+    primaryOfferPrice: "¥29.9",
+    secondaryOfferTitle: "Full persona sample kit",
+    secondaryOfferDesc: "Six 1.5ml samples to experience every scent persona.",
+    secondaryOfferPrice: "¥59",
+    giftOfferTitle: "Gift box sample kit",
+    giftOfferDesc: "Six samples + persona card + gift box packaging.",
+    giftOfferPrice: "¥99",
+  },
+  checkout: {
+    title: "Confirm your scent samples",
+    subtitle:
+      "This MVP isn't wired to real payment yet. A purchase intent has been created and payment can be added next.",
+    successTitle: "Your scent sample request has been recorded.",
+    successDesc:
+      "Next, this purchase intent can connect to WeChat Pay / Stripe / a manual fulfillment flow.",
+  },
+  feedback: {
+    title: "Scent trial feedback",
+    subtitle: "Your feedback makes the next recommendation more accurate.",
+    favoriteLabel: "Which one did you like most?",
+    dislikedLabel: "Which ones didn't suit you?",
+    ratingLabel: "Rate each sample you tried",
+    feelingLabel: "Which description fits how you felt?",
+    feelingOptions: [
+      "Very much like me",
+      "Sweeter than expected",
+      "Colder than expected",
+      "Didn't last long enough",
+      "A bit too strong",
+      "Better for a room than on skin",
+      "Good for gifting",
+    ],
+    buyFullSizeLabel: "Do you want to buy a full bottle?",
+    fullSizeProductLabel: "If so, which one?",
+    commentLabel: "Any other feedback",
+    submitButton: "Submit feedback",
+    thankYouTitle: "Thanks for your feedback!",
+    thankYouDesc: "Your feedback makes the next recommendation more accurate.",
+  },
+  admin: {
+    title: "Admin dashboard",
+    emptyState: "No quiz data yet. Complete a quiz to see it here.",
+  },
+};
+
+const SITE_COPY_BY_LOCALE: Record<Locale, SiteCopy> = {
+  zh: SITE_COPY_ZH,
+  en: SITE_COPY_EN,
+};
+
+/** Locale-aware site copy. Defaults to zh for back-compat. */
+export function getSiteCopy(locale: Locale = "zh"): SiteCopy {
+  return SITE_COPY_BY_LOCALE[locale] ?? SITE_COPY_ZH;
+}
+
+/** Default (zh) site copy. Prefer getSiteCopy(locale) in localized UI. */
+export const SITE_COPY = SITE_COPY_ZH;
 
 export const CONTENT_KIT = {
   xiaohongshuTitles: [

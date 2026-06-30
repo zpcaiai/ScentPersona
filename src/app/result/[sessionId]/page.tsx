@@ -12,7 +12,9 @@ import { getProductById } from "@/data/products";
 import { parseJsonArray, parseJsonRecord } from "@/lib/utils";
 import { matchPersona } from "@/lib/scoring/matchPersona";
 import { recommendProducts } from "@/lib/scoring/recommendProducts";
-import { SITE_COPY } from "@/data/copy";
+import { getSiteCopy } from "@/data/copy";
+import { getLocale } from "@/lib/i18n/server";
+import { pick } from "@/lib/i18n/config";
 import type { PersonaId, ScentTag, ProductRecommendation } from "@/lib/scoring/types";
 
 interface ResultPageProps {
@@ -20,6 +22,9 @@ interface ResultPageProps {
 }
 
 export default async function ResultPage({ params }: ResultPageProps) {
+  const locale = getLocale();
+  const copy = getSiteCopy(locale);
+
   const session = await db.quizSession.findUnique({
     where: { id: params.sessionId },
   });
@@ -29,20 +34,24 @@ export default async function ResultPage({ params }: ResultPageProps) {
       <PageShell>
         <div className="text-center py-16">
           <h1 className="text-xl font-serif text-stone-700">
-            未找到测试结果
+            {pick(locale, "未找到测试结果", "We couldn't find this result")}
           </h1>
           <p className="mt-2 text-stone-500">
-            可能链接已失效，试试重新测试。
+            {pick(
+              locale,
+              "可能链接已失效，试试重新测试。",
+              "The link may have expired. Try taking the quiz again."
+            )}
           </p>
           <Link href="/quiz" className="btn-primary mt-6 inline-flex">
-            重新测试
+            {copy.result.retakeCta}
           </Link>
         </div>
       </PageShell>
     );
   }
 
-  const persona = getPersonaById(session.personaId);
+  const persona = getPersonaById(session.personaId, locale);
   if (!persona) {
     notFound();
   }
@@ -56,22 +65,24 @@ export default async function ResultPage({ params }: ResultPageProps) {
   const matched = matchPersona({
     tagScores: tagScores as Record<ScentTag, number>,
     personaScores: personaScores as Record<PersonaId, number>,
+    locale,
   });
 
   const recommended = recommendProducts({
     personaId: session.personaId as PersonaId,
     tagScores: tagScores as Record<ScentTag, number>,
+    locale,
   });
 
   const recommendations: ProductRecommendation[] = recommendedProductIds.length > 0
     ? recommendedProductIds.map((id, i) => {
         const rec = recommended.recommendations.find((r) => r.productId === id);
-        const product = getProductById(id);
+        const product = getProductById(id, locale);
         return rec ?? {
           productId: id,
           score: 0,
           role: i === 0 ? "本命香候选" : i === 1 ? "安全款" : "惊喜尝试",
-          reason: product?.plainDescription ?? "推荐尝试",
+          reason: product?.plainDescription ?? pick(locale, "推荐尝试", "Worth a try"),
         };
       })
     : recommended.recommendations;
@@ -87,7 +98,9 @@ export default async function ResultPage({ params }: ResultPageProps) {
       <PersonaHero persona={p} confidence={matched.confidence} />
 
       <div className="card mt-4">
-        <h3 className="font-serif text-lg text-stone-800">人格描述</h3>
+        <h3 className="font-serif text-lg text-stone-800">
+          {pick(locale, "人格描述", "Persona description")}
+        </h3>
         <p className="mt-2 text-sm text-stone-600 leading-relaxed">
           {p.reportSections.identity}
         </p>
@@ -96,7 +109,9 @@ export default async function ResultPage({ params }: ResultPageProps) {
       <ScentProfileCard persona={p} />
 
       <div className="card mt-6">
-        <h3 className="font-serif text-lg text-stone-800">适合场景</h3>
+        <h3 className="font-serif text-lg text-stone-800">
+          {pick(locale, "适合场景", "Where it fits")}
+        </h3>
         <p className="mt-2 text-sm text-stone-600 leading-relaxed">
           {p.reportSections.scenes}
         </p>
@@ -114,6 +129,22 @@ export default async function ResultPage({ params }: ResultPageProps) {
 
       <RecommendedSamples recommendations={recommendations} sessionId={session.id} />
 
+      <div className="card mt-6 text-center">
+        <h3 className="font-serif text-lg text-stone-800">
+          {pick(locale, "想看真实商品比价？", "Want real product price comparisons?")}
+        </h3>
+        <p className="mt-2 text-sm text-stone-500">
+          {pick(
+            locale,
+            "根据你的气味分数，从已导入商品库中匹配多平台价格和购买链接。",
+            "Based on your scent scores, we match prices and purchase links across platforms from the catalog."
+          )}
+        </p>
+        <Link href={`/result/${session.id}/recommendations`} className="btn-primary mt-4 inline-flex">
+          {pick(locale, "查看商品库推荐", "See catalog recommendations")}
+        </Link>
+      </div>
+
       <ShareCard persona={p} />
 
       <div className="text-center py-8">
@@ -121,7 +152,7 @@ export default async function ResultPage({ params }: ResultPageProps) {
           {p.reportSections.closing}
         </p>
         <Link href="/quiz" className="btn-secondary">
-          {SITE_COPY.result.retakeCta}
+          {copy.result.retakeCta}
         </Link>
       </div>
     </PageShell>

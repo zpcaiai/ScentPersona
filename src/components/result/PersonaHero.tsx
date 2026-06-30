@@ -1,4 +1,6 @@
 import type { Persona } from "@/data/personas";
+import { getLocale } from "@/lib/i18n/server";
+import { pick } from "@/lib/i18n/config";
 
 interface PersonaHeroProps {
   persona: Persona;
@@ -6,9 +8,12 @@ interface PersonaHeroProps {
 }
 
 export default function PersonaHero({ persona, confidence }: PersonaHeroProps) {
+  const locale = getLocale();
   return (
     <div className="text-center py-8">
-      <div className="text-sm text-sage-500 mb-2">你的气味人格是</div>
+      <div className="text-sm text-sage-500 mb-2">
+        {pick(locale, "你的气味人格是", "Your scent persona is")}
+      </div>
       <h1 className="text-3xl font-serif text-stone-800">{persona.name}</h1>
       <p className="mt-2 text-stone-600">{persona.title}</p>
       <div className="mt-4 flex flex-wrap justify-center gap-2">
@@ -22,7 +27,7 @@ export default function PersonaHero({ persona, confidence }: PersonaHeroProps) {
         ))}
       </div>
       <div className="mt-3 text-xs text-stone-400">
-        匹配度 {Math.round(confidence * 100)}%
+        {pick(locale, "匹配度", "Match")} {Math.round(confidence * 100)}%
       </div>
     </div>
   );

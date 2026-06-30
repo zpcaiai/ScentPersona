@@ -1,10 +1,14 @@
 import { Component, PropsWithChildren } from "react";
+import { getLocale, syncTabBar } from "./lib/i18n";
 import "./app.scss";
 
 class App extends Component<PropsWithChildren> {
   componentDidMount() {}
 
-  componentDidShow() {}
+  componentDidShow() {
+    // Reflect the saved language choice on the (native) tab bar.
+    syncTabBar(getLocale());
+  }
 
   componentDidHide() {}
 

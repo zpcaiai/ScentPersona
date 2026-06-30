@@ -1,22 +1,26 @@
 import { useEffect, useState } from "react";
 import { View, Text, Button, Progress } from "@tarojs/components";
 import Taro from "@tarojs/taro";
-import { QUIZ_QUESTIONS } from "../../data/quizQuestions";
-import { SITE_COPY } from "../../data/copy";
+import { getQuizQuestions } from "../../data/quizQuestions";
+import { getSiteCopy } from "../../data/copy";
 import { scoreQuizAnswers, matchPersona, recommendProducts } from "../../lib/scoring";
 import { submitQuiz, trackEvent } from "../../lib/request";
 import type { QuizAnswerInput } from "../../lib/scoring/types";
+import { useLang, pick } from "../../lib/i18n";
 import { THEME_CLASS, IS_XHS } from "../../lib/theme";
 import "./index.scss";
 
 export default function Quiz() {
+  const { locale } = useLang();
+  const copy = getSiteCopy(locale);
+  const questions = getQuizQuestions(locale);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswerInput[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
 
-  const total = QUIZ_QUESTIONS.length;
-  const question = QUIZ_QUESTIONS[currentIndex];
+  const total = questions.length;
+  const question = questions[currentIndex];
 
   useEffect(() => {
     trackEvent({ eventName: "quiz_start", path: "/pages/quiz/index" });
@@ -42,10 +46,12 @@ export default function Quiz() {
       const personaResult = matchPersona({
         tagScores: scoreResult.tagScores,
         personaScores: scoreResult.personaScores,
+        locale,
       });
       const productResult = recommendProducts({
         personaId: personaResult.personaId,
         tagScores: scoreResult.tagScores,
+        locale,
       });
 
       let sessionId = "";
@@ -91,7 +97,7 @@ export default function Quiz() {
   if (loading) {
     return (
       <View className={`quiz-loading ${THEME_CLASS}`}>
-        <Text className="quiz-loading-text">{SITE_COPY.quiz.loadingText}</Text>
+        <Text className="quiz-loading-text">{copy.quiz.loadingText}</Text>
       </View>
     );
   }
@@ -132,7 +138,7 @@ export default function Quiz() {
       <View className="quiz-actions">
         {currentIndex > 0 && (
           <Button className="btn-secondary quiz-prev" onClick={handlePrev}>
-            上一题
+            {pick(locale, "上一题", "Previous")}
           </Button>
         )}
         <Button
@@ -140,13 +146,13 @@ export default function Quiz() {
           disabled={!selectedOption}
           onClick={handleNext}
         >
-          {currentIndex < total - 1 ? "下一题" : "查看结果"}
+          {currentIndex < total - 1 ? pick(locale, "下一题", "Next") : pick(locale, "查看结果", "See results")}
         </Button>
       </View>
 
       {error && (
         <View className="quiz-error">
-          <Text>{SITE_COPY.quiz.errorText}</Text>
+          <Text>{copy.quiz.errorText}</Text>
         </View>
       )}
     </View>

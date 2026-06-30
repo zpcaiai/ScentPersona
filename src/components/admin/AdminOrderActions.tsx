@@ -1,16 +1,8 @@
 "use client";
 
 import { useState } from "react";
-
-const ORDER_STATUS_OPTIONS = [
-  { value: "pending", label: "待支付" },
-  { value: "paid", label: "已支付" },
-  { value: "processing", label: "备货中" },
-  { value: "shipped", label: "已发货" },
-  { value: "completed", label: "已完成" },
-  { value: "cancelled", label: "已取消" },
-  { value: "refunded", label: "已退款" },
-];
+import { useLang } from "@/lib/i18n/LangProvider";
+import { pick } from "@/lib/i18n/config";
 
 export default function AdminOrderActions({
   orderId,
@@ -21,6 +13,17 @@ export default function AdminOrderActions({
   initialStatus: string;
   initialTrackingNumber: string;
 }) {
+  const { locale } = useLang();
+  const statusOptions = [
+    { value: "pending", label: pick(locale, "待支付", "Pending payment") },
+    { value: "paid", label: pick(locale, "已支付", "Paid") },
+    { value: "processing", label: pick(locale, "备货中", "Preparing") },
+    { value: "shipped", label: pick(locale, "已发货", "Shipped") },
+    { value: "completed", label: pick(locale, "已完成", "Completed") },
+    { value: "cancelled", label: pick(locale, "已取消", "Cancelled") },
+    { value: "refunded", label: pick(locale, "已退款", "Refunded") },
+  ];
+
   const [status, setStatus] = useState(initialStatus);
   const [trackingNumber, setTrackingNumber] = useState(initialTrackingNumber);
   const [saving, setSaving] = useState(false);
@@ -41,12 +44,12 @@ export default function AdminOrderActions({
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "保存失败");
+        throw new Error(data.error || pick(locale, "保存失败", "Failed to save"));
       }
 
-      setMessage("已保存");
+      setMessage(pick(locale, "已保存", "Saved"));
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : "保存失败");
+      setMessage(err instanceof Error ? err.message : pick(locale, "保存失败", "Failed to save"));
     } finally {
       setSaving(false);
     }
@@ -66,13 +69,13 @@ export default function AdminOrderActions({
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "退款失败");
+        throw new Error(data.error || pick(locale, "退款失败", "Refund failed"));
       }
 
       setStatus("refunded");
-      setMessage("退款已处理");
+      setMessage(pick(locale, "退款已处理", "Refund processed"));
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : "退款失败");
+      setMessage(err instanceof Error ? err.message : pick(locale, "退款失败", "Refund failed"));
     } finally {
       setRefunding(false);
     }
@@ -85,7 +88,7 @@ export default function AdminOrderActions({
         onChange={(e) => setStatus(e.target.value)}
         className="rounded-lg border border-cream-200 bg-white px-3 py-2 text-xs text-stone-700"
       >
-        {ORDER_STATUS_OPTIONS.map((option) => (
+        {statusOptions.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
           </option>
@@ -94,7 +97,7 @@ export default function AdminOrderActions({
       <input
         value={trackingNumber}
         onChange={(e) => setTrackingNumber(e.target.value)}
-        placeholder="物流单号"
+        placeholder={pick(locale, "物流单号", "Tracking number")}
         className="rounded-lg border border-cream-200 bg-white px-3 py-2 text-xs text-stone-700"
       />
       <button
@@ -103,7 +106,7 @@ export default function AdminOrderActions({
         disabled={saving}
         className="rounded-lg bg-sage-600 px-3 py-2 text-xs font-medium text-cream-50 disabled:opacity-50"
       >
-        {saving ? "保存中..." : "保存订单状态"}
+        {saving ? pick(locale, "保存中...", "Saving...") : pick(locale, "保存订单状态", "Save order status")}
       </button>
       <button
         type="button"
@@ -111,7 +114,7 @@ export default function AdminOrderActions({
         disabled={refunding || status === "pending" || status === "cancelled" || status === "refunded"}
         className="rounded-lg border border-clay-400 px-3 py-2 text-xs font-medium text-clay-600 disabled:opacity-50"
       >
-        {refunding ? "退款中..." : "发起退款"}
+        {refunding ? pick(locale, "退款中...", "Refunding...") : pick(locale, "发起退款", "Issue refund")}
       </button>
       {message && <div className="text-xs text-stone-500">{message}</div>}
     </div>

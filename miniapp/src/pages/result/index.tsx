@@ -3,11 +3,13 @@ import { View, Text, Button, ScrollView, Image } from "@tarojs/components";
 import Taro, { useShareAppMessage, useShareTimeline } from "@tarojs/taro";
 import { getPersonaById } from "../../data/personas";
 import { getProductById } from "../../data/products";
-import { SCENT_TAG_LABELS } from "../../data/scentTags";
-import { SITE_COPY } from "../../data/copy";
+import { getScentTagLabels } from "../../data/scentTags";
+import { getSiteCopy } from "../../data/copy";
 import { generateResultSummary } from "../../lib/scoring";
+import { getRoleLabel } from "../../lib/scoring/recommendProducts";
 import { trackEvent, assetUrl } from "../../lib/request";
 import type { PersonaId, TagScores, ProductRecommendation } from "../../lib/scoring/types";
+import { useLang, pick } from "../../lib/i18n";
 import { THEME_CLASS } from "../../lib/theme";
 import "./index.scss";
 
@@ -22,6 +24,9 @@ interface QuizResultData {
 }
 
 export default function Result() {
+  const { locale } = useLang();
+  const copy = getSiteCopy(locale);
+  const tagLabels = getScentTagLabels(locale);
   const [result, setResult] = useState<QuizResultData | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -40,23 +45,28 @@ export default function Result() {
     }
   }, []);
 
-  const sharedPersona = result ? getPersonaById(result.personaId) : null;
+  const sharedPersona = result ? getPersonaById(result.personaId, locale) : null;
   useShareAppMessage(() => ({
-    title: sharedPersona ? `我的气味人格是「${sharedPersona.name}」，你的呢？` : "测测你的气味人格 | ScentPersona",
+    title: sharedPersona
+      ? pick(locale, `我的气味人格是「${sharedPersona.name}」，你的呢？`, `My scent persona is “${sharedPersona.name}” — what's yours?`)
+      : pick(locale, "测测你的气味人格 | ScentPersona", "Find your scent persona | ScentPersona"),
     path: "/pages/index/index",
   }));
   useShareTimeline(() => ({
-    title: sharedPersona ? `我的气味人格是「${sharedPersona.name}」` : "测测你的气味人格",
+    title: sharedPersona
+      ? pick(locale, `我的气味人格是「${sharedPersona.name}」`, `My scent persona is “${sharedPersona.name}”`)
+      : pick(locale, "测测你的气味人格", "Find your scent persona"),
   }));
 
   if (!result) return null;
 
-  const persona = getPersonaById(result.personaId);
+  const persona = getPersonaById(result.personaId, locale);
   if (!persona) return null;
 
   const summary = generateResultSummary({
     personaId: result.personaId,
     tagScores: result.tagScores,
+    locale,
   });
 
   const goToCheckout = () => {
@@ -80,7 +90,7 @@ export default function Result() {
   };
 
   const handleCopy = () => {
-    const text = `${persona.shareLine}\n\n${SITE_COPY.brand.name} · ${SITE_COPY.brand.tagline}`;
+    const text = `${persona.shareLine}\n\n${copy.brand.name} · ${copy.brand.tagline}`;
     Taro.setClipboardData({ data: text });
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -94,46 +104,46 @@ export default function Result() {
     <View className={`result ${THEME_CLASS}`}>
       {/* Persona Hero */}
       <View className="result-hero">
-        <Text className="result-hero-label">你的气味人格</Text>
+        <Text className="result-hero-label">{pick(locale, "你的气味人格", "Your scent persona")}</Text>
         <Text className="result-hero-name">{persona.name}</Text>
         <Text className="result-hero-title">{persona.title}</Text>
         <View className="result-hero-confidence">
           <Text className="result-hero-confidence-text">
-            匹配度 {Math.round(result.confidence * 100)}%
+            {pick(locale, "匹配度", "Match")} {Math.round(result.confidence * 100)}%
           </Text>
         </View>
       </View>
 
       {/* Report */}
       <View className="card">
-        <Text className="section-title">人格报告</Text>
+        <Text className="section-title">{pick(locale, "人格报告", "Persona report")}</Text>
         <Text className="result-report-text">{persona.reportSections.identity}</Text>
-        <Text className="result-report-subtitle">香调方向</Text>
+        <Text className="result-report-subtitle">{pick(locale, "香调方向", "Scent direction")}</Text>
         <Text className="result-report-text">{persona.reportSections.scentDirection}</Text>
-        <Text className="result-report-subtitle">不太适合你的</Text>
+        <Text className="result-report-subtitle">{pick(locale, "不太适合你的", "Less suited to you")}</Text>
         <Text className="result-report-text">{persona.reportSections.avoid}</Text>
-        <Text className="result-report-subtitle">理想场景</Text>
+        <Text className="result-report-subtitle">{pick(locale, "理想场景", "Ideal moments")}</Text>
         <Text className="result-report-text">{persona.reportSections.scenes}</Text>
         <Text className="result-report-closing">{persona.reportSections.closing}</Text>
       </View>
 
       {/* Tags */}
       <View className="card">
-        <Text className="section-title">你的气味标签</Text>
+        <Text className="section-title">{pick(locale, "你的气味标签", "Your scent tags")}</Text>
         <View className="result-tags">
           {summary.topTags.map((tag) => (
             <View key={tag} className="tag tag-sage">
-              <Text>{SCENT_TAG_LABELS[tag]}</Text>
+              <Text>{tagLabels[tag]}</Text>
             </View>
           ))}
         </View>
         {summary.avoidTags.length > 0 && (
           <>
-            <Text className="result-avoid-label">尽量避开</Text>
+            <Text className="result-avoid-label">{pick(locale, "尽量避开", "Best to avoid")}</Text>
             <View className="result-tags">
               {summary.avoidTags.map((tag) => (
                 <View key={tag} className="tag tag-clay">
-                  <Text>{SCENT_TAG_LABELS[tag]}</Text>
+                  <Text>{tagLabels[tag]}</Text>
                 </View>
               ))}
             </View>
@@ -143,7 +153,7 @@ export default function Result() {
 
       {/* Match reasons */}
       <View className="card">
-        <Text className="section-title">为什么是这个人格</Text>
+        <Text className="section-title">{pick(locale, "为什么是这个人格", "Why this persona")}</Text>
         {result.reasons.map((reason, i) => (
           <View key={i} className="result-reason">
             <Text className="text-sage">· </Text>
@@ -154,9 +164,9 @@ export default function Result() {
 
       {/* Recommendations */}
       <View className="card">
-        <Text className="section-title">为你推荐的小样</Text>
+        <Text className="section-title">{pick(locale, "为你推荐的小样", "Samples picked for you")}</Text>
         {result.recommendations.map((rec, i) => {
-          const product = getProductById(rec.productId);
+          const product = getProductById(rec.productId, locale);
           if (!product) return null;
           return (
             <View
@@ -166,7 +176,7 @@ export default function Result() {
             >
               <Image className="result-rec-img" src={assetUrl(product.image)} mode="aspectFill" />
               <View className="result-rec-info">
-                <Text className="result-rec-role">{rec.role}</Text>
+                <Text className="result-rec-role">{getRoleLabel(rec.role, locale)}</Text>
                 <Text className="result-rec-name">{product.name}</Text>
                 <Text className="result-rec-reason">{rec.reason}</Text>
               </View>
@@ -178,34 +188,34 @@ export default function Result() {
 
       {/* Sample CTA */}
       <View className="card result-cta">
-        <Text className="result-cta-title">{SITE_COPY.result.sampleCtaTitle}</Text>
-        <Text className="result-cta-copy">{SITE_COPY.result.sampleCtaCopy}</Text>
+        <Text className="result-cta-title">{copy.result.sampleCtaTitle}</Text>
+        <Text className="result-cta-copy">{copy.result.sampleCtaCopy}</Text>
         <Button className="btn-primary" onClick={goToCheckout}>
-          {SITE_COPY.result.sampleCtaButton}
+          {copy.result.sampleCtaButton}
         </Button>
       </View>
 
       {/* Actions */}
       <View className="result-actions">
         <Button className="btn-secondary" onClick={handleCopy}>
-          {copied ? SITE_COPY.result.copiedText : SITE_COPY.result.copyButton}
+          {copied ? copy.result.copiedText : copy.result.copyButton}
         </Button>
         <Button className="btn-secondary" onClick={retake}>
-          {SITE_COPY.result.retakeCta}
+          {copy.result.retakeCta}
         </Button>
       </View>
 
       <View className="result-actions">
         <Button className="btn-secondary" onClick={goToProducts}>
-          查看全部产品
+          {pick(locale, "查看全部产品", "Browse all products")}
         </Button>
         <Button className="btn-secondary" onClick={goToFeedback}>
-          填写试香反馈
+          {pick(locale, "填写试香反馈", "Share scent feedback")}
         </Button>
       </View>
 
       <Button className="btn-primary result-share" openType="share" onClick={handleShare}>
-        分享给朋友
+        {pick(locale, "分享给朋友", "Share with friends")}
       </Button>
     </View>
   );

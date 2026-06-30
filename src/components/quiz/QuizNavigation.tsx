@@ -1,5 +1,8 @@
 "use client";
 
+import { useLang } from "@/lib/i18n/LangProvider";
+import { pick } from "@/lib/i18n/config";
+
 interface QuizNavigationProps {
   onBack: () => void;
   onNext: () => void;
@@ -19,6 +22,7 @@ export default function QuizNavigation({
   isLast,
   loading,
 }: QuizNavigationProps) {
+  const { locale } = useLang();
   return (
     <div className="mt-8 flex items-center justify-between">
       <button
@@ -26,7 +30,7 @@ export default function QuizNavigation({
         disabled={!canGoBack}
         className="text-sm text-stone-500 hover:text-sage-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
       >
-        ← 上一题
+        {pick(locale, "← 上一题", "← Previous")}
       </button>
 
       {isLast ? (
@@ -35,7 +39,9 @@ export default function QuizNavigation({
           disabled={!canGoNext || loading}
           className="btn-primary"
         >
-          {loading ? "生成中..." : "查看结果 →"}
+          {loading
+            ? pick(locale, "生成中...", "Generating...")
+            : pick(locale, "查看结果 →", "See results →")}
         </button>
       ) : (
         <button
@@ -43,7 +49,7 @@ export default function QuizNavigation({
           disabled={!canGoNext}
           className="btn-primary"
         >
-          下一题 →
+          {pick(locale, "下一题 →", "Next →")}
         </button>
       )}
     </div>

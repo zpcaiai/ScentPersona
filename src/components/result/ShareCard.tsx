@@ -1,8 +1,10 @@
 "use client";
 
 import type { Persona } from "@/data/personas";
-import { SCENT_TAG_LABELS } from "@/data/scentTags";
-import { SITE_COPY } from "@/data/copy";
+import { getScentTagLabels } from "@/data/scentTags";
+import { getSiteCopy } from "@/data/copy";
+import { useLang } from "@/lib/i18n/LangProvider";
+import { pick, type Locale } from "@/lib/i18n/config";
 import CopyButton from "@/components/common/CopyButton";
 import type { ScentTag } from "@/lib/scoring/types";
 
@@ -10,21 +12,29 @@ interface ShareCardProps {
   persona: Persona;
 }
 
-function buildShareText(persona: Persona): string {
-  const keywords = persona.keywords.slice(0, 3).join("、");
+function buildShareText(persona: Persona, locale: Locale): string {
+  const labels = getScentTagLabels(locale);
+  const sep = pick(locale, "、", ", ");
+  const keywords = persona.keywords.slice(0, 3).join(sep);
   const tags = persona.primaryTags
-    .map((t: ScentTag) => SCENT_TAG_LABELS[t])
-    .join("、");
-  return `我测出来是【${persona.name}】。\n关键词：${keywords}。\n适合我的味道：${tags}。\n先测，再闻，找到你的本命香。`;
+    .map((t: ScentTag) => labels[t])
+    .join(sep);
+  return pick(
+    locale,
+    `我测出来是【${persona.name}】。\n关键词：${keywords}。\n适合我的味道：${tags}。\n先测，再闻，找到你的本命香。`,
+    `My result is "${persona.name}".\nKeywords: ${keywords}.\nScents that suit me: ${tags}.\nTest first, then smell — find your signature scent.`
+  );
 }
 
 export default function ShareCard({ persona }: ShareCardProps) {
-  const shareText = buildShareText(persona);
+  const { locale } = useLang();
+  const copy = getSiteCopy(locale);
+  const shareText = buildShareText(persona, locale);
 
   return (
     <div className="card mt-6">
       <div className="rounded-xl bg-gradient-to-br from-cream-100 to-sage-400/10 p-6 text-center">
-        <div className="text-sm text-sage-500">{SITE_COPY.result.shareTitle}</div>
+        <div className="text-sm text-sage-500">{copy.result.shareTitle}</div>
         <h3 className="mt-2 text-2xl font-serif text-stone-800">
           {persona.name}
         </h3>
@@ -45,11 +55,11 @@ export default function ShareCard({ persona }: ShareCardProps) {
 
       <div className="mt-4 flex items-center justify-between">
         <span className="text-sm text-stone-500">
-          {SITE_COPY.result.shareCta}
+          {copy.result.shareCta}
         </span>
         <CopyButton
           text={shareText}
-          label={SITE_COPY.result.copyButton}
+          label={copy.result.copyButton}
         />
       </div>
     </div>

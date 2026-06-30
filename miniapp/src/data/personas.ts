@@ -1,4 +1,4 @@
-import type { PersonaId, ScentTag } from "@/lib/scoring/types";
+import type { PersonaId, ScentTag, Locale } from "@/lib/scoring/types";
 
 export interface Persona {
   id: PersonaId;
@@ -184,6 +184,189 @@ export const PERSONAS: Persona[] = [
   },
 ];
 
-export function getPersonaById(id: string): Persona | undefined {
-  return PERSONAS.find((p) => p.id === id);
+type PersonaText = Pick<
+  Persona,
+  "name" | "title" | "keywords" | "description" | "idealScenes" | "shareLine" | "reportSections"
+>;
+
+const PERSONA_TEXT_EN: Record<PersonaId, PersonaText> = {
+  "white-shirt-morning": {
+    name: "White Shirt Morning",
+    title: "Clean, crisp, no need to be remembered",
+    keywords: ["Clean", "Crisp", "Everyday", "Understated"],
+    description:
+      "You like things clean and uncomplicated. No need for much decoration — simple is enough. Your scent should be the kind that smells good without stealing the show.",
+    idealScenes: ["Commute", "Everyday", "First meetings", "Summer"],
+    shareLine:
+      "I'm White Shirt Morning. Clean and understated — you only notice how good it is up close.",
+    reportSections: {
+      identity:
+        "You're someone who likes 'just right.' Not too much, not too strong — clean is enough. Your scent persona is a white shirt in the morning: simple, crisp, and easy to be around.",
+      scentDirection:
+        "You suit clean, skin-close, soapy scents. White tea, musk, and bergamot are your direction. Avoid anything too sweet or too heavy.",
+      avoid:
+        "Sweet fruity scents or heavy orientals may not fit where you are right now. Not that they smell bad — they just aren't 'you.'",
+      scenes:
+        "Daily commutes, first dates, days you'd rather not stand out. Your scent is for you to smell, not for others.",
+      closing: "You don't need a scent to prove anything. Clean is your presence.",
+    },
+  },
+  "rain-study": {
+    name: "Rainy Study",
+    title: "Quiet, restrained, a story up close",
+    keywords: ["Quiet", "Restrained", "Woody", "Deep"],
+    description:
+      "You enjoy solitude and quiet spaces. No need for a crowd — a book and a cup of tea is enough. Your scent should be woody, like a study after the rain.",
+    idealScenes: ["Reading", "Solitude", "Work", "Rainy days"],
+    shareLine: "I'm Rainy Study. Quiet and restrained — the story only opens up close.",
+    reportSections: {
+      identity:
+        "You're someone who enjoys being alone. You don't need much socializing — you're most at ease on your own. Your scent persona is a study after the rain: quiet, deep, and best appreciated up close.",
+      scentDirection:
+        "You suit woody, papery, slightly cool scents. Cedar, sandalwood, and after-rain air are your direction. Avoid anything too sweet or too bright.",
+      avoid:
+        "Sweet fruity or overly lively floral scents may not fit you right now. You like scents with a story, not scents that simply please.",
+      scenes:
+        "Reading, solitude, work, rainy days. Your scent is the background note of a quiet room — it never steals focus, but the room feels empty without it.",
+      closing: "You don't need to be understood by many. The ones who get you can simply come closer.",
+    },
+  },
+  "warm-sweater": {
+    name: "Warm Sweater",
+    title: "Gentle, enveloping, made for bedtime",
+    keywords: ["Warm", "Soft", "Bedtime", "Cozy"],
+    description:
+      "You value comfort and a sense of safety. You like feeling wrapped up, and a tiring day needs a gentle ending. Your scent should be warm and soft.",
+    idealScenes: ["Bedtime", "At home", "Winter", "Unwinding"],
+    shareLine:
+      "I'm Warm Sweater. Gentle and enveloping — a closing ritual for a tiring day.",
+    reportSections: {
+      identity:
+        "You're someone who values comfort. Home matters to you, and the end of a day calls for a gentle ritual. Your scent persona is a warm lamp and a sweater in winter: warm, soft, and reassuring.",
+      scentDirection:
+        "You suit warm, skin-close, enveloping scents. Amber, vanilla, sandalwood, and musk are your direction. Avoid anything too cold or too sharp.",
+      avoid:
+        "Icy citrus or commanding orientals may not fit you right now. You need to feel wrapped up, not put on display.",
+      scenes:
+        "Bedtime, at home, winter, the end of a tiring day. Your scent is a quiet 'well done' to your room and to yourself.",
+      closing: "You deserve a gentle ending. Let the room settle first.",
+    },
+  },
+  "midnight-cabin": {
+    name: "Midnight Cabin",
+    title: "Deep, story-worn, not for everyone",
+    keywords: ["Deep", "Woody", "Mature", "Story-worn"],
+    description:
+      "You carry a composure beyond your years. You like things with depth and don't chase mainstream taste. Your scent should be deep, woody, and story-worn.",
+    idealScenes: ["Night", "Solitude", "Late autumn", "Winter"],
+    shareLine: "I'm Midnight Cabin. Deep and story-worn — not for everyone.",
+    reportSections: {
+      identity:
+        "You're someone with a story. You don't need everyone to like you — those who get it, get it. Your scent persona is a cabin at midnight: deep, seasoned, and pleasing no one for its own sake.",
+      scentDirection:
+        "You suit deep woods, smoke, and leather. Pine, cedar, sandalwood, and vetiver are your direction. Avoid anything too sweet or too fresh.",
+      avoid:
+        "Sweet fruity or fresh floral scents may not fit you right now. You want depth, not approval.",
+      scenes:
+        "Night, solitude, late autumn and winter. Your scent is the background note of a late-night drink alone — no company needed, just atmosphere.",
+      closing: "Not everyone can read you. But when someone does, that's enough.",
+    },
+  },
+  "orchard-sunshine": {
+    name: "Orchard Sunshine",
+    title: "Bright, lively, mood-lifting",
+    keywords: ["Bright", "Sweet", "Lively", "Approachable"],
+    description:
+      "You're someone people feel happy around. You love sunshine, liveliness, and sweet things. Your scent should be bright and approachable.",
+    idealScenes: ["Dates", "Parties", "Spring & summer", "Good-mood days"],
+    shareLine: "I'm Orchard Sunshine. Bright and lively — people feel good just being near.",
+    reportSections: {
+      identity:
+        "You carry your own energy. Being near you feels good, like walking into a sunlit orchard. Your scent persona is bright, sweet, and mood-lifting.",
+      scentDirection:
+        "You suit bright fruity and lightly sweet floral scents. Citrus, peach, neroli, and jasmine are your direction. Avoid anything too cold or too deep.",
+      avoid:
+        "Deep woods or cold orientals may not fit you right now. You want sunshine, not midnight.",
+      scenes:
+        "Dates, parties, spring and summer, good-mood days. Your scent is a reason for people to come closer.",
+      closing: "You are the sunshine. The scent just lets more people catch it.",
+    },
+  },
+  "cool-black": {
+    name: "Cool in Black",
+    title: "Cool, restrained, a little distant",
+    keywords: ["Cool", "Restrained", "Distant", "Commanding"],
+    description:
+      "Your first impression is cool and a little distant. But up close you're not cold at all — you just don't warm up easily. Your scent should be cool and restrained.",
+    idealScenes: ["Commute", "Formal occasions", "Night", "Dates"],
+    shareLine:
+      "I'm Cool in Black. Cool, restrained, a little distant — but not cold once you're near.",
+    reportSections: {
+      identity:
+        "You're someone who keeps a certain distance — not from coldness, but because you don't warm up easily. Your scent persona is cool in black: restrained, commanding, and only warm once you're close.",
+      scentDirection:
+        "You suit cool, clean, present scents. White tea, cedar, and iris are your direction. Avoid anything too sweet or too warm.",
+      avoid:
+        "Sweet fruity or warm gourmand scents may not fit you right now. You want allure within distance, not approval.",
+      scenes:
+        "Commutes, formal occasions, night, dates. Your scent is the smell of a black coat — cool, but inviting.",
+      closing: "Your cool isn't rejection — it's a filter. The ones who get you will come closer on their own.",
+    },
+  },
+  "olive-rest": {
+    name: "Olive Hill Rest",
+    title: "Quiet, meditative, made for solitude",
+    keywords: ["Quiet", "Meditative", "Mindful", "Bedtime"],
+    description:
+      "You need quiet space to recharge. Meditation, reading, and solitude are how you refill. Your scent should feel meditative, like wind on a hillside.",
+    idealScenes: ["Meditation", "Reading", "Bedtime", "Solitude"],
+    shareLine: "I'm Olive Hill Rest. Quiet and meditative — finding myself in solitude.",
+    reportSections: {
+      identity:
+        "You're someone who recharges in quiet. Liveliness is fine, but solitude is where you refill. Your scent persona is the wind over an olive hill: quiet, meditative, and grounding.",
+      scentDirection:
+        "You suit meditative scents. Frankincense, myrrh, olive leaf, and sandalwood are your direction. Avoid anything too sweet or too attention-grabbing.",
+      avoid:
+        "Bright fruity or commanding oriental scents may not fit you right now. You need to return to quiet, not to be noticed.",
+      scenes:
+        "Meditation, reading, bedtime, solitude. Your scent is the switch that quiets the world.",
+      closing: "In the quiet, you find yourself. The scent just walks you back to that quiet place.",
+    },
+  },
+  "city-escape": {
+    name: "City Escape",
+    title: "Wanting out, wanting air, wanting elsewhere",
+    keywords: ["Escape", "Freedom", "Nature", "Undefined"],
+    description:
+      "You often want to leave the city for somewhere with no ceiling. No plan needed — you just want to breathe. Your scent should feel like an escape, like being elsewhere.",
+    idealScenes: ["Weekends", "Travel", "Outdoors", "Days you need to breathe"],
+    shareLine: "I'm City Escape. Wanting out, wanting air, wanting to be elsewhere.",
+    reportSections: {
+      identity:
+        "You're someone who often wants to 'escape' — not to actually leave, but to catch your breath. Your scent persona is a city escape: unwilling to be defined, just wanting to be elsewhere for a while.",
+      scentDirection:
+        "You suit natural, escapist scents. Citrus, green leaves, pine, and after-rain air are your direction. Avoid anything too urban or too commuter-like.",
+      avoid:
+        "Formal commuter scents or sweet date scents may not fit you right now. You want room to breathe, not a social cue.",
+      scenes:
+        "Weekends, travel, outdoors, days you need to breathe. Your scent is a ticket with no destination.",
+      closing: "You don't have to actually escape. A scent can take you to 'elsewhere' for a moment.",
+    },
+  },
+};
+
+function localizePersona(persona: Persona, locale: Locale): Persona {
+  if (locale === "en") {
+    return { ...persona, ...PERSONA_TEXT_EN[persona.id] };
+  }
+  return persona;
+}
+
+export function getPersonas(locale: Locale = "zh"): Persona[] {
+  return PERSONAS.map((persona) => localizePersona(persona, locale));
+}
+
+export function getPersonaById(id: string, locale: Locale = "zh"): Persona | undefined {
+  const persona = PERSONAS.find((p) => p.id === id);
+  return persona ? localizePersona(persona, locale) : undefined;
 }

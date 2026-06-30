@@ -1,30 +1,35 @@
 import Link from "next/link";
 import PageShell from "@/components/layout/PageShell";
-import { SITE_COPY } from "@/data/copy";
-import { PERSONAS } from "@/data/personas";
-import { PRODUCTS } from "@/data/products";
+import { getSiteCopy } from "@/data/copy";
+import { getPersonas } from "@/data/personas";
 import TrackEvent from "@/components/common/TrackEvent";
+import { getLocale } from "@/lib/i18n/server";
+import { pick } from "@/lib/i18n/config";
 
 const previewPersonas = ["rain-study", "warm-sweater", "white-shirt-morning", "olive-rest"];
 
 export default function LandingPage() {
+  const locale = getLocale();
+  const copy = getSiteCopy(locale);
+  const personas = getPersonas(locale);
+
   return (
     <PageShell>
       <TrackEvent eventName="page_view" path="/" />
       {/* Hero */}
       <section className="text-center py-12">
         <h1 className="text-3xl font-serif text-stone-800 leading-tight">
-          {SITE_COPY.landing.heroTitle}
+          {copy.landing.heroTitle}
         </h1>
         <p className="mt-4 text-stone-600 leading-relaxed">
-          {SITE_COPY.landing.heroSubtitle}
+          {copy.landing.heroSubtitle}
         </p>
         <div className="mt-8 flex flex-col gap-3 items-center">
           <Link href="/quiz" className="btn-primary w-48">
-            {SITE_COPY.landing.heroCtaPrimary}
+            {copy.landing.heroCtaPrimary}
           </Link>
           <Link href="/products" className="btn-secondary w-48">
-            {SITE_COPY.landing.heroCtaSecondary}
+            {copy.landing.heroCtaSecondary}
           </Link>
         </div>
       </section>
@@ -32,10 +37,10 @@ export default function LandingPage() {
       {/* Problem */}
       <section className="py-8">
         <h2 className="text-xl font-serif text-stone-700 text-center mb-6">
-          {SITE_COPY.landing.problemTitle}
+          {copy.landing.problemTitle}
         </h2>
         <div className="grid gap-3">
-          {SITE_COPY.landing.problemPoints.map((point, i) => (
+          {copy.landing.problemPoints.map((point, i) => (
             <div key={i} className="card flex items-center gap-3">
               <span className="text-sage-500 text-lg">·</span>
               <span className="text-stone-600">{point}</span>
@@ -47,10 +52,10 @@ export default function LandingPage() {
       {/* How it works */}
       <section className="py-8">
         <h2 className="text-xl font-serif text-stone-700 text-center mb-6">
-          {SITE_COPY.landing.howItWorksTitle}
+          {copy.landing.howItWorksTitle}
         </h2>
         <div className="grid grid-cols-2 gap-4">
-          {SITE_COPY.landing.steps.map((step, i) => (
+          {copy.landing.steps.map((step, i) => (
             <div key={i} className="card text-center">
               <div className="text-sage-500 text-sm mb-1">Step {i + 1}</div>
               <div className="font-serif text-stone-800">{step.title}</div>
@@ -63,10 +68,10 @@ export default function LandingPage() {
       {/* Persona preview */}
       <section className="py-8">
         <h2 className="text-xl font-serif text-stone-700 text-center mb-6">
-          你可能是哪种气味人格？
+          {pick(locale, "你可能是哪种气味人格？", "Which scent persona might you be?")}
         </h2>
         <div className="grid grid-cols-2 gap-4">
-          {PERSONAS.filter((p) => previewPersonas.includes(p.id)).map((persona) => (
+          {personas.filter((p) => previewPersonas.includes(p.id)).map((persona) => (
             <Link
               key={persona.id}
               href="/quiz"
@@ -89,20 +94,20 @@ export default function LandingPage() {
       {/* Product preview */}
       <section className="py-8">
         <h2 className="text-xl font-serif text-stone-700 text-center mb-6">
-          先试三支，再选本命
+          {pick(locale, "先试三支，再选本命", "Try three first, then choose your signature")}
         </h2>
         <div className="card text-center">
           <div className="font-serif text-lg text-stone-800">
-            {SITE_COPY.products.primaryOfferTitle}
+            {copy.products.primaryOfferTitle}
           </div>
           <div className="text-sm text-stone-500 mt-2">
-            {SITE_COPY.products.primaryOfferDesc}
+            {copy.products.primaryOfferDesc}
           </div>
           <div className="text-2xl font-serif text-clay-500 mt-3">
-            {SITE_COPY.products.primaryOfferPrice}
+            {copy.products.primaryOfferPrice}
           </div>
           <Link href="/quiz" className="btn-primary mt-4 inline-flex">
-            {SITE_COPY.landing.heroCtaPrimary}
+            {copy.landing.heroCtaPrimary}
           </Link>
         </div>
       </section>
@@ -110,10 +115,10 @@ export default function LandingPage() {
       {/* Trust */}
       <section className="py-8">
         <h2 className="text-xl font-serif text-stone-700 text-center mb-6">
-          {SITE_COPY.landing.trustTitle}
+          {copy.landing.trustTitle}
         </h2>
         <div className="grid gap-3">
-          {SITE_COPY.landing.trustPoints.map((point, i) => (
+          {copy.landing.trustPoints.map((point, i) => (
             <div key={i} className="flex items-center gap-3 text-stone-600">
               <span className="text-sage-500">✓</span>
               <span>{point}</span>
@@ -125,10 +130,10 @@ export default function LandingPage() {
       {/* Final CTA */}
       <section className="text-center py-12">
         <h2 className="text-2xl font-serif text-stone-800">
-          {SITE_COPY.landing.finalCtaTitle}
+          {copy.landing.finalCtaTitle}
         </h2>
         <Link href="/quiz" className="btn-primary mt-6 inline-flex w-48">
-          {SITE_COPY.landing.finalCtaButton}
+          {copy.landing.finalCtaButton}
         </Link>
       </section>
     </PageShell>

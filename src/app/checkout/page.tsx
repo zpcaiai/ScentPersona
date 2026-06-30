@@ -4,12 +4,16 @@ import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import PageShell from "@/components/layout/PageShell";
-import { SITE_COPY } from "@/data/copy";
+import { getSiteCopy } from "@/data/copy";
 import { PRODUCTS, getProductById } from "@/data/products";
+import { useLang } from "@/lib/i18n/LangProvider";
+import { pick } from "@/lib/i18n/config";
 import TrackEvent, { trackEvent } from "@/components/common/TrackEvent";
 
 function CheckoutContent() {
   const router = useRouter();
+  const { locale } = useLang();
+  const copy = getSiteCopy(locale);
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("sessionId");
   const selectedProductIds = searchParams.get("productIds");
@@ -37,7 +41,7 @@ function CheckoutContent() {
   }, [sessionId]);
 
   const selectedValidProductIds = selectedProductIds
-    ? selectedProductIds.split(",").filter((id) => getProductById(id))
+    ? selectedProductIds.split(",").filter((id) => getProductById(id, locale))
     : [];
   const checkoutProductIds = Array.from(new Set([
     ...(selectedValidProductIds.length > 0 ? selectedValidProductIds : recommendedIds),
@@ -45,7 +49,7 @@ function CheckoutContent() {
   ])).slice(0, 3);
 
   const recommendedProducts = checkoutProductIds
-    .map((id) => getProductById(id))
+    .map((id) => getProductById(id, locale))
     .filter(Boolean);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -76,7 +80,7 @@ function CheckoutContent() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "订单创建失败");
+        throw new Error(data.error || pick(locale, "订单创建失败", "Failed to create order"));
       }
 
       const data = await res.json();
@@ -89,7 +93,7 @@ function CheckoutContent() {
       });
       router.push(`/order/${data.orderId}?accessToken=${encodeURIComponent(data.orderAccessToken)}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "订单创建失败，请稍后重试");
+      setError(err instanceof Error ? err.message : pick(locale, "订单创建失败，请稍后重试", "Couldn\u2019t create the order. Please try again later."));
     } finally {
       setLoading(false);
     }
@@ -104,15 +108,15 @@ function CheckoutContent() {
       />
       <div className="py-8">
         <h1 className="text-2xl font-serif text-stone-800 text-center">
-          {SITE_COPY.checkout.title}
+          {copy.checkout.title}
         </h1>
         <p className="mt-2 text-sm text-stone-500 text-center">
-          {SITE_COPY.checkout.subtitle}
+          {copy.checkout.subtitle}
         </p>
       </div>
       {recommendedProducts.length > 0 && (
         <div className="mt-6">
-          <h3 className="font-serif text-stone-700 mb-3">你的推荐小样</h3>
+          <h3 className="font-serif text-stone-700 mb-3">{pick(locale, "你的推荐小样", "Your recommended samples")}</h3>
           <div className="grid gap-3">
             {recommendedProducts.map((product) => product && (
               <div key={product.id} className="card flex items-center gap-3">
@@ -131,13 +135,13 @@ function CheckoutContent() {
 
       <div className="card mt-6">
         <div className="flex items-center justify-between mb-4">
-          <span className="text-stone-600">气味人格小样套装</span>
-          <span className="text-xl font-serif text-clay-500">29.9元</span>
+          <span className="text-stone-600">{pick(locale, "气味人格小样套装", "Scent Persona sample kit")}</span>
+          <span className="text-xl font-serif text-clay-500">{pick(locale, "29.9元", "\u00a529.9")}</span>
         </div>
 
         <form onSubmit={handleSubmit} className="grid gap-4">
           <div>
-            <label className="text-sm text-stone-600 block mb-1">姓名 *</label>
+            <label className="text-sm text-stone-600 block mb-1">{pick(locale, "姓名 *", "Name *")}</label>
             <input
               type="text"
               required
@@ -147,7 +151,7 @@ function CheckoutContent() {
             />
           </div>
           <div>
-            <label className="text-sm text-stone-600 block mb-1">手机号 *</label>
+            <label className="text-sm text-stone-600 block mb-1">{pick(locale, "手机号 *", "Phone number *")}</label>
             <input
               type="tel"
               required
@@ -157,7 +161,7 @@ function CheckoutContent() {
             />
           </div>
           <div>
-            <label className="text-sm text-stone-600 block mb-1">收货地址 *</label>
+            <label className="text-sm text-stone-600 block mb-1">{pick(locale, "收货地址 *", "Shipping address *")}</label>
             <input
               type="text"
               required
@@ -167,7 +171,7 @@ function CheckoutContent() {
             />
           </div>
           <div>
-            <label className="text-sm text-stone-600 block mb-1">备注（选填）</label>
+            <label className="text-sm text-stone-600 block mb-1">{pick(locale, "备注（选填）", "Note (optional)")}</label>
             <textarea
               value={form.note}
               onChange={(e) => setForm({ ...form, note: e.target.value })}
@@ -183,7 +187,7 @@ function CheckoutContent() {
           )}
 
           <button type="submit" disabled={loading} className="btn-primary">
-            {loading ? "创建订单中..." : "创建订单并去支付"}
+            {loading ? pick(locale, "创建订单中...", "Creating order...") : pick(locale, "创建订单并去支付", "Create order & pay")}
           </button>
         </form>
       </div>

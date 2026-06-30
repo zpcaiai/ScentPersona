@@ -1,4 +1,4 @@
-import type { ScentTag, PersonaId } from "@/lib/scoring/types";
+import type { ScentTag, PersonaId, Locale } from "@/lib/scoring/types";
 
 export interface Product {
   id: string;
@@ -193,10 +193,155 @@ export const PRODUCTS: Product[] = [
   },
 ];
 
-export function getProductById(id: string): Product | undefined {
-  return PRODUCTS.find((p) => p.id === id);
+type ProductText = Pick<
+  Product,
+  | "name"
+  | "shortName"
+  | "notes"
+  | "plainDescription"
+  | "professionalDescription"
+  | "emotionalScene"
+  | "suitableFor"
+  | "notSuitableFor"
+  | "useCases"
+  | "ctaText"
+>;
+
+const PRODUCT_TEXT_EN: Record<string, ProductText> = {
+  "white-tea-morning": {
+    name: "White Tea Morning",
+    shortName: "White Tea Morning",
+    notes: {
+      top: ["White tea", "Bergamot", "Morning dew"],
+      middle: ["Jasmine", "Iris"],
+      base: ["White musk", "Cedar"],
+    },
+    plainDescription:
+      "Like a freshly washed white shirt — clean, crisp, and understated. Good for daily commutes and days you'd rather go unnoticed.",
+    professionalDescription:
+      "Opens with white tea and bergamot, a heart of delicate jasmine and iris, closing on white musk and cedar — a clean, skin-close, soapy whole.",
+    emotionalScene:
+      "Seven in the morning, sunlight just reaching the room. You put on a white shirt, sip some warm water, and get ready to leave. The scent of that moment.",
+    suitableFor: ["Daily commute", "First dates", "Days you'd rather not stand out", "Summer"],
+    notSuitableFor: ["Occasions where you want a strong impression", "Winter late nights"],
+    useCases: ["The office", "Before a date", "Before heading out"],
+    ctaText: "Try White Tea Morning",
+  },
+  "rain-study": {
+    name: "Rainy Study",
+    shortName: "Rainy Study",
+    notes: {
+      top: ["After-rain air", "Green leaves"],
+      middle: ["Paper", "Cedar", "Sandalwood"],
+      base: ["Amber", "Patchouli"],
+    },
+    plainDescription:
+      "Like stepping into a study after the rain, the air full of paper and wood. Quiet and restrained — the story opens up close.",
+    professionalDescription:
+      "The top recreates the fresh green of after-rain air, the heart builds a study's texture with paper and cedar, and amber and patchouli add grounded depth at the base.",
+    emotionalScene:
+      "A rainy afternoon, you sit alone in the study. Rain outside the window, a cup of tea and an old book at hand. The air is quiet.",
+    suitableFor: ["Reading", "Solitude", "Work", "Rainy days", "Meditation"],
+    notSuitableFor: ["Lively parties", "Occasions calling for sweetness"],
+    useCases: ["The study", "The office", "Before bed"],
+    ctaText: "Try Rainy Study",
+  },
+  "warm-sweater": {
+    name: "Warm Sweater",
+    shortName: "Warm Sweater",
+    notes: {
+      top: ["Amber", "Warm ginger"],
+      middle: ["Cashmere", "Vanilla"],
+      base: ["Sandalwood", "Musk"],
+    },
+    plainDescription:
+      "Like wrapping up in a warm sweater under a soft lamp. Gentle and enveloping — made for bedtime and the end of a tiring day.",
+    professionalDescription:
+      "Amber and warm ginger build a cozy opening, cashmere and vanilla create a soft, skin-close heart, and sandalwood and musk let the scent settle quietly at the base.",
+    emotionalScene:
+      "Ten on a winter night, fresh out of the shower, you pull on your favorite sweater and turn off the lights but for one warm lamp. The scent of that moment.",
+    suitableFor: ["Bedtime", "Unwinding", "Winter", "At home", "The end of a tiring day"],
+    notSuitableFor: ["Summer outdoors", "When you need to stay sharp and focused"],
+    useCases: ["The bedroom", "Before bed", "Weekends at home"],
+    ctaText: "Try Warm Sweater",
+  },
+  "midnight-cabin": {
+    name: "Midnight Cabin",
+    shortName: "Midnight Cabin",
+    notes: {
+      top: ["Pine", "Smoke"],
+      middle: ["Cedar", "Leather"],
+      base: ["Sandalwood", "Vetiver", "Amber"],
+    },
+    plainDescription:
+      "Like stepping into a mountain cabin at midnight, the air full of fireplace smoke and wood. Deep and story-worn — not for everyone.",
+    professionalDescription:
+      "Pine and smoke build a deep opening, cedar and leather add layers in the heart, and sandalwood and vetiver give the woods a long, settled base.",
+    emotionalScene:
+      "Late at night, you push open a wooden door. Inside: fireplace, old books, and whisky. Outside: snow and silence.",
+    suitableFor: ["Late autumn", "Winter", "Night", "Solitude", "People with some history behind them"],
+    notSuitableFor: ["Summer", "Daytime commutes", "People who like fresh scents"],
+    useCases: ["Night", "Solitude", "Dates"],
+    ctaText: "Try Midnight Cabin",
+  },
+  "orchard-sunshine": {
+    name: "Orchard Sunshine",
+    shortName: "Orchard Sunshine",
+    notes: {
+      top: ["Citrus", "Peach", "Bergamot"],
+      middle: ["Neroli", "Jasmine"],
+      base: ["Musk", "Sandalwood"],
+    },
+    plainDescription:
+      "Like walking into a sunlit orchard, the air sweet with citrus and peach. Bright, lively, and mood-lifting.",
+    professionalDescription:
+      "Citrus and peach build a bright fruity opening, neroli and jasmine add floral layers in the heart, and musk and sandalwood soften the sweetness to a close.",
+    emotionalScene:
+      "A weekend afternoon, you walk into an orchard. Sun on your face, the air sweet with fruit and flowers. You smile.",
+    suitableFor: ["Spring & summer", "Dates", "Parties", "Good-mood days", "Gifting"],
+    notSuitableFor: ["People who dislike sweetness", "Deep winter", "Formal business settings"],
+    useCases: ["Dates", "Parties", "Going out"],
+    ctaText: "Try Orchard Sunshine",
+  },
+  "olive-rest": {
+    name: "Olive Hill Rest",
+    shortName: "Olive Hill Rest",
+    notes: {
+      top: ["Olive leaf", "Fig"],
+      middle: ["Frankincense", "Myrrh"],
+      base: ["Sandalwood", "Amber", "Musk"],
+    },
+    plainDescription:
+      "Like being on a quiet hilltop, the wind carrying olive trees. Meditative — made for meditation, reading, and a bedtime ritual.",
+    professionalDescription:
+      "Olive leaf and fig build a green opening, frankincense and myrrh bring meditative depth in the heart, and sandalwood and amber let the scent settle quietly at the base.",
+    emotionalScene:
+      "At dusk, you sit on a hilltop. The wind smells of olive trees and figs. The world is quiet, and so are you.",
+    suitableFor: ["Meditation", "Reading", "Bedtime", "Solitude", "Moments that call for quiet"],
+    notSuitableFor: ["Lively occasions", "Mornings that need energy"],
+    useCases: ["Before bed", "Meditation", "Reading"],
+    ctaText: "Try Olive Hill Rest",
+  },
+};
+
+function localizeProduct(product: Product, locale: Locale): Product {
+  if (locale === "en") {
+    const text = PRODUCT_TEXT_EN[product.id];
+    if (text) return { ...product, ...text };
+  }
+  return product;
 }
 
-export function getProductBySlug(slug: string): Product | undefined {
-  return PRODUCTS.find((p) => p.slug === slug);
+export function getProducts(locale: Locale = "zh"): Product[] {
+  return PRODUCTS.map((p) => localizeProduct(p, locale));
+}
+
+export function getProductById(id: string, locale: Locale = "zh"): Product | undefined {
+  const product = PRODUCTS.find((p) => p.id === id);
+  return product ? localizeProduct(product, locale) : undefined;
+}
+
+export function getProductBySlug(slug: string, locale: Locale = "zh"): Product | undefined {
+  const product = PRODUCTS.find((p) => p.slug === slug);
+  return product ? localizeProduct(product, locale) : undefined;
 }

@@ -1,0 +1,22 @@
+.proxy { padding: 24rpx; min-height: 100vh; }
+.proxy-bar { display: flex; gap: 12rpx; align-items: center; }
+.proxy-input { flex: 1; background: #fff; border: 1px solid #e4d8c0; border-radius: 14rpx; padding: 16rpx 20rpx; font-size: 28rpx; }
+.proxy-go { white-space: nowrap; }
+.proxy-note { display: block; color: #9a948c; font-size: 22rpx; margin: 16rpx 0; line-height: 1.5; }
+.proxy-empty { display: block; text-align: center; color: #9a948c; margin-top: 48rpx; }
+.proxy-offer { margin-top: 16rpx; }
+.proxy-offer-top { display: flex; gap: 16rpx; }
+.proxy-offer-img { width: 120rpx; height: 120rpx; border-radius: 12rpx; }
+.proxy-offer-main { flex: 1; }
+.proxy-offer-plat { display: block; color: #b08d5e; font-size: 22rpx; }
+.proxy-offer-title { display: block; font-size: 28rpx; margin: 4rpx 0; }
+.proxy-offer-meta { display: block; color: #9a948c; font-size: 22rpx; }
+.proxy-offer-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 16rpx; }
+.proxy-price { color: #b08d5e; font-size: 34rpx; font-family: Georgia, serif; }
+.proxy-line { display: flex; justify-content: space-between; margin-top: 8rpx; font-size: 26rpx; }
+.proxy-total { font-weight: 600; border-top: 1px solid #f0e9da; padding-top: 12rpx; margin-top: 12rpx; }
+.proxy-agree { margin: 20rpx 0; font-size: 24rpx; color: #6b7d5e; line-height: 1.6; }
+.proxy-status { display: block; font-size: 40rpx; font-family: Georgia, serif; color: #556648; }
+.proxy-status-desc { display: block; color: #6b7d5e; margin: 8rpx 0 16rpx; }
+.proxy-tl { display: block; font-size: 24rpx; color: #6b7d5e; margin-top: 6rpx; }
+.proxy-adj-title { display: block; font-weight: 600; color: #b08d5e; }

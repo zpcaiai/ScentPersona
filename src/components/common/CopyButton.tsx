@@ -1,13 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { useLang } from "@/lib/i18n/LangProvider";
+import { getSiteCopy } from "@/data/copy";
 
 interface CopyButtonProps {
   text: string;
   label?: string;
 }
 
-export default function CopyButton({ text, label = "复制" }: CopyButtonProps) {
+export default function CopyButton({ text, label }: CopyButtonProps) {
+  const { locale } = useLang();
+  const common = getSiteCopy(locale).common;
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -33,7 +37,7 @@ export default function CopyButton({ text, label = "复制" }: CopyButtonProps) 
       onClick={handleCopy}
       className="btn-secondary text-sm"
     >
-      {copied ? "已复制" : label}
+      {copied ? common.copied : label ?? common.copy}
     </button>
   );
 }

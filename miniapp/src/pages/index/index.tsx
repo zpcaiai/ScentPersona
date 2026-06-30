@@ -1,13 +1,18 @@
 import { useEffect } from "react";
 import { View, Text, Button, Image } from "@tarojs/components";
 import Taro, { useShareAppMessage, useShareTimeline } from "@tarojs/taro";
-import { SITE_COPY } from "../../data/copy";
-import { PERSONAS } from "../../data/personas";
+import { getSiteCopy } from "../../data/copy";
+import { getPersonas } from "../../data/personas";
 import { trackEvent, assetUrl } from "../../lib/request";
 import { THEME_CLASS } from "../../lib/theme";
+import { useLang, pick } from "../../lib/i18n";
 import "./index.scss";
 
 export default function Index() {
+  const { locale } = useLang();
+  const copy = getSiteCopy(locale);
+  const personas = getPersonas(locale);
+
   useEffect(() => {
     trackEvent({ eventName: "page_view", path: "/pages/index/index" });
   }, []);
@@ -15,34 +20,30 @@ export default function Index() {
   const goToQuiz = () => Taro.navigateTo({ url: "/pages/quiz/index" });
   const goToProducts = () => Taro.switchTab({ url: "/pages/products/index" });
 
-  useShareAppMessage(() => ({
-    title: "先测再闻，找到你的本命香 | ScentPersona",
-    path: "/pages/index/index",
-  }));
-  useShareTimeline(() => ({
-    title: "先测再闻，找到你的本命香 | ScentPersona",
-  }));
+  const shareTitle = pick(locale, "先测再闻，找到你的本命香 | ScentPersona", "Test first, then smell — find your signature scent | ScentPersona");
+  useShareAppMessage(() => ({ title: shareTitle, path: "/pages/index/index" }));
+  useShareTimeline(() => ({ title: shareTitle }));
 
   return (
     <View className={`index ${THEME_CLASS}`}>
       {/* Hero */}
       <View className="hero">
-        <Text className="hero-eyebrow">中文香水人格测试 · 8 种气味人格</Text>
-        <Text className="hero-title">{SITE_COPY.landing.heroTitle}</Text>
-        <Text className="hero-subtitle">{SITE_COPY.landing.heroSubtitle}</Text>
+        <Text className="hero-eyebrow">{pick(locale, "中文香水人格测试 · 8 种气味人格", "Scent persona quiz · 8 personas")}</Text>
+        <Text className="hero-title">{copy.landing.heroTitle}</Text>
+        <Text className="hero-subtitle">{copy.landing.heroSubtitle}</Text>
         <Image className="hero-img" src={assetUrl("/products/sample-set.jpg")} mode="aspectFill" />
         <Button className="btn-primary hero-cta" onClick={goToQuiz}>
-          {SITE_COPY.landing.heroCtaPrimary}
+          {copy.landing.heroCtaPrimary}
         </Button>
         <Button className="btn-secondary" onClick={goToProducts}>
-          {SITE_COPY.landing.heroCtaSecondary}
+          {copy.landing.heroCtaSecondary}
         </Button>
       </View>
 
       {/* Problem */}
       <View className="card">
-        <Text className="section-title">{SITE_COPY.landing.problemTitle}</Text>
-        {SITE_COPY.landing.problemPoints.map((point, i) => (
+        <Text className="section-title">{copy.landing.problemTitle}</Text>
+        {copy.landing.problemPoints.map((point, i) => (
           <View key={i} className="problem-item">
             <Text className="problem-dot">·</Text>
             <Text>{point}</Text>
@@ -52,8 +53,8 @@ export default function Index() {
 
       {/* How it works */}
       <View className="card">
-        <Text className="section-title">{SITE_COPY.landing.howItWorksTitle}</Text>
-        {SITE_COPY.landing.steps.map((step, i) => (
+        <Text className="section-title">{copy.landing.howItWorksTitle}</Text>
+        {copy.landing.steps.map((step, i) => (
           <View key={i} className="step-item">
             <View className="step-num">
               <Text className="step-num-text">{i + 1}</Text>
@@ -68,9 +69,9 @@ export default function Index() {
 
       {/* Persona preview */}
       <View className="card">
-        <Text className="section-title">8种气味人格</Text>
+        <Text className="section-title">{pick(locale, "8种气味人格", "8 scent personas")}</Text>
         <View className="persona-grid">
-          {PERSONAS.map((persona) => (
+          {personas.map((persona) => (
             <View key={persona.id} className="persona-chip">
               <Text className="persona-chip-name">{persona.name}</Text>
               <Text className="persona-chip-title">{persona.title}</Text>
@@ -81,8 +82,8 @@ export default function Index() {
 
       {/* Trust */}
       <View className="card">
-        <Text className="section-title">{SITE_COPY.landing.trustTitle}</Text>
-        {SITE_COPY.landing.trustPoints.map((point, i) => (
+        <Text className="section-title">{copy.landing.trustTitle}</Text>
+        {copy.landing.trustPoints.map((point, i) => (
           <View key={i} className="trust-item">
             <Text className="text-sage">✓ </Text>
             <Text>{point}</Text>
@@ -92,14 +93,14 @@ export default function Index() {
 
       {/* Final CTA */}
       <View className="card final-cta">
-        <Text className="final-cta-title">{SITE_COPY.landing.finalCtaTitle}</Text>
+        <Text className="final-cta-title">{copy.landing.finalCtaTitle}</Text>
         <Button className="btn-primary" onClick={goToQuiz}>
-          {SITE_COPY.landing.finalCtaButton}
+          {copy.landing.finalCtaButton}
         </Button>
       </View>
 
       <View className="footer">
-        <Text className="text-muted">ScentPersona · 先测再闻，找到你的本命香</Text>
+        <Text className="text-muted">{pick(locale, "ScentPersona · 先测再闻，找到你的本命香", "ScentPersona · Test first, then smell")}</Text>
       </View>
     </View>
   );

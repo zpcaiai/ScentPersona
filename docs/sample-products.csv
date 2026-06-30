@@ -1,0 +1,3 @@
+platform,platformProductId,title,brand,price,originalPrice,rating,reviewCount,salesCount,shopName,shopType,imageUrl,sourceUrl,volume,concentration,scentFamily,topNotes,middleNotes,baseNotes,description
+manual,sp-white-tea-50,白茶清晨 EDP 50ml 清新白茶木质香水,ScentPersona,268,328,4.8,218,1200,ScentPersona 官方样品店,authorized,,https://example.com/white-tea,50ml,EDP,白茶 木质,白茶、柑橘,纸张、白麝香,雪松、琥珀,干净安静适合通勤
+manual,sp-rose-musk-30,柔雾玫瑰 EDP 30ml 玫瑰麝香香水,ScentPersona,198,258,4.7,186,960,ScentPersona 官方样品店,authorized,,https://example.com/rose-musk,30ml,EDP,花香 麝香,荔枝、粉胡椒,玫瑰、鸢尾,白麝香、檀香,柔和贴肤适合约会和日常

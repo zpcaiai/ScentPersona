@@ -3,6 +3,7 @@ import { View, Text, Button, Input } from "@tarojs/components";
 import Taro, { useDidShow, usePullDownRefresh } from "@tarojs/taro";
 import { fetchOrder, fetchOrders } from "../../lib/request";
 import { formatPrice } from "../../lib/utils";
+import { useLang, pick, type Locale } from "../../lib/i18n";
 import { THEME_CLASS } from "../../lib/theme";
 import "./index.scss";
 
@@ -22,21 +23,40 @@ interface OrderItem {
   accessToken: string;
 }
 
-const STATUS_LABELS: Record<string, string> = {
-  pending: "待支付",
-  paid: "已支付",
-  processing: "备货中",
-  shipped: "已发货",
-  completed: "已完成",
-  cancelled: "已取消",
-  refunded: "已退款",
+const STATUS_LABELS: Record<Locale, Record<string, string>> = {
+  zh: {
+    pending: "待支付",
+    paid: "已支付",
+    processing: "备货中",
+    shipped: "已发货",
+    completed: "已完成",
+    cancelled: "已取消",
+    refunded: "已退款",
+  },
+  en: {
+    pending: "Unpaid",
+    paid: "Paid",
+    processing: "Preparing",
+    shipped: "Shipped",
+    completed: "Completed",
+    cancelled: "Cancelled",
+    refunded: "Refunded",
+  },
 };
 
-const TYPE_LABELS: Record<string, string> = {
-  single: "单支小样",
-  "sample-set-3": "3支小样套装",
-  "sample-set-6": "6支小样套装",
-  "gift-box": "礼盒套装",
+const TYPE_LABELS: Record<Locale, Record<string, string>> = {
+  zh: {
+    single: "单支小样",
+    "sample-set-3": "3支小样套装",
+    "sample-set-6": "6支小样套装",
+    "gift-box": "礼盒套装",
+  },
+  en: {
+    single: "Single sample",
+    "sample-set-3": "3-sample kit",
+    "sample-set-6": "6-sample kit",
+    "gift-box": "Gift box kit",
+  },
 };
 
 function getTokens(): Record<string, string> {
@@ -48,6 +68,7 @@ function saveToken(orderId: string, token: string) {
 }
 
 export default function Orders() {
+  const { locale } = useLang();
   const [orders, setOrders] = useState<OrderItem[]>([]);
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(true);
@@ -119,7 +140,7 @@ export default function Orders() {
   const handleQuery = async () => {
     const v = phone.trim();
     if (!/^1\d{10}$/.test(v)) {
-      Taro.showToast({ title: "请输入正确的手机号", icon: "none" });
+      Taro.showToast({ title: pick(locale, "请输入正确的手机号", "Please enter a valid phone number"), icon: "none" });
       return;
     }
     Taro.setStorageSync(PHONE_KEY, v);
@@ -137,8 +158,8 @@ export default function Orders() {
   return (
     <View className={`orders ${THEME_CLASS}`}>
       <View className="orders-header">
-        <Text className="orders-title">我的订单</Text>
-        <Text className="orders-subtitle">输入手机号可同步在所有设备上的订单</Text>
+        <Text className="orders-title">{pick(locale, "我的订单", "My orders")}</Text>
+        <Text className="orders-subtitle">{pick(locale, "输入手机号可同步在所有设备上的订单", "Enter your phone number to sync orders across all devices")}</Text>
       </View>
 
       <View className="orders-search">
@@ -146,7 +167,7 @@ export default function Orders() {
           className="orders-search-input"
           type="number"
           maxlength={11}
-          placeholder="输入下单手机号查询"
+          placeholder={pick(locale, "输入下单手机号查询", "Enter the phone number used at checkout")}
           value={phone}
           onInput={(e) => setPhone(e.detail.value)}
         />
@@ -155,19 +176,19 @@ export default function Orders() {
           disabled={querying || loading}
           onClick={handleQuery}
         >
-          {querying ? "查询中..." : "查询"}
+          {querying ? pick(locale, "查询中...", "Searching...") : pick(locale, "查询", "Search")}
         </Button>
       </View>
 
       {loading && (
         <View className="orders-empty">
-          <Text className="text-muted">加载中...</Text>
+          <Text className="text-muted">{pick(locale, "加载中...", "Loading...")}</Text>
         </View>
       )}
 
       {!loading && orders.length === 0 && (
         <View className="orders-empty">
-          <Text className="text-muted">暂无订单。下单后可在此查看与支付。</Text>
+          <Text className="text-muted">{pick(locale, "暂无订单。下单后可在此查看与支付。", "No orders yet. Once you order, you can view and pay here.")}</Text>
         </View>
       )}
 
@@ -180,13 +201,13 @@ export default function Orders() {
           <View className="order-card-header">
             <Text className="order-card-no">{order.orderNo}</Text>
             <Text className={`order-card-status order-status-${order.status}`}>
-              {STATUS_LABELS[order.status] || order.status}
+              {STATUS_LABELS[locale][order.status] || order.status}
             </Text>
           </View>
-          <Text className="order-card-type">{TYPE_LABELS[order.productType] || order.productType}</Text>
+          <Text className="order-card-type">{TYPE_LABELS[locale][order.productType] || order.productType}</Text>
           <View className="order-card-footer">
             <Text className="order-card-date">
-              {new Date(order.createdAt).toLocaleDateString("zh-CN")}
+              {new Date(order.createdAt).toLocaleDateString(pick(locale, "zh-CN", "en-US"))}
             </Text>
             <Text className="order-card-amount">¥{formatPrice(order.amount)}</Text>
           </View>
