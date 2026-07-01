@@ -98,3 +98,4 @@
 
 - ✅ **聚合位显式选品 + Hero 对象存储上传 + 看板一键重置**：专题商品聚合块支持 family / productNames / offerIds 三种指定（自营优先）；新增 S3 兼容 SigV4 预签名上传（无依赖 `src/lib/storage/s3.ts` + `/api/admin/uploads/presign` 受 product:edit 保护 + `ImageUpload` 集成进内容页），密钥不落前端；演示数据抽成共享模块 `src/lib/dev/demoData.ts`（seed / reset 脚本 / 后台按钮共用），新增 `/api/admin/demo/reset`（admin:manage + ENABLE_DEMO_TOOLS 双门控）与看板「重置演示数据」按钮。
 - ✅ **上传校验/缩略图 + 可视化选品器 + 预签名限流**：上传前端校验格式/大小(MAX_UPLOAD_BYTES)/尺寸并自动生成缩略图(`.thumb` 约定，列表页 `deriveThumbUrl` 消费)；改用预签名 POST 的 content-length-range 在存储端强制大小上限；预签名接口按操作员 20 次/分限流(`src/lib/rate-limit.ts`)；内容页新增 `ProductBlockBuilder` 可视化生成商品聚合块(配 `/api/admin/products/options`)，免手写 JSON。
+- ✅ **heroThumbUrl 正式字段 + 内容块拖拽排序 + 跨实例限流**：`ContentPage.heroThumbUrl` 列 + 迁移 `20260115000000_content_hero_thumb`（前端上传落库、列表页优先读该列并回退 `.thumb` 约定；边界用类型转换桥接，本地 `prisma generate` 后生效）；`BlockListEditor` HTML5 拖拽排序/上下移/删除整段内容块；`rate-limit.ts` 升级为 Upstash Redis(REST) 跨实例限流，未配置/不可达自动降级进程内内存限流（无 Redis 也能用）。

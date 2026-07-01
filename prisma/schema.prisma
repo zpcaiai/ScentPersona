@@ -1095,6 +1095,7 @@ model ContentPage {
   pageType         String    @default("landing")
   status           String    @default("draft")
   heroImageUrl     String?
+  heroThumbUrl     String?
   contentBlocksJson String   @default("[]")
   seoTitle         String?
   seoDescription   String?

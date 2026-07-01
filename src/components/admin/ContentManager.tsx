@@ -5,10 +5,11 @@ import { useLang } from "@/lib/i18n/LangProvider";
 import { pick } from "@/lib/i18n/config";
 import ImageUpload from "@/components/admin/ImageUpload";
 import ProductBlockBuilder from "@/components/admin/ProductBlockBuilder";
+import BlockListEditor from "@/components/admin/BlockListEditor";
 export default function ContentManager({ pages }: { pages: { id: string; slug: string; title: string; status: string }[] }) {
   const router = useRouter();
   const { locale } = useLang();
-  const [f, setF] = useState({ slug: "", title: "", subtitle: "", pageType: "landing", heroImageUrl: "", contentBlocksJson: "", seoTitle: "", seoDescription: "" });
+  const [f, setF] = useState({ slug: "", title: "", subtitle: "", pageType: "landing", heroImageUrl: "", heroThumbUrl: "", contentBlocksJson: "", seoTitle: "", seoDescription: "" });
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   async function create() {
@@ -36,13 +37,15 @@ export default function ContentManager({ pages }: { pages: { id: string; slug: s
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <input className="flex-1 rounded border border-cream-300 px-2 py-1.5" placeholder={pick(locale, "Hero 图 URL（可粘贴或上传）", "Hero image URL (paste or upload)")} value={f.heroImageUrl} onChange={(e) => setF({ ...f, heroImageUrl: e.target.value })} />
-            <ImageUpload prefix="hero" onUploaded={(url) => setF({ ...f, heroImageUrl: url })} />
+            <ImageUpload prefix="hero" onUploaded={(url, thumb) => setF({ ...f, heroImageUrl: url, heroThumbUrl: thumb || "" })} />
           </div>
           {f.heroImageUrl && (
             /* eslint-disable-next-line @next/next/no-img-element */
             <img src={f.heroImageUrl} alt="" className="h-20 w-full rounded object-cover" />
           )}
         </div>
+        <div className="text-xs text-clay-500">{pick(locale, "内容块（可拖拽排序）", "Blocks (drag to reorder)")}</div>
+        <BlockListEditor value={f.contentBlocksJson} onChange={(json) => setF({ ...f, contentBlocksJson: json })} />
         <textarea className="w-full rounded border border-cream-300 px-2 py-1.5 font-mono text-xs" rows={5} placeholder={pick(locale, '内容块 JSON，如 [{"title":"为什么是它","text":"...","cta":{"label":"开始测试","href":"/quiz"}}]', 'Content blocks JSON, e.g. [{"title":"Why this one","text":"...","cta":{"label":"Start the quiz","href":"/quiz"}}]')} value={f.contentBlocksJson} onChange={(e) => setF({ ...f, contentBlocksJson: e.target.value })} />
         <ProductBlockBuilder onInsert={insertBlock} />
         <input className="w-full rounded border border-cream-300 px-2 py-1.5" placeholder={pick(locale, "SEO 标题", "SEO title")} value={f.seoTitle} onChange={(e) => setF({ ...f, seoTitle: e.target.value })} />

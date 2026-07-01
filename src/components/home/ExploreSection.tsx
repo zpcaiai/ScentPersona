@@ -18,7 +18,6 @@ export default async function ExploreSection() {
       where: { status: "published", pageType: "landing" },
       orderBy: { publishedAt: "desc" },
       take: 6,
-      select: { slug: true, title: true, subtitle: true, heroImageUrl: true },
     }),
   ]);
 
@@ -64,7 +63,7 @@ export default async function ExploreSection() {
               >
                 {t.heroImageUrl && (
                   /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={deriveThumbUrl(t.heroImageUrl)} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
+                  <img src={(t as { heroThumbUrl?: string | null }).heroThumbUrl ?? deriveThumbUrl(t.heroImageUrl)} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
                 )}
                 <div>
                   <div className="font-serif text-stone-800">{t.title}</div>

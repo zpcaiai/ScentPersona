@@ -18,7 +18,6 @@ export default async function TopicsIndexPage() {
   const topics = await db.contentPage.findMany({
     where: { status: "published", pageType: "landing" },
     orderBy: { publishedAt: "desc" },
-    select: { slug: true, title: true, subtitle: true, heroImageUrl: true },
   });
 
   return (
@@ -38,7 +37,7 @@ export default async function TopicsIndexPage() {
             <Link key={t.slug} href={`/c/${t.slug}`} className="card flex items-center gap-3 hover:border-sage-400 transition-colors">
               {t.heroImageUrl && (
                 /* eslint-disable-next-line @next/next/no-img-element */
-                <img src={deriveThumbUrl(t.heroImageUrl)} alt="" className="h-14 w-14 shrink-0 rounded-lg object-cover" />
+                <img src={(t as { heroThumbUrl?: string | null }).heroThumbUrl ?? deriveThumbUrl(t.heroImageUrl)} alt="" className="h-14 w-14 shrink-0 rounded-lg object-cover" />
               )}
               <div>
                 <div className="font-serif text-lg text-stone-800">{t.title}</div>

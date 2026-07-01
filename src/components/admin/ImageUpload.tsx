@@ -35,7 +35,7 @@ async function postForm(url: string, fields: Record<string, string>, body: Blob,
   return fetch(url, { method: "POST", body: fd });
 }
 
-export default function ImageUpload({ prefix = "hero", onUploaded }: { prefix?: string; onUploaded: (url: string) => void }) {
+export default function ImageUpload({ prefix = "hero", onUploaded }: { prefix?: string; onUploaded: (url: string, thumbUrl?: string) => void }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -71,7 +71,7 @@ export default function ImageUpload({ prefix = "hero", onUploaded }: { prefix?: 
         const thumb = await makeThumb(img, file.type);
         if (thumb) await postForm(j.thumb.url, j.thumb.fields, thumb, `thumb.${ext}`).catch(() => {});
       }
-      onUploaded(j.full.publicUrl);
+      onUploaded(j.full.publicUrl, j.thumb?.publicUrl);
     } catch { setErr("网络错误"); }
     finally { setBusy(false); if (e.target) e.target.value = ""; }
   }

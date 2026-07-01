@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   const operator = getAdminOperator(request);
   if (!adminCan(request, "product:edit")) return NextResponse.json({ error: "forbidden" }, { status: 403 });
 
-  const rl = rateLimit(`presign:${operator}`, 20, 60_000);
+  const rl = await rateLimit(`presign:${operator}`, 20, 60_000);
   if (!rl.ok) return NextResponse.json({ error: "rate_limited", retryAfterMs: rl.retryAfterMs }, { status: 429, headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)) } });
 
   if (!isStorageConfigured()) return NextResponse.json({ error: "storage_not_configured" }, { status: 501 });

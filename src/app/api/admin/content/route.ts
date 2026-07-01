@@ -17,17 +17,18 @@ export async function POST(request: Request) {
     try { JSON.parse(body.contentBlocksJson); blocks = body.contentBlocksJson; } catch { /* keep [] */ }
   }
   try {
-    const page = await db.contentPage.create({
-      data: {
-        slug, title,
-        subtitle: sanitizeText(body.subtitle, 200),
-        pageType: sanitizeText(body.pageType, 20) ?? "landing",
-        heroImageUrl: sanitizeText(body.heroImageUrl, 500),
-        contentBlocksJson: blocks,
-        seoTitle: sanitizeText(body.seoTitle, 120),
-        seoDescription: sanitizeText(body.seoDescription, 300),
-      },
-    });
+    const heroThumbUrl = sanitizeText(body.heroThumbUrl, 500);
+    const data = {
+      slug, title,
+      subtitle: sanitizeText(body.subtitle, 200),
+      pageType: sanitizeText(body.pageType, 20) ?? "landing",
+      heroImageUrl: sanitizeText(body.heroImageUrl, 500),
+      contentBlocksJson: blocks,
+      seoTitle: sanitizeText(body.seoTitle, 120),
+      seoDescription: sanitizeText(body.seoDescription, 300),
+    };
+    // heroThumbUrl activates after `prisma generate` picks up the new column; only sent when present.
+    const page = await db.contentPage.create({ data: { ...data, ...(heroThumbUrl ? { heroThumbUrl } : {}) } as typeof data });
     await auditAdminAction({ adminUserId: operator, action: "content_create", detail: slug });
     return NextResponse.json({ ok: true, id: page.id });
   } catch {
