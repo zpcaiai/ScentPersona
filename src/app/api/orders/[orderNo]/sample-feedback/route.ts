@@ -58,7 +58,7 @@ export async function POST(request: Request, { params }: { params: { orderNo: st
       const key = likeLevel === "love" || likeLevel === "like" ? "likedProductIdsJson" : likeLevel === "dislike" ? "dislikedProductIdsJson" : null;
       if (key) {
         let arr: string[] = [];
-        try { arr = JSON.parse((sp as Record<string, string>)[key] || "[]"); } catch { /* */ }
+        try { arr = JSON.parse((sp as unknown as Record<string, string>)[key] || "[]"); } catch { /* */ }
         if (!arr.includes(productId)) arr.push(productId);
         await db.userScentProfile.update({ where: { userId }, data: { [key]: JSON.stringify(arr) } });
       }

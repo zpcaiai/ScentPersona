@@ -44,7 +44,7 @@ export async function POST(request: Request, { params }: { params: { orderId: st
     ? await db.order.count({ where: { customerPhone: order.customerPhone, refunds: { some: { createdAt: { gte: since } } } } })
     : 0;
   const missingClaimsCount = order.customerPhone
-    ? await db.afterSalesCase.count({ where: { type: "missing", order: undefined, createdAt: { gte: since }, orderId: { in: (await db.order.findMany({ where: { customerPhone: order.customerPhone }, select: { id: true } })).map((o: { id: string }) => o.id) } } })
+    ? await db.afterSalesCase.count({ where: { type: "missing", createdAt: { gte: since }, orderId: { in: (await db.order.findMany({ where: { customerPhone: order.customerPhone }, select: { id: true } })).map((o: { id: string }) => o.id) } } })
     : 0;
   const ordersByPhone = order.customerPhone ? await db.order.count({ where: { customerPhone: order.customerPhone } }) : 1;
   const delivered = order.shipment?.shippingStatus === "delivered" || order.status === "delivered";
