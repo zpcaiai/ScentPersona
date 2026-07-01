@@ -70,6 +70,51 @@ const SKUS: { skuCode: string; name: string; type: string; volumeMl: number; sto
   { skuCode: "PKG-GIFTBOX", name: "气味人格礼盒包材", type: "packaging", volumeMl: 0, stock: 500, costCents: 500, batchNo: "PKG26" },
 ];
 
+const CONTENT: { slug: string; title: string; subtitle: string; seoTitle: string; seoDesc: string; blocks: unknown[] }[] = [
+  {
+    slug: "men-first-fragrance", title: "男生的第一支香水", subtitle: "不用懂香调，回答几个生活问题就好",
+    seoTitle: "男生第一支香水怎么选 | ScentPersona", seoDesc: "6 个生活问题，帮你找到第一支不会出错的香水，并对比多平台价格。",
+    blocks: [
+      { title: "为什么第一支这么难选", text: "香调术语太多、试错成本太高。我们把它变简单：回答 6 个生活问题，直接给方向。" },
+      { title: "从这三种开始最稳", items: ["干净通勤：白茶、柑橘、白麝香", "温柔约会：奶香、橙花、香草", "有气场的夜晚：雪松、檀香、琥珀"] },
+      { cta: { label: "开始选香测试", href: "/quiz" } },
+    ],
+  },
+  {
+    slug: "gift-no-mistake", title: "送礼不踩雷", subtitle: "按对方的样子选，而不是按你自己的",
+    seoTitle: "香水送礼怎么选不踩雷 | ScentPersona", seoDesc: "用一个小测试判断对方适合的香味方向，再挑小样礼盒或正装。",
+    blocks: [
+      { title: "送礼三条原则", items: ["先小样、后正装，降低踩雷风险", "选“干净好闻不挑人”的方向更安全", "附一张气味人格卡，更有心意"] },
+      { cta: { label: "帮 TA 做个测试", href: "/quiz" } },
+    ],
+  },
+  {
+    slug: "bedtime-ritual", title: "睡前香氛仪式", subtitle: "给疲惫的一天一个安静的结束",
+    seoTitle: "睡前香氛怎么选 | ScentPersona", seoDesc: "茶、纸张、乳香、木质——营造放松氛围的睡前香味方向（非助眠功效承诺）。",
+    blocks: [
+      { title: "让房间先安静下来", text: "睡前的香不需要存在感，需要的是把注意力从白天收回来的安静。茶、纸张、乳香、雪松都是好选择。" },
+      { text: "温和配方，使用前建议先做局部测试。" },
+      { cta: { label: "找到你的安静香", href: "/quiz" } },
+    ],
+  },
+  {
+    slug: "commute-scent", title: "通勤不出错的香", subtitle: "干净、低调、不打扰同事",
+    seoTitle: "通勤香水推荐 | ScentPersona", seoDesc: "上班、见客户、第一次约会前，选干净感高、存在感适中的通勤香。",
+    blocks: [
+      { title: "通勤香的标准", items: ["干净感高、存在感适中", "喷 1-2 下即可，别太多", "白茶/柑橘/白麝香类最稳"] },
+      { cta: { label: "看看适合你的通勤香", href: "/quiz" } },
+    ],
+  },
+];
+
+const COUPONS: { code: string; type: string; value: number; scope: string; min?: number; maxDiscount?: number; perUser?: number }[] = [
+  { code: "WELCOME10", type: "fixed_amount", value: 1000, scope: "all", perUser: 1 },
+  { code: "SAVE20OVER200", type: "fixed_amount", value: 2000, scope: "all", min: 20000 },
+  { code: "FREESHIP", type: "free_shipping", value: 0, scope: "all" },
+  { code: "SAMPLE5", type: "sample_credit", value: 500, scope: "sample", perUser: 1 },
+  { code: "PROXY15", type: "percentage", value: 15, scope: "proxy_order", maxDiscount: 3000 },
+];
+
 async function main() {
   // 1) Legal (only if not already active)
   for (const l of LEGAL) {
@@ -148,6 +193,26 @@ async function main() {
     await db.costRule.create({ data: { name: "支付手续费", type: "payment_fee", ruleJson: JSON.stringify({ rate: 0.006 }), isActive: true } });
     console.log("  cost rule: payment_fee 0.6%");
   }
+
+  // 7) Content / landing pages (upsert by unique slug)
+  for (const c of CONTENT) {
+    await db.contentPage.upsert({
+      where: { slug: c.slug },
+      create: { slug: c.slug, title: c.title, subtitle: c.subtitle, pageType: "landing", status: "published", publishedAt: new Date(), contentBlocksJson: JSON.stringify(c.blocks), seoTitle: c.seoTitle, seoDescription: c.seoDesc },
+      update: { title: c.title, subtitle: c.subtitle, status: "published", contentBlocksJson: JSON.stringify(c.blocks), seoTitle: c.seoTitle, seoDescription: c.seoDesc },
+    });
+  }
+  console.log(`  content: ${CONTENT.length} landing pages`);
+
+  // 8) Coupons (upsert by unique code)
+  for (const c of COUPONS) {
+    await db.coupon.upsert({
+      where: { code: c.code },
+      create: { code: c.code, type: c.type, value: c.value, scope: c.scope, minOrderAmountCents: c.min ?? null, maxDiscountCents: c.maxDiscount ?? null, perUserLimit: c.perUser ?? null, status: "active" },
+      update: { type: c.type, value: c.value, scope: c.scope, minOrderAmountCents: c.min ?? null, maxDiscountCents: c.maxDiscount ?? null, perUserLimit: c.perUser ?? null, status: "active" },
+    });
+  }
+  console.log(`  coupons: ${COUPONS.length}`);
 }
 
 main()

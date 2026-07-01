@@ -106,3 +106,14 @@ npm run build:local
 # E2E 测试 (需要先启动 dev server)
 npm run test:e2e
 ```
+
+## 生产部署
+
+完整的生产部署流程（Vercel + Neon、迁移与种子、真实支付/通知接入、微信/小红书小程序发布、实时 WS、上线自检、CI、安全合规清单）见 [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)。
+
+初始化数据（法务协议、可推荐商品、会员等级、库存、示例专题页与优惠券）：
+
+```bash
+npx prisma migrate deploy && npx prisma generate
+npx prisma db seed
+```
