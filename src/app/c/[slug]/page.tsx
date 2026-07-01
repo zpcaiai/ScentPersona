@@ -10,7 +10,7 @@ import TopicProducts from "@/components/content/TopicProducts";
 
 export const dynamic = "force-dynamic";
 
-interface Block { type: string; title?: string; text?: string; items?: string[]; family?: string; cta?: { label: string; href: string } }
+interface Block { type: string; title?: string; text?: string; items?: string[]; family?: string; productNames?: string[]; offerIds?: string[]; cta?: { label: string; href: string } }
 
 async function getPage(slug: string) {
   return db.contentPage.findFirst({ where: { slug, status: "published" } });
@@ -45,7 +45,7 @@ export default async function ContentLandingPage({ params }: { params: { slug: s
           </section>
         ))}
         {blocks.filter((b) => b.type === "products").map((b, i) => (
-          <TopicProducts key={`p${i}`} family={b.family} title={b.title} />
+          <TopicProducts key={`p${i}`} family={b.family} title={b.title} productNames={b.productNames} offerIds={b.offerIds} />
         ))}
         {blocks.length === 0 && (
           <Link href="/quiz" className="inline-block rounded-xl bg-sage-500 px-5 py-2.5 font-medium text-white">{pick(locale, "开始选香测试", "Start the scent quiz")}</Link>

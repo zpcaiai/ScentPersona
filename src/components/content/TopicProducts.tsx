@@ -7,9 +7,17 @@ const yuan = (cents?: number | null) => (cents == null ? "" : `¥${(cents / 100)
 const isSelf = (t?: string | null) => !!t && /flagship|official|self/.test(t);
 
 /** Aggregated self-op / recommended offers for a topic page. Optional scent-family filter. */
-export default async function TopicProducts({ family, title }: { family?: string; title?: string }) {
+export default async function TopicProducts({ family, title, offerIds, productNames }: {
+  family?: string; title?: string; offerIds?: string[]; productNames?: string[];
+}) {
+  const where =
+    offerIds && offerIds.length
+      ? { id: { in: offerIds } }
+      : productNames && productNames.length
+        ? { reviewStatus: "approved", isAvailable: true, product: { normalizedName: { in: productNames } } }
+        : { reviewStatus: "approved", isAvailable: true, ...(family ? { product: { scentFamily: family } } : {}) };
   const offers = await db.productOffer.findMany({
-    where: { reviewStatus: "approved", isAvailable: true, ...(family ? { product: { scentFamily: family } } : {}) },
+    where,
     orderBy: [{ salesCount: "desc" }],
     take: 12,
     include: { product: { select: { normalizedName: true, scentFamily: true } } },

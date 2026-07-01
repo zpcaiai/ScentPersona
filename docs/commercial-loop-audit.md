@@ -95,3 +95,5 @@
 - ✅ **种子扩充 + 部署文档**：seed 增补 4 个示例专题落地页（`/c/*`）与 5 张示例优惠券（新人/满减/免邮/小样立减/代下单折扣，按 code 幂等 upsert）；新增 `docs/DEPLOYMENT.md` 覆盖 Vercel+Neon、迁移/种子、真实支付与通知接入、微信/小红书小程序发布、裸 WS 自托管、上线自检、CI、安全合规清单，并在 README 挂链。
 - ✅ **首页专题推荐位 + /c 聚合页 + 演示数据 + 商品 CSV**：首页新增 DB 驱动的"按香型探索 + 精选专题"模块，新增 `/c` 专题聚合页；seed 增加 `SEED_DEMO` 门控的演示用户/订单/利润快照/漏斗数据填充经营看板（幂等，`DEMO-` 前缀）；商品与多平台报价抽成 `data/products.csv` + `scripts/import-products.mjs`（--dry 校验，平台+商品ID upsert）供运营批量维护，配 `db:seed:demo` / `import:products` 脚本。
 - ✅ **专题 hero + 商品聚合位 / 演示一键重置 / CSV 校验 CI**：专题页新增 hero 图（种子 picsum 占位）与"自营/推荐商品聚合位"（`TopicProducts` 按香型聚合已审核 offer，自营优先）；`scripts/reset-demo.mjs`（`reset:demo`，--yes 执行）清空所有演示标记记录后重播 `SEED_DEMO`；新增 `.github/workflows/csv-validate.yml`，PR 改 `data/products.csv` 或导入脚本自动跑 `--dry` 校验。
+
+- ✅ **聚合位显式选品 + Hero 对象存储上传 + 看板一键重置**：专题商品聚合块支持 family / productNames / offerIds 三种指定（自营优先）；新增 S3 兼容 SigV4 预签名上传（无依赖 `src/lib/storage/s3.ts` + `/api/admin/uploads/presign` 受 product:edit 保护 + `ImageUpload` 集成进内容页），密钥不落前端；演示数据抽成共享模块 `src/lib/dev/demoData.ts`（seed / reset 脚本 / 后台按钮共用），新增 `/api/admin/demo/reset`（admin:manage + ENABLE_DEMO_TOOLS 双门控）与看板「重置演示数据」按钮。

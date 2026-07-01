@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getBusinessMetrics } from "@/lib/analytics/businessMetrics";
 import DashboardCharts from "@/components/admin/DashboardCharts";
+import DemoDataControls from "@/components/admin/DemoDataControls";
 import { getLocale } from "@/lib/i18n/server";
 import { pick } from "@/lib/i18n/config";
 
@@ -35,6 +36,7 @@ export default async function BusinessDashboard({ searchParams }: { searchParams
           ))}
         </div>
       </div>
+      {process.env.ENABLE_DEMO_TOOLS === "1" && <DemoDataControls />}
       <p className="text-xs text-clay-500">{pick(locale, "数据来自真实数据库；金额以元展示，内部以 cents 存储。利润为累计（按订单最新快照）。", "Data is from the live database; amounts shown in ¥, stored internally in cents. Profit is cumulative (per the latest order snapshot).")}</p>
 
       <h2 className="mt-5 font-medium text-clay-600">{pick(locale, "流量与测试", "Traffic & quizzes")}</h2>
