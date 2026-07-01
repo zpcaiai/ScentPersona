@@ -1,5 +1,7 @@
+"use client";
+
 import Link from "next/link";
-import { getLocale } from "@/lib/i18n/server";
+import { useLang } from "@/lib/i18n/LangProvider";
 
 const COPY = {
   zh: {
@@ -18,7 +20,8 @@ const COPY = {
 } as const;
 
 export default function Footer() {
-  const t = COPY[getLocale()];
+  const { locale } = useLang();
+  const t = COPY[locale];
   return (
     <footer className="border-t border-cream-200 mt-auto">
       <div className="mx-auto max-w-2xl px-4 py-6 text-center text-xs text-stone-400">

@@ -1,6 +1,8 @@
+"use client";
+
 import Link from "next/link";
-import { getLocale } from "@/lib/i18n/server";
 import LanguageToggle from "@/lib/i18n/LanguageToggle";
+import { useLang } from "@/lib/i18n/LangProvider";
 import type { Locale } from "@/lib/scoring/types";
 
 const navItems: { href: string; label: Record<Locale, string> }[] = [
@@ -12,7 +14,7 @@ const navItems: { href: string; label: Record<Locale, string> }[] = [
 ];
 
 export default function Header() {
-  const locale = getLocale();
+  const { locale } = useLang();
   return (
     <header className="border-b border-cream-200 bg-cream-50/80 backdrop-blur-sm sticky top-0 z-50">
       <div className="mx-auto max-w-2xl px-4 py-3 flex items-center justify-between gap-3">
