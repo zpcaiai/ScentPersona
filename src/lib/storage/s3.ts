@@ -63,3 +63,45 @@ export function presignPutUrl(key: string, expiresSeconds = 600): { uploadUrl: s
     method: "PUT",
   };
 }
+
+/**
+ * Presigned POST with a size-enforcing policy (content-length-range). Unlike PUT,
+ * S3/R2/MinIO reject the upload server-side if the body is outside [1, maxBytes].
+ */
+export function presignPost(key: string, opts: { maxBytes: number; contentType: string }): { url: string; fields: Record<string, string>; publicUrl: string } | null {
+  const c = getStorageConfig();
+  if (!c) return null;
+  const u = new URL(c.endpoint);
+  const amzDate = new Date().toISOString().replace(/[:-]|\.\d{3}/g, "");
+  const dateStamp = amzDate.slice(0, 8);
+  const credential = `${c.accessKeyId}/${dateStamp}/${c.region}/s3/aws4_request`;
+  const expiration = new Date(Date.now() + 600_000).toISOString().replace(/\.\d{3}Z$/, "Z");
+  const conditions: unknown[] = [
+    { bucket: c.bucket },
+    ["eq", "$key", key],
+    ["content-length-range", 1, opts.maxBytes],
+    ["eq", "$Content-Type", opts.contentType],
+    { "x-amz-algorithm": "AWS4-HMAC-SHA256" },
+    { "x-amz-credential": credential },
+    { "x-amz-date": amzDate },
+  ];
+  const policy = Buffer.from(JSON.stringify({ expiration, conditions })).toString("base64");
+  const signingKey = hmac(hmac(hmac(hmac("AWS4" + c.secretAccessKey, dateStamp), c.region), "s3"), "aws4_request");
+  const signature = crypto.createHmac("sha256", signingKey).update(policy).digest("hex");
+  return {
+    url: c.forcePathStyle ? `${u.protocol}//${u.host}/${c.bucket}` : `${u.protocol}//${c.bucket}.${u.host}`,
+    fields: {
+      key, "Content-Type": opts.contentType,
+      "X-Amz-Algorithm": "AWS4-HMAC-SHA256", "X-Amz-Credential": credential, "X-Amz-Date": amzDate,
+      Policy: policy, "X-Amz-Signature": signature,
+    },
+    publicUrl: `${c.publicBaseUrl}/${encPath(key)}`,
+  };
+}
+
+/** Derive the thumbnail URL from an uploaded hero URL (same-ext ".thumb" convention). Non-uploaded (e.g. picsum) URLs pass through unchanged. */
+export function deriveThumbUrl(hero?: string | null): string | undefined {
+  if (!hero) return undefined;
+  if (!hero.includes("/content/hero/")) return hero;
+  return hero.replace(/(\.[a-z0-9]+)(\?|$)/i, ".thumb$1$2");
+}

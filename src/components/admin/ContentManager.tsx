@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { pick } from "@/lib/i18n/config";
 import ImageUpload from "@/components/admin/ImageUpload";
+import ProductBlockBuilder from "@/components/admin/ProductBlockBuilder";
 export default function ContentManager({ pages }: { pages: { id: string; slug: string; title: string; status: string }[] }) {
   const router = useRouter();
   const { locale } = useLang();
@@ -15,6 +16,12 @@ export default function ContentManager({ pages }: { pages: { id: string; slug: s
     const r = await fetch("/api/admin/content", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(f) });
     const j = await r.json(); setBusy(false); setMsg(r.ok ? pick(locale, "已创建（草稿）", "Created (draft)") : j.error);
     if (r.ok) { setF({ ...f, slug: "", title: "" }); router.refresh(); }
+  }
+  function insertBlock(block: Record<string, unknown>) {
+    let arr: unknown[] = [];
+    try { const parsed = JSON.parse(f.contentBlocksJson || "[]"); if (Array.isArray(parsed)) arr = parsed; } catch { /* start fresh */ }
+    arr.push(block);
+    setF({ ...f, contentBlocksJson: JSON.stringify(arr, null, 2) });
   }
   async function toggle(id: string, status: string) {
     await fetch(`/api/admin/content/${id}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: status === "published" ? "unpublish" : "publish" }) });
@@ -37,6 +44,7 @@ export default function ContentManager({ pages }: { pages: { id: string; slug: s
           )}
         </div>
         <textarea className="w-full rounded border border-cream-300 px-2 py-1.5 font-mono text-xs" rows={5} placeholder={pick(locale, '内容块 JSON，如 [{"title":"为什么是它","text":"...","cta":{"label":"开始测试","href":"/quiz"}}]', 'Content blocks JSON, e.g. [{"title":"Why this one","text":"...","cta":{"label":"Start the quiz","href":"/quiz"}}]')} value={f.contentBlocksJson} onChange={(e) => setF({ ...f, contentBlocksJson: e.target.value })} />
+        <ProductBlockBuilder onInsert={insertBlock} />
         <input className="w-full rounded border border-cream-300 px-2 py-1.5" placeholder={pick(locale, "SEO 标题", "SEO title")} value={f.seoTitle} onChange={(e) => setF({ ...f, seoTitle: e.target.value })} />
         <button disabled={busy} onClick={create} className="w-full rounded-lg bg-sage-500 py-2 text-white">{pick(locale, "创建专题页", "Create page")}</button>
         {msg && <p className="text-clay-600">{msg}</p>}

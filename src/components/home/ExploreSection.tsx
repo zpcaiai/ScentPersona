@@ -2,6 +2,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { getLocale } from "@/lib/i18n/server";
 import { pick } from "@/lib/i18n/config";
+import { deriveThumbUrl } from "@/lib/storage/s3";
 
 /** Homepage explore module: scent-family chips (into the quiz funnel) + featured topic cards. */
 export default async function ExploreSection() {
@@ -17,7 +18,7 @@ export default async function ExploreSection() {
       where: { status: "published", pageType: "landing" },
       orderBy: { publishedAt: "desc" },
       take: 6,
-      select: { slug: true, title: true, subtitle: true },
+      select: { slug: true, title: true, subtitle: true, heroImageUrl: true },
     }),
   ]);
 
@@ -59,10 +60,16 @@ export default async function ExploreSection() {
               <Link
                 key={t.slug}
                 href={`/c/${t.slug}`}
-                className="card hover:border-sage-400 transition-colors"
+                className="card flex items-center gap-3 hover:border-sage-400 transition-colors"
               >
-                <div className="font-serif text-stone-800">{t.title}</div>
-                {t.subtitle && <div className="text-sm text-stone-500 mt-1">{t.subtitle}</div>}
+                {t.heroImageUrl && (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={deriveThumbUrl(t.heroImageUrl)} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
+                )}
+                <div>
+                  <div className="font-serif text-stone-800">{t.title}</div>
+                  {t.subtitle && <div className="text-sm text-stone-500 mt-1">{t.subtitle}</div>}
+                </div>
               </Link>
             ))}
           </div>

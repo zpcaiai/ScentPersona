@@ -4,6 +4,7 @@ import PageShell from "@/components/layout/PageShell";
 import { db } from "@/lib/db";
 import { getLocale } from "@/lib/i18n/server";
 import { pick } from "@/lib/i18n/config";
+import { deriveThumbUrl } from "@/lib/storage/s3";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +18,7 @@ export default async function TopicsIndexPage() {
   const topics = await db.contentPage.findMany({
     where: { status: "published", pageType: "landing" },
     orderBy: { publishedAt: "desc" },
-    select: { slug: true, title: true, subtitle: true },
+    select: { slug: true, title: true, subtitle: true, heroImageUrl: true },
   });
 
   return (
@@ -34,9 +35,15 @@ export default async function TopicsIndexPage() {
       ) : (
         <div className="grid gap-3">
           {topics.map((t) => (
-            <Link key={t.slug} href={`/c/${t.slug}`} className="card hover:border-sage-400 transition-colors">
-              <div className="font-serif text-lg text-stone-800">{t.title}</div>
-              {t.subtitle && <div className="text-sm text-stone-500 mt-1">{t.subtitle}</div>}
+            <Link key={t.slug} href={`/c/${t.slug}`} className="card flex items-center gap-3 hover:border-sage-400 transition-colors">
+              {t.heroImageUrl && (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src={deriveThumbUrl(t.heroImageUrl)} alt="" className="h-14 w-14 shrink-0 rounded-lg object-cover" />
+              )}
+              <div>
+                <div className="font-serif text-lg text-stone-800">{t.title}</div>
+                {t.subtitle && <div className="text-sm text-stone-500 mt-1">{t.subtitle}</div>}
+              </div>
             </Link>
           ))}
         </div>
