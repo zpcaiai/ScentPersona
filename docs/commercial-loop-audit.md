@@ -88,3 +88,4 @@
   - 微信服务号：`wechatTemplateProvider`（access_token 内存缓存 + 模板消息发送）接入通知 wechat 渠道；收件人用 OA openid（经通知 `data.openid` 传入）。
   - 至此支付覆盖：Web 扫码(微信 Native)/支付宝跳转 + 微信小程序 JSAPI + 微信 H5 + 小红书小程序；通知覆盖：站内/邮件(Resend)/短信(阿里云+Twilio)/微信服务号模板。
 - ✅ **小程序 C 端与 Web 对齐**：token 鉴权（`/api/account/*` 支持 Bearer，登录返回 token，小程序自动携带）；新增 16 个小程序页面（账户中心/气味资产/地址簿/衣橱/券/邀请/会员/通知/发票/隐私/客服+会话/售后/试香反馈/专题/法务），tabBar「我的」改为账户中心，proxy-order 增加售后与试香反馈入口；新增 `/api/content/[slug]`、`/api/legal/[slug]`。微信/小红书双端同一套 Taro 代码。
+- ✅ **看板图表 + 支付实时推送 + E2E**：经营看板接入 Chart.js（转化漏斗/订单类型/利润/履约/商品互动 5 图，CDN 加载）；`/pay/wechat` 由客户端轮询改为 **SSE 服务端推送**（`/api/payments/wechat-events`，单连接 EventSource，支付成功即推送；注：Vercel 无常驻进程不支持裸 WebSocket，SSE 为该栈的正确推送方式，跨实例可再接 Redis/Pusher）；新增 Playwright E2E `tests/e2e/proxy-order.spec.ts` 覆盖代下单 API 全链路（报价→确认→支付→幂等→采购→发货→签收）+ 确认页 UI 冒烟 + 协议未勾选异常，配 `/api/test/seed-offer`（`E2E_TEST=1` 才启用）。

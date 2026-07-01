@@ -28,15 +28,14 @@ export default function WechatQR({ text, orderId }: { text: string; orderId: str
   }, [text]);
 
   useEffect(() => {
-    if (!orderId) return;
-    const t = setInterval(async () => {
-      try {
-        const r = await fetch(`/api/payments/wechat-status?orderId=${encodeURIComponent(orderId)}`);
-        const j = await r.json();
-        if (j.paid) { setPaid(true); clearInterval(t); }
-      } catch { /* ignore */ }
-    }, 3000);
-    return () => clearInterval(t);
+    if (!orderId || typeof EventSource === "undefined") return;
+    // Server-pushed status via SSE (no client polling).
+    const es = new EventSource(`/api/payments/wechat-events?orderId=${encodeURIComponent(orderId)}`);
+    const done = () => { setPaid(true); es.close(); };
+    es.addEventListener("paid", done);
+    es.addEventListener("timeout", () => es.close());
+    es.addEventListener("failed", () => es.close());
+    return () => es.close();
   }, [orderId]);
 
   if (paid) return <p style={{ color: "#556648", fontWeight: 600, marginTop: 16 }}>{pick(locale, "✅ 支付成功，订单已更新", "✅ Payment successful, order updated")}</p>;

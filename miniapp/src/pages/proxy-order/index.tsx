@@ -77,10 +77,10 @@ export default function ProxyOrder() {
       </View>
 
       {["shipped", "delivered", "after_sales"].includes(d.status) && (
-        <Button className="btn-secondary" onClick={() => Taro.navigateTo({ url: `/pages/after-sales/index?orderNo=${orderNo}&token=${token}` })}>遇到问题？申请售后</Button>
+        <Button className="btn-secondary" onClick={() => Taro.navigateTo({ url: `/pages/after-sales/index?orderNo=${orderNo}&token=${token}` })}>{pick(locale, "遇到问题？申请售后", "Something wrong? Request after-sales")}</Button>
       )}
       {d.status === "delivered" && (
-        <Button className="btn-primary" onClick={() => Taro.navigateTo({ url: `/pages/sample-feedback/index?orderNo=${orderNo}&token=${token}` })}>填写试香反馈，领正装抵扣券</Button>
+        <Button className="btn-primary" onClick={() => Taro.navigateTo({ url: `/pages/sample-feedback/index?orderNo=${orderNo}&token=${token}` })}>{pick(locale, "填写试香反馈，领正装抵扣券", "Share scent feedback, get a full-bottle credit")}</Button>
       )}
 
       {["paid", "purchasing", "out_of_stock", "price_changed"].includes(d.status) &&

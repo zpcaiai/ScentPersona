@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getBusinessMetrics } from "@/lib/analytics/businessMetrics";
+import DashboardCharts from "@/components/admin/DashboardCharts";
 import { getLocale } from "@/lib/i18n/server";
 import { pick } from "@/lib/i18n/config";
 
