@@ -117,3 +117,12 @@ npm run test:e2e
 npx prisma migrate deploy && npx prisma generate
 npx prisma db seed
 ```
+
+### 演示数据与运营维护
+
+```bash
+npm run db:seed:demo       # 额外写入演示用户/订单，填充经营看板（生产勿用）
+npm run import:products     # 从 data/products.csv 批量导入/更新商品与报价（运营维护）
+```
+
+前台 `/c` 为专题聚合页，首页含"按香型探索 + 精选专题"推荐位。

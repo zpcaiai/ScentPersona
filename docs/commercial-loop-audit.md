@@ -93,3 +93,4 @@
 - ✅ **Prisma seed + 全量类型检查通过**：`prisma/seed.ts`（幂等）种子——5 份法务协议（发布生效）、3 款可推荐商品共 6 个多平台 offer、4 档会员等级、3 个自营 SKU（含批号/有效期/库存）、经营主体、支付手续费 CostRule；配 `package.json` 的 `prisma.seed`，`npx prisma db seed` 或 `npm run db:seed` 即可，让 `/admin/launch-checklist` 的法务/可推荐商品/库存三项转绿。生成完整 Prisma client 后**全项目 `tsc --noEmit` 0 错误**（并修掉随之暴露的 2 处真实类型问题）。
 
 - ✅ **种子扩充 + 部署文档**：seed 增补 4 个示例专题落地页（`/c/*`）与 5 张示例优惠券（新人/满减/免邮/小样立减/代下单折扣，按 code 幂等 upsert）；新增 `docs/DEPLOYMENT.md` 覆盖 Vercel+Neon、迁移/种子、真实支付与通知接入、微信/小红书小程序发布、裸 WS 自托管、上线自检、CI、安全合规清单，并在 README 挂链。
+- ✅ **首页专题推荐位 + /c 聚合页 + 演示数据 + 商品 CSV**：首页新增 DB 驱动的"按香型探索 + 精选专题"模块，新增 `/c` 专题聚合页；seed 增加 `SEED_DEMO` 门控的演示用户/订单/利润快照/漏斗数据填充经营看板（幂等，`DEMO-` 前缀）；商品与多平台报价抽成 `data/products.csv` + `scripts/import-products.mjs`（--dry 校验，平台+商品ID upsert）供运营批量维护，配 `db:seed:demo` / `import:products` 脚本。

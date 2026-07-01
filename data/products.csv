@@ -1,0 +1,20 @@
+product_name,brand,volume_ml,scent_family,gender,top_notes,middle_notes,base_notes,tags,scenes,platform,platform_product_id,price_cents,original_price_cents,shop_name,shop_type,rating,review_count,sales_count
+祖玛珑 蓝风铃淡香水,Jo Malone,100,清新花香,unisex,蓝风铃|柠檬,茉莉|铃兰,白麝香|琥珀,clean:8;soft:6;woody:3;bright:7;presence:4;calm:5,通勤|约会|日常,tmall,seed-bluebell-tmall,118000,138000,祖玛珑官方旗舰店,flagship_official,4.9,5200,3100
+祖玛珑 蓝风铃淡香水,Jo Malone,100,清新花香,unisex,蓝风铃|柠檬,茉莉|铃兰,白麝香|琥珀,clean:8;soft:6;woody:3;bright:7;presence:4;calm:5,通勤|约会|日常,jd,seed-bluebell-jd,121000,,京东国际美妆,brand_authorized,4.8,2100,1500
+祖玛珑 蓝风铃淡香水,Jo Malone,100,清新花香,unisex,蓝风铃|柠檬,茉莉|铃兰,白麝香|琥珀,clean:8;soft:6;woody:3;bright:7;presence:4;calm:5,通勤|约会|日常,pdd,seed-bluebell-pdd,99000,,香氛折扣店,pop,4.5,320,800
+白茶清晨淡香水,ScentPersona,50,白茶木质,unisex,白茶|柑橘,橙花|白花,白麝香|雪松,clean:9;soft:7;woody:4;bright:5;presence:3;calm:7,通勤|独处|睡前,tmall,seed-baicha-tmall,29900,39900,ScentPersona 官方旗舰店,flagship_official,4.9,1800,2600
+白茶清晨淡香水,ScentPersona,50,白茶木质,unisex,白茶|柑橘,橙花|白花,白麝香|雪松,clean:9;soft:7;woody:4;bright:5;presence:3;calm:7,通勤|独处|睡前,taobao,seed-baicha-taobao,28800,,香遇小铺,pop,4.7,640,900
+深夜木屋淡香精,ScentPersona,50,木质东方,unisex,佛手柑,雪松|广藿香,檀香|琥珀|香草,clean:3;soft:5;woody:9;bright:2;presence:8;calm:6,重要场合|约会|夜晚,jd,seed-muwu-jd,45900,,ScentPersona 京东自营,flagship_official,4.8,760,540
+海盐柑橘古龙水,ScentPersona,100,柑橘馥奇,male,佛手柑|柠檬|海盐,迷迭香|薰衣草,雪松|白麝香,clean:9;soft:3;woody:3;bright:9;presence:5;calm:4,通勤|运动|夏日,tmall,seed-haiyan-tmall,32900,42900,ScentPersona 官方旗舰店,flagship_official,4.8,1200,1700
+海盐柑橘古龙水,ScentPersona,100,柑橘馥奇,male,佛手柑|柠檬|海盐,迷迭香|薰衣草,雪松|白麝香,clean:9;soft:3;woody:3;bright:9;presence:5;calm:4,通勤|运动|夏日,jd,seed-haiyan-jd,33900,,ScentPersona 京东自营,flagship_official,4.8,540,620
+栀子花园淡香水,ScentPersona,50,白花香,female,栀子|柑橘,茉莉|晚香玉,白麝香|檀香,clean:6;soft:9;woody:2;bright:6;presence:6;calm:5,约会|婚礼|春日,tmall,seed-zhizi-tmall,30900,40900,ScentPersona 官方旗舰店,flagship_official,4.9,1500,2100
+栀子花园淡香水,ScentPersona,50,白花香,female,栀子|柑橘,茉莉|晚香玉,白麝香|檀香,clean:6;soft:9;woody:2;bright:6;presence:6;calm:5,约会|婚礼|春日,taobao,seed-zhizi-taobao,29900,,香遇小铺,pop,4.7,380,520
+琥珀丝绒香精,ScentPersona,50,琥珀东方,unisex,粉红胡椒|佛手柑,玫瑰|乳香,琥珀|香草|安息香,clean:2;soft:6;woody:6;bright:2;presence:9;calm:5,晚宴|秋冬|重要场合,jd,seed-hupo-jd,52900,,ScentPersona 京东自营,flagship_official,4.8,430,300
+焦糖拿铁淡香水,ScentPersona,50,美食香,female,咖啡|佛手柑,焦糖|榛子,香草|檀香,clean:3;soft:8;woody:4;bright:3;presence:6;calm:6,约会|秋冬|日常,tmall,seed-jiaotang-tmall,27900,35900,ScentPersona 官方旗舰店,flagship_official,4.8,990,1400
+焦糖拿铁淡香水,ScentPersona,50,美食香,female,咖啡|佛手柑,焦糖|榛子,香草|檀香,clean:3;soft:8;woody:4;bright:3;presence:6;calm:6,约会|秋冬|日常,pdd,seed-jiaotang-pdd,22900,,香氛折扣店,pop,4.4,210,460
+海屿微风淡香水,ScentPersona,100,水生清新,male,海洋调|柠檬|青柠,鼠尾草|水生花,龙涎香|麝香,clean:9;soft:3;woody:3;bright:8;presence:4;calm:6,通勤|夏日|运动,jd,seed-haiyu-jd,31900,,ScentPersona 京东自营,flagship_official,4.7,610,700
+海屿微风淡香水,ScentPersona,100,水生清新,male,海洋调|柠檬|青柠,鼠尾草|水生花,龙涎香|麝香,clean:9;soft:3;woody:3;bright:8;presence:4;calm:6,通勤|夏日|运动,taobao,seed-haiyu-taobao,29900,,香遇小铺,pop,4.6,240,350
+书房皮革香精,ScentPersona,50,皮革木质,male,佛手柑|藏红花,皮革|鸢尾,广藿香|檀香,clean:2;soft:4;woody:9;bright:2;presence:8;calm:5,商务|秋冬|夜晚,jd,seed-pige-jd,55900,,ScentPersona 京东自营,flagship_official,4.8,350,240
+雨后青草淡香水,ScentPersona,30,绿意清新,unisex,青草|紫罗兰叶|柑橘,无花果叶|铃兰,白麝香|雪松,clean:8;soft:6;woody:3;bright:6;presence:3;calm:8,独处|通勤|春日,tmall,seed-qingcao-tmall,19900,25900,ScentPersona 官方旗舰店,flagship_official,4.9,2200,3000
+大马士革玫瑰香精,ScentPersona,50,玫瑰花香,female,荔枝|粉红胡椒,大马士革玫瑰|牡丹,麝香|广藿香,clean:4;soft:8;woody:3;bright:5;presence:7;calm:5,约会|婚礼|秋冬,tmall,seed-meigui-tmall,48900,58900,ScentPersona 官方旗舰店,flagship_official,4.9,1300,900
+大马士革玫瑰香精,ScentPersona,50,玫瑰花香,female,荔枝|粉红胡椒,大马士革玫瑰|牡丹,麝香|广藿香,clean:4;soft:8;woody:3;bright:5;presence:7;calm:5,约会|婚礼|秋冬,jd,seed-meigui-jd,49900,,ScentPersona 京东自营,flagship_official,4.8,470,380

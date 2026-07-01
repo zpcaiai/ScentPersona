@@ -5,6 +5,7 @@ import { getPersonas } from "@/data/personas";
 import TrackEvent from "@/components/common/TrackEvent";
 import { getLocale } from "@/lib/i18n/server";
 import { pick } from "@/lib/i18n/config";
+import ExploreSection from "@/components/home/ExploreSection";
 
 const previewPersonas = ["rain-study", "warm-sweater", "white-shirt-morning", "olive-rest"];
 
@@ -64,6 +65,9 @@ export default function LandingPage() {
           ))}
         </div>
       </section>
+
+      {/* Explore: scent families + featured topics (DB-backed) */}
+      <ExploreSection />
 
       {/* Persona preview */}
       <section className="py-8">

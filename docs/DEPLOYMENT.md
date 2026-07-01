@@ -111,6 +111,23 @@ npx prisma db seed        # 等价 npm run db:seed
 - 5 张示例优惠券（`WELCOME10` 新人立减 ¥10、`SAVE20OVER200` 满 ¥200 减 ¥20、`FREESHIP` 免邮、`SAMPLE5` 小样立减 ¥5、`PROXY15` 代下单 85 折封顶 ¥30）
 - 经营主体资料 + 支付手续费成本规则（0.6%，喂给利润核算）
 
+**演示数据（可选，演示经营看板用）**：种子默认只写上面的上线必需数据；要让 `/admin/business-dashboard` 有数据，加环境变量跑一次：
+
+```bash
+SEED_DEMO=1 npx prisma db seed     # 或 npm run db:seed:demo
+```
+
+会写入 8 个演示用户、24 笔样品/代下单订单（跨状态、跨最近 75 天）、利润快照、40 次测试会话与 60 条商品浏览事件及少量售后/工单/履约记录。幂等（哨兵订单 `DEMO-0001` 存在则跳过），演示数据均标 `DEMO-` / `@scentpersona.example`，生产环境请勿设置 `SEED_DEMO`。
+
+**运营批量维护商品（CSV）**：商品与多平台报价可用 `data/products.csv` 维护（一行一个报价，列表列用 `|`、tags 用 `键:值;`）。编辑后导入：
+
+```bash
+node scripts/import-products.mjs --dry   # 先校验解析
+npm run import:products                   # 写库：Product 按名匹配、Offer 按 平台+商品ID upsert
+```
+
+前台新增 `/c` 专题聚合页（列出所有已发布专题），首页也有"按香型探索 + 精选专题"推荐位，数据均来自数据库种子。
+
 ---
 
 ## 6. 首个后台账号（bootstrap）
