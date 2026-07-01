@@ -25,7 +25,7 @@ const LEGAL: { type: string; title: string; content: string }[] = [
 const NOW = new Date();
 const PRODUCTS: {
   name: string; brand: string; volumeMl: number; scentFamily: string;
-  top: string[]; middle: string[]; base: string[]; tags: Record<string, number>; scenes: string[];
+  top: string[]; middle: string[]; base: string[]; tags: Record<string, number>; scenes: string[]; gender?: string;
   offers: { platform: string; pid: string; priceCents: number; original?: number; shop: string; shopType: string; rating: number; reviews: number; sales: number }[];
 }[] = [
   {
@@ -53,6 +53,75 @@ const PRODUCTS: {
     tags: { clean: 3, soft: 5, woody: 9, bright: 2, presence: 8, calm: 6 }, scenes: ["重要场合", "约会", "夜晚"],
     offers: [
       { platform: "jd", pid: "seed-muwu-jd", priceCents: 45900, shop: "ScentPersona 京东自营", shopType: "flagship_official", rating: 4.8, reviews: 760, sales: 540 },
+    ],
+  },
+  {
+    name: "海盐柑橘古龙水", brand: "ScentPersona", volumeMl: 100, scentFamily: "柑橘馥奇", gender: "male",
+    top: ["佛手柑", "柠檬", "海盐"], middle: ["迷迭香", "薰衣草"], base: ["雪松", "白麝香"],
+    tags: { clean: 9, soft: 3, woody: 3, bright: 9, presence: 5, calm: 4 }, scenes: ["通勤", "运动", "夏日"],
+    offers: [
+      { platform: "tmall", pid: "seed-haiyan-tmall", priceCents: 32900, original: 42900, shop: "ScentPersona 官方旗舰店", shopType: "flagship_official", rating: 4.8, reviews: 1200, sales: 1700 },
+      { platform: "jd", pid: "seed-haiyan-jd", priceCents: 33900, shop: "ScentPersona 京东自营", shopType: "flagship_official", rating: 4.8, reviews: 540, sales: 620 },
+    ],
+  },
+  {
+    name: "栀子花园淡香水", brand: "ScentPersona", volumeMl: 50, scentFamily: "白花香", gender: "female",
+    top: ["栀子", "柑橘"], middle: ["茉莉", "晚香玉"], base: ["白麝香", "檀香"],
+    tags: { clean: 6, soft: 9, woody: 2, bright: 6, presence: 6, calm: 5 }, scenes: ["约会", "婚礼", "春日"],
+    offers: [
+      { platform: "tmall", pid: "seed-zhizi-tmall", priceCents: 30900, original: 40900, shop: "ScentPersona 官方旗舰店", shopType: "flagship_official", rating: 4.9, reviews: 1500, sales: 2100 },
+      { platform: "taobao", pid: "seed-zhizi-taobao", priceCents: 29900, shop: "香遇小铺", shopType: "pop", rating: 4.7, reviews: 380, sales: 520 },
+    ],
+  },
+  {
+    name: "琥珀丝绒香精", brand: "ScentPersona", volumeMl: 50, scentFamily: "琥珀东方",
+    top: ["粉红胡椒", "佛手柑"], middle: ["玫瑰", "乳香"], base: ["琥珀", "香草", "安息香"],
+    tags: { clean: 2, soft: 6, woody: 6, bright: 2, presence: 9, calm: 5 }, scenes: ["晚宴", "秋冬", "重要场合"],
+    offers: [
+      { platform: "jd", pid: "seed-hupo-jd", priceCents: 52900, shop: "ScentPersona 京东自营", shopType: "flagship_official", rating: 4.8, reviews: 430, sales: 300 },
+    ],
+  },
+  {
+    name: "焦糖拿铁淡香水", brand: "ScentPersona", volumeMl: 50, scentFamily: "美食香", gender: "female",
+    top: ["咖啡", "佛手柑"], middle: ["焦糖", "榛子"], base: ["香草", "檀香"],
+    tags: { clean: 3, soft: 8, woody: 4, bright: 3, presence: 6, calm: 6 }, scenes: ["约会", "秋冬", "日常"],
+    offers: [
+      { platform: "tmall", pid: "seed-jiaotang-tmall", priceCents: 27900, original: 35900, shop: "ScentPersona 官方旗舰店", shopType: "flagship_official", rating: 4.8, reviews: 990, sales: 1400 },
+      { platform: "pdd", pid: "seed-jiaotang-pdd", priceCents: 22900, shop: "香氛折扣店", shopType: "pop", rating: 4.4, reviews: 210, sales: 460 },
+    ],
+  },
+  {
+    name: "海屿微风淡香水", brand: "ScentPersona", volumeMl: 100, scentFamily: "水生清新", gender: "male",
+    top: ["海洋调", "柠檬", "青柠"], middle: ["鼠尾草", "水生花"], base: ["龙涎香", "麝香"],
+    tags: { clean: 9, soft: 3, woody: 3, bright: 8, presence: 4, calm: 6 }, scenes: ["通勤", "夏日", "运动"],
+    offers: [
+      { platform: "jd", pid: "seed-haiyu-jd", priceCents: 31900, shop: "ScentPersona 京东自营", shopType: "flagship_official", rating: 4.7, reviews: 610, sales: 700 },
+      { platform: "taobao", pid: "seed-haiyu-taobao", priceCents: 29900, shop: "香遇小铺", shopType: "pop", rating: 4.6, reviews: 240, sales: 350 },
+    ],
+  },
+  {
+    name: "书房皮革香精", brand: "ScentPersona", volumeMl: 50, scentFamily: "皮革木质", gender: "male",
+    top: ["佛手柑", "藏红花"], middle: ["皮革", "鸢尾"], base: ["广藿香", "檀香"],
+    tags: { clean: 2, soft: 4, woody: 9, bright: 2, presence: 8, calm: 5 }, scenes: ["商务", "秋冬", "夜晚"],
+    offers: [
+      { platform: "jd", pid: "seed-pige-jd", priceCents: 55900, shop: "ScentPersona 京东自营", shopType: "flagship_official", rating: 4.8, reviews: 350, sales: 240 },
+    ],
+  },
+  {
+    name: "雨后青草淡香水", brand: "ScentPersona", volumeMl: 30, scentFamily: "绿意清新",
+    top: ["青草", "紫罗兰叶", "柑橘"], middle: ["无花果叶", "铃兰"], base: ["白麝香", "雪松"],
+    tags: { clean: 8, soft: 6, woody: 3, bright: 6, presence: 3, calm: 8 }, scenes: ["独处", "通勤", "春日"],
+    offers: [
+      { platform: "tmall", pid: "seed-qingcao-tmall", priceCents: 19900, original: 25900, shop: "ScentPersona 官方旗舰店", shopType: "flagship_official", rating: 4.9, reviews: 2200, sales: 3000 },
+    ],
+  },
+  {
+    name: "大马士革玫瑰香精", brand: "ScentPersona", volumeMl: 50, scentFamily: "玫瑰花香", gender: "female",
+    top: ["荔枝", "粉红胡椒"], middle: ["大马士革玫瑰", "牡丹"], base: ["麝香", "广藿香"],
+    tags: { clean: 4, soft: 8, woody: 3, bright: 5, presence: 7, calm: 5 }, scenes: ["约会", "婚礼", "秋冬"],
+    offers: [
+      { platform: "tmall", pid: "seed-meigui-tmall", priceCents: 48900, original: 58900, shop: "ScentPersona 官方旗舰店", shopType: "flagship_official", rating: 4.9, reviews: 1300, sales: 900 },
+      { platform: "jd", pid: "seed-meigui-jd", priceCents: 49900, shop: "ScentPersona 京东自营", shopType: "flagship_official", rating: 4.8, reviews: 470, sales: 380 },
     ],
   },
 ];
@@ -105,6 +174,51 @@ const CONTENT: { slug: string; title: string; subtitle: string; seoTitle: string
       { cta: { label: "看看适合你的通勤香", href: "/quiz" } },
     ],
   },
+  {
+    slug: "summer-citrus", title: "夏日清凉柑橘", subtitle: "热的时候，只想要干净又提神的味道",
+    seoTitle: "夏天香水推荐：柑橘与水生 | ScentPersona", seoDesc: "高温天最舒服的柑橘、水生、绿意方向，清爽不腻，适合通勤与运动。",
+    blocks: [
+      { title: "夏天就该清清爽爽", text: "高温会放大香味，所以夏天更适合清淡通透的方向：柑橘、海盐、青草、水生花。" },
+      { title: "夏日三个稳妥方向", items: ["柑橘古龙：提神、干净、存在感低", "水生清新：像刚吹过海风", "绿意青草：安静又透气"] },
+      { cta: { label: "找到你的夏日香", href: "/quiz" } },
+    ],
+  },
+  {
+    slug: "office-light", title: "职场淡香入门", subtitle: "让人觉得你干净，而不是让人闻到你香水",
+    seoTitle: "职场通勤淡香推荐 | ScentPersona", seoDesc: "适合上班、开会、见客户的低存在感淡香，白茶、柑橘、白麝香更稳。",
+    blocks: [
+      { title: "职场香的分寸", text: "办公室是共享空间，香味要凑近才闻得到。喷 1 下在衣领内侧或手腕即可。" },
+      { title: "不会出错的选择", items: ["白茶 / 白麝香：干净到像刚洗过", "柑橘馥奇：清爽有精神", "绿意青草：安静不抢戏"] },
+      { cta: { label: "测测你的通勤香", href: "/quiz" } },
+    ],
+  },
+  {
+    slug: "date-sweet", title: "约会甜香指南", subtitle: "温柔一点，靠近的时候刚刚好",
+    seoTitle: "约会香水推荐：甜香与白花 | ScentPersona", seoDesc: "约会场合适合的美食甜香、白花与玫瑰方向，温柔有记忆点又不齁。",
+    blocks: [
+      { title: "甜，但别齁", text: "约会香的关键是靠近时的惊喜。焦糖、香草、白花、玫瑰都很讨喜，喷在锁骨或发梢更自然。" },
+      { title: "三种温柔方向", items: ["美食甜香：焦糖、香草、奶感", "白花香：栀子、茉莉、晚香玉", "玫瑰花香：柔而不老气"] },
+      { cta: { label: "找到你的约会香", href: "/quiz" } },
+    ],
+  },
+  {
+    slug: "niche-intro", title: "小众沙龙入门", subtitle: "想要一点辨识度，又不想踩雷",
+    seoTitle: "小众沙龙香入门推荐 | ScentPersona", seoDesc: "从琥珀、皮革、玫瑰香精入门沙龙香，存在感更强，适合秋冬与重要场合。",
+    blocks: [
+      { title: "沙龙香在贵什么", text: "更高的香精浓度、更有个性的原料。存在感和留香更强，适合秋冬和需要被记住的场合。" },
+      { title: "入门三支", items: ["琥珀东方：温暖、有包裹感", "皮革木质：沉稳、有气场", "玫瑰香精：柔中带力量"] },
+      { cta: { label: "看看适合你的沙龙香", href: "/quiz" } },
+    ],
+  },
+  {
+    slug: "four-season-wardrobe", title: "四季香水衣橱", subtitle: "一年四季，各留一支就够了",
+    seoTitle: "四季香水衣橱怎么搭 | ScentPersona", seoDesc: "春柑橘、夏水生、秋木质、冬琥珀——用一支合适的香陪你过完一年四季。",
+    blocks: [
+      { title: "衣橱思路", text: "香水和衣服一样分季节。与其买很多，不如每季留一支合适的，轮换着用。" },
+      { title: "四季各一支", items: ["春：柑橘 / 绿意，轻盈明亮", "夏：水生 / 白茶，清爽通透", "秋：木质 / 玫瑰，温润有层次", "冬：琥珀 / 皮革，温暖有存在感"] },
+      { cta: { label: "搭一个属于你的衣橱", href: "/quiz" } },
+    ],
+  },
 ];
 
 const COUPONS: { code: string; type: string; value: number; scope: string; min?: number; maxDiscount?: number; perUser?: number }[] = [
@@ -132,7 +246,7 @@ async function main() {
       product = await db.product.create({
         data: {
           normalizedName: p.name, brand: p.brand, volumeMl: p.volumeMl, category: "fragrance",
-          scentFamily: p.scentFamily, gender: "unisex",
+          scentFamily: p.scentFamily, gender: p.gender ?? "unisex",
           topNotesJson: JSON.stringify(p.top), middleNotesJson: JSON.stringify(p.middle), baseNotesJson: JSON.stringify(p.base),
           scentTagsJson: JSON.stringify(p.tags), suitableScenesJson: JSON.stringify(p.scenes), reviewStatus: "approved",
         },
