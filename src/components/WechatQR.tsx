@@ -28,14 +28,37 @@ export default function WechatQR({ text, orderId }: { text: string; orderId: str
   }, [text]);
 
   useEffect(() => {
-    if (!orderId || typeof EventSource === "undefined") return;
-    // Server-pushed status via SSE (no client polling).
-    const es = new EventSource(`/api/payments/wechat-events?orderId=${encodeURIComponent(orderId)}`);
-    const done = () => { setPaid(true); es.close(); };
-    es.addEventListener("paid", done);
-    es.addEventListener("timeout", () => es.close());
-    es.addEventListener("failed", () => es.close());
-    return () => es.close();
+    if (!orderId) return;
+    let cleanup = () => {};
+    let settled = false;
+    const markPaid = () => { if (!settled) { settled = true; setPaid(true); } cleanup(); };
+
+    const startSse = () => {
+      if (typeof EventSource === "undefined") return;
+      const es = new EventSource(`/api/payments/wechat-events?orderId=${encodeURIComponent(orderId)}`);
+      es.addEventListener("paid", markPaid);
+      es.addEventListener("timeout", () => es.close());
+      es.addEventListener("failed", () => es.close());
+      cleanup = () => es.close();
+    };
+
+    // Prefer a real WebSocket when a self-hosted WS endpoint is configured;
+    // fall back to SSE (serverless) on any connection error.
+    const wsBase = process.env.NEXT_PUBLIC_WS_URL;
+    if (wsBase && typeof WebSocket !== "undefined") {
+      let opened = false;
+      let ws: WebSocket;
+      try {
+        ws = new WebSocket(`${wsBase.replace(/\/$/, "")}/?orderId=${encodeURIComponent(orderId)}`);
+      } catch { startSse(); return () => cleanup(); }
+      ws.onopen = () => { opened = true; };
+      ws.onmessage = (ev) => { try { const m = JSON.parse(ev.data); if (m.event === "paid") markPaid(); else if (m.event === "failed") ws.close(); } catch { /* ignore */ } };
+      ws.onerror = () => { if (!opened && !settled) { try { ws.close(); } catch { /* */ } startSse(); } };
+      cleanup = () => { try { ws.close(); } catch { /* */ } };
+      return () => cleanup();
+    }
+    startSse();
+    return () => cleanup();
   }, [orderId]);
 
   if (paid) return <p style={{ color: "#556648", fontWeight: 600, marginTop: 16 }}>{pick(locale, "✅ 支付成功，订单已更新", "✅ Payment successful, order updated")}</p>;

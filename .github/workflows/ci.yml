@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  checks:
+    name: Typecheck + Unit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm install --no-audit --no-fund
+      - run: npx prisma generate
+      - run: npm run typecheck
+      - run: npm test
+
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: scentpersona
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/scentpersona?schema=public
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/scentpersona?schema=public
+      APP_URL: http://localhost:3000
+      E2E_TEST: "1"
+      ADMIN_PASSWORD: ci-admin-pass
+      ADMIN_BOOTSTRAP_EMAIL: admin@scentpersona.local
+      SESSION_SECRET: ci-session-secret
+      ADMIN_SESSION_SECRET: ci-admin-session-secret
+      MOCK_PAY_SECRET: ci-mock-secret
+      DEFAULT_PAYMENT_PROVIDER: mock
+      DEFAULT_SHIPPING_PROVIDER: mock
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm install --no-audit --no-fund
+      - name: Apply migrations
+        run: npx prisma migrate deploy
+      - name: Build
+        run: npm run build:local
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+      - name: Run E2E
+        run: |
+          ./node_modules/.bin/next start &
+          SERVER_PID=$!
+          echo "waiting for server…"
+          for i in $(seq 1 60); do curl -sf http://localhost:3000/ >/dev/null && break; sleep 2; done
+          PLAYWRIGHT_BASE_URL=http://localhost:3000 npm run test:e2e
+          STATUS=$?
+          kill $SERVER_PID 2>/dev/null || true
+          exit $STATUS
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

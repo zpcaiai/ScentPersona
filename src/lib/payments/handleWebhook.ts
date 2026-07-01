@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { getPaymentProvider } from "./index";
 import { recordOrderEvent, transitionOrderStatus } from "@/lib/orders/transitionOrderStatus";
+import { publishPaymentEvent } from "./publishPaymentEvent";
 import { recalcOrderProfitSafe } from "@/lib/finance/calculateOrderProfit";
 import { notifyOrderSafe } from "@/lib/notifications/notifyOrder";
 
@@ -43,6 +44,7 @@ export async function handlePaymentWebhook(
       title: "支付未成功",
       message: ev.type,
     });
+    publishPaymentEvent(payment.orderId, "failed", { status: "failed" });
     return { ok: true, status: "failed" };
   }
 
@@ -98,5 +100,6 @@ export async function handlePaymentWebhook(
 
   recalcOrderProfitSafe(payment.orderId);
   notifyOrderSafe(payment.orderId, "payment_success");
+  publishPaymentEvent(payment.orderId, "paid", { status: "paid" });
   return { ok: true, status: "paid" };
 }

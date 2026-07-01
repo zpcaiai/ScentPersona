@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
+import { useLang } from "@/lib/i18n/LangProvider";
+import { pick } from "@/lib/i18n/config";
 
 interface Props {
   funnel: { starts: number; completions: number; paid: number };
@@ -14,6 +16,7 @@ const CLAY = "#b08d5e";
 const CREAM = "#e4d8c0";
 
 export default function DashboardCharts(props: Props) {
+  const { locale } = useLang();
   const funnel = useRef<HTMLCanvasElement>(null);
   const types = useRef<HTMLCanvasElement>(null);
   const profit = useRef<HTMLCanvasElement>(null);
@@ -28,9 +31,9 @@ export default function DashboardCharts(props: Props) {
       const noLegend = { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } }, maintainAspectRatio: false };
       const mk = (ref: React.RefObject<HTMLCanvasElement>, cfg: any) => { if (ref.current) charts.push(new Chart(ref.current, cfg)); };
 
-      mk(funnel, { type: "bar", data: { labels: ["测试开始", "测试完成", "支付订单"], datasets: [{ data: [props.funnel.starts, props.funnel.completions, props.funnel.paid], backgroundColor: GREEN, borderRadius: 6 }] }, options: noLegend });
-      mk(types, { type: "doughnut", data: { labels: ["代下单", "小样套装"], datasets: [{ data: [props.orderTypes.proxy, props.orderTypes.sample], backgroundColor: [GREEN, CLAY] }] }, options: { maintainAspectRatio: false } });
-      mk(profit, { type: "bar", data: { labels: ["收入", "毛利", "净利"], datasets: [{ data: [props.profit.revenue / 100, props.profit.gross / 100, props.profit.net / 100], backgroundColor: [CLAY, GREEN, "#8a9a7b"], borderRadius: 6 }] }, options: noLegend });
+      mk(funnel, { type: "bar", data: { labels: [pick(locale, "测试开始", "Quiz started"), pick(locale, "测试完成", "Quiz completed"), pick(locale, "支付订单", "Paid orders")], datasets: [{ data: [props.funnel.starts, props.funnel.completions, props.funnel.paid], backgroundColor: GREEN, borderRadius: 6 }] }, options: noLegend });
+      mk(types, { type: "doughnut", data: { labels: [pick(locale, "代下单", "Proxy order"), pick(locale, "小样套装", "Sample kit")], datasets: [{ data: [props.orderTypes.proxy, props.orderTypes.sample], backgroundColor: [GREEN, CLAY] }] }, options: { maintainAspectRatio: false } });
+      mk(profit, { type: "bar", data: { labels: [pick(locale, "收入", "Revenue"), pick(locale, "毛利", "Gross"), pick(locale, "净利", "Net")], datasets: [{ data: [props.profit.revenue / 100, props.profit.gross / 100, props.profit.net / 100], backgroundColor: [CLAY, GREEN, "#8a9a7b"], borderRadius: 6 }] }, options: noLegend });
       const fk = Object.keys(props.fulfillment);
       mk(fulfil, { type: "bar", data: { labels: fk, datasets: [{ data: fk.map((k) => props.fulfillment[k]), backgroundColor: GREEN, borderRadius: 6 }] }, options: noLegend });
       const pk = ["view", "favorite", "outbound_click", "dislike", "click_offer"].filter((k) => props.products[k] != null);
@@ -45,7 +48,7 @@ export default function DashboardCharts(props: Props) {
     }
     return () => { charts.forEach((c) => c.destroy()); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [locale]);
 
   const Card = ({ title, r }: { title: string; r: React.RefObject<HTMLCanvasElement> }) => (
     <div className="rounded-xl border border-cream-200 p-3">
@@ -56,11 +59,11 @@ export default function DashboardCharts(props: Props) {
   void CREAM;
   return (
     <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-      <Card title="转化漏斗" r={funnel} />
-      <Card title="订单类型" r={types} />
-      <Card title="利润（元，累计）" r={profit} />
-      <Card title="代下单履约分布" r={fulfil} />
-      <Card title="商品互动" r={products} />
+      <Card title={pick(locale, "转化漏斗", "Conversion funnel")} r={funnel} />
+      <Card title={pick(locale, "订单类型", "Order types")} r={types} />
+      <Card title={pick(locale, "利润（元，累计）", "Profit (¥, cumulative)")} r={profit} />
+      <Card title={pick(locale, "代下单履约分布", "Proxy fulfillment")} r={fulfil} />
+      <Card title={pick(locale, "商品互动", "Product engagement")} r={products} />
     </div>
   );
 }
