@@ -119,6 +119,13 @@ SEED_DEMO=1 npx prisma db seed     # 或 npm run db:seed:demo
 
 会写入 8 个演示用户、24 笔样品/代下单订单（跨状态、跨最近 75 天）、利润快照、40 次测试会话与 60 条商品浏览事件及少量售后/工单/履约记录。幂等（哨兵订单 `DEMO-0001` 存在则跳过），演示数据均标 `DEMO-` / `@scentpersona.example`，生产环境请勿设置 `SEED_DEMO`。
 
+一键重置演示数据（先清空所有演示标记记录再重播，仅影响演示数据）：
+
+```bash
+node scripts/reset-demo.mjs          # 预览将删除的数量
+npm run reset:demo -- --yes          # 执行删除并重新播种
+```
+
 **运营批量维护商品（CSV）**：商品与多平台报价可用 `data/products.csv` 维护（一行一个报价，列表列用 `|`、tags 用 `键:值;`）。编辑后导入：
 
 ```bash
@@ -126,7 +133,7 @@ node scripts/import-products.mjs --dry   # 先校验解析
 npm run import:products                   # 写库：Product 按名匹配、Offer 按 平台+商品ID upsert
 ```
 
-前台新增 `/c` 专题聚合页（列出所有已发布专题），首页也有"按香型探索 + 精选专题"推荐位，数据均来自数据库种子。
+前台新增 `/c` 专题聚合页（列出所有已发布专题），首页也有"按香型探索 + 精选专题"推荐位，数据均来自数据库种子。每个专题页带 hero 图（种子用 picsum 占位，运营可在后台改 `heroImageUrl`）和"自营/推荐商品聚合位"（按香型从已审核 offer 聚合，自营优先展示）。
 
 ---
 
@@ -207,6 +214,7 @@ docker compose -f docker-compose.ws.yml up -d
 - **checks**：`prisma generate` → `tsc --noEmit`（当前全项目 0 错误）→ `next lint` → `vitest`（纯逻辑引擎断言）。
 - **miniapp**：Taro 端 `tsc` 类型检查。
 - **e2e**：起 Postgres service → `migrate deploy` → `build` → Playwright 跑代下单主流程（`tests/e2e/proxy-order.spec.ts`，测试用播种接口受 `E2E_TEST=1` 保护）。
+- **csv-validate**（`.github/workflows/csv-validate.yml`）：PR 改动 `data/products.csv` 或 `scripts/import-products.mjs` 时，自动跑 `node scripts/import-products.mjs --dry` 校验解析（无需 DB）。
 
 推送前本地务必 `npm install` 同步 `package-lock.json`（含 `ws` 依赖），否则 CI 的 `npm ci` 会失败。
 

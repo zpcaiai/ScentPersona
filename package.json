@@ -19,6 +19,7 @@
     "db:seed": "tsx prisma/seed.ts",
   "db:seed:demo": "SEED_DEMO=1 tsx prisma/seed.ts",
   "import:products": "node scripts/import-products.mjs",
+  "reset:demo": "node scripts/reset-demo.mjs",
     "db:studio": "prisma studio",
     "postinstall": "prisma generate",
     "ws:server": "node scripts/ws-server.mjs"

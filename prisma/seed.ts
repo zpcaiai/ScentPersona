@@ -309,11 +309,19 @@ async function main() {
   }
 
   // 7) Content / landing pages (upsert by unique slug)
+  const TOPIC_FAMILY: Record<string, string | null> = {
+    "men-first-fragrance": "柑橘馥奇", "gift-no-mistake": "白花香", "bedtime-ritual": "白茶木质",
+    "commute-scent": "柑橘馥奇", "summer-citrus": "柑橘馥奇", "office-light": "白茶木质",
+    "date-sweet": "美食香", "niche-intro": "琥珀东方", "four-season-wardrobe": null,
+  };
   for (const c of CONTENT) {
+    const fam = c.slug in TOPIC_FAMILY ? TOPIC_FAMILY[c.slug] : undefined;
+    const blocks = fam !== undefined ? [...c.blocks, { type: "products", ...(fam ? { family: fam } : {}) }] : c.blocks;
+    const hero = `https://picsum.photos/seed/scentpersona-${c.slug}/1200/480`;
     await db.contentPage.upsert({
       where: { slug: c.slug },
-      create: { slug: c.slug, title: c.title, subtitle: c.subtitle, pageType: "landing", status: "published", publishedAt: new Date(), contentBlocksJson: JSON.stringify(c.blocks), seoTitle: c.seoTitle, seoDescription: c.seoDesc },
-      update: { title: c.title, subtitle: c.subtitle, status: "published", contentBlocksJson: JSON.stringify(c.blocks), seoTitle: c.seoTitle, seoDescription: c.seoDesc },
+      create: { slug: c.slug, title: c.title, subtitle: c.subtitle, pageType: "landing", status: "published", publishedAt: new Date(), heroImageUrl: hero, contentBlocksJson: JSON.stringify(blocks), seoTitle: c.seoTitle, seoDescription: c.seoDesc },
+      update: { title: c.title, subtitle: c.subtitle, status: "published", heroImageUrl: hero, contentBlocksJson: JSON.stringify(blocks), seoTitle: c.seoTitle, seoDescription: c.seoDesc },
     });
   }
   console.log(`  content: ${CONTENT.length} landing pages`);
@@ -405,13 +413,13 @@ async function main() {
       }
       for (let i = 0; i < 40; i++) {
         const created = daysAgo(Math.floor((i * 37) % 75));
-        await db.quizSession.create({ data: { source: i % 3 === 0 ? "xhs" : "web", createdAt: created, completedAt: i % 10 < 7 ? new Date(created.getTime() + 300000) : null } });
+        await db.quizSession.create({ data: { source: i % 3 === 0 ? "demo-xhs" : "demo-web", createdAt: created, completedAt: i % 10 < 7 ? new Date(created.getTime() + 300000) : null } });
       }
       const evTypes = ["view", "click", "compare", "add_wishlist"];
       for (let i = 0; i < 60; i++) {
         const created = daysAgo(Math.floor((i * 19) % 75));
         const product = products[i % Math.max(1, products.length)];
-        await db.userProductEvent.create({ data: { eventType: evTypes[i % evTypes.length], productId: product?.id ?? null, createdAt: created } });
+        await db.userProductEvent.create({ data: { eventType: evTypes[i % evTypes.length], productId: product?.id ?? null, eventValueJson: JSON.stringify({ demo: true }), createdAt: created } });
       }
       const nRedeem = Math.min(6, coupons.length, demoOrders.length);
       for (let i = 0; i < nRedeem; i++) {
